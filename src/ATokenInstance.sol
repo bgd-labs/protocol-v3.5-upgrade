@@ -9,10 +9,13 @@ import {
   Errors,
   VersionedInitializable
 } from "aave-v3-origin/contracts/protocol/tokenization/AToken.sol";
+import {AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
+import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
 
 /**
  * Modifications:
  * - bumped revision
+ * - special method to clear the existing GHO facilitator
  */
 contract ATokenInstance is AToken {
   uint256 public constant ATOKEN_REVISION = 2;
@@ -56,5 +59,11 @@ contract ATokenInstance is AToken {
       aTokenSymbol,
       params
     );
+  }
+
+  // special method to clear the existing GHO facilitator
+  // TODO: onlyOwner or similar
+  function resolveFacilitator(uint256 amount) external {
+    IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).burn(amount);
   }
 }
