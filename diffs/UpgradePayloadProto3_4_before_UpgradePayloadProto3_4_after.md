@@ -21,9 +21,13 @@
 ```json
 {
   "poolConfig": {
+    "poolConfiguratorImpl": {
+      "from": "0x4816b2C2895f97fB918f1aE7Da403750a0eE372e",
+      "to": "0xc7183455a4C133Ae270771860664b6B7ec320bB1"
+    },
     "poolImpl": {
       "from": "0xeF434E4573b90b6ECd4a00f4888381e4D0CC5Ccd",
-      "to": "0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f"
+      "to": "0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9"
     }
   },
   "reserves": {

@@ -11,27 +11,22 @@ import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
 import {IERC20} from "solidity-utils/contracts/oz-common/interfaces/IERC20.sol";
 import {ProtocolV3TestBase, ReserveConfig} from "aave-helpers/src/ProtocolV3TestBase.sol";
 import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
-import {UpgradePayload3_4} from "../src/UpgradePayload3_4.sol";
+import {UpgradePayloadProto3_4} from "../src/UpgradePayloadProto3_4.sol";
 import {PoolInstanceProtoProto3_4} from "../src/PoolInstanceProtoProto3_4.sol";
-import {ATokenInstance} from "../src/ATokenInstance.sol";
-import {VariableDebtTokenInstance} from "../src/VariableDebtTokenInstance.sol";
+import {ATokenInstanceGHO} from "../src/ATokenInstanceGHO.sol";
+import {VariableDebtTokenInstanceGHO} from "../src/VariableDebtTokenInstanceGHO.sol";
+import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 /**
  * @dev Test for AaveV3EthereumLido_GHOListingOnLidoPool_20241119
  * command: FOUNDRY_PROFILE=mainnet forge test --match-path=src/20241119_AaveV3EthereumLido_GHOListingOnLidoPool/AaveV3EthereumLido_GHOListingOnLidoPool_20241119.t.sol -vv
  */
-contract UpgradePayload3_4_Test is ProtocolV3TestBase {
-  UpgradePayload3_4 internal proposal;
+contract UpgradePayloadProto3_4_Test is ProtocolV3TestBase {
+  UpgradePayloadProto3_4 internal proposal;
 
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl("mainnet"), 21265036);
-    PoolInstanceProtoProto3_4 poolInstance = new PoolInstanceProtoProto3_4(
-      AaveV3Ethereum.POOL_ADDRESSES_PROVIDER,
-      IReserveInterestRateStrategy(AaveV3EthereumAssets.WETH_INTEREST_RATE_STRATEGY)
-    );
-    ATokenInstance aTokenImpl = new ATokenInstance(AaveV3Ethereum.POOL);
-    VariableDebtTokenInstance vTokenImpl = new VariableDebtTokenInstance(AaveV3Ethereum.POOL);
-    proposal = new UpgradePayload3_4(poolInstance, address(aTokenImpl), address(vTokenImpl));
+    proposal = UpgradePayloadProto3_4(DeploymentLibrary._deployMainnetProto());
   }
 
   /**
@@ -46,10 +41,10 @@ contract UpgradePayload3_4_Test is ProtocolV3TestBase {
     assertEq(virtualBalanceBefore, 0);
     assertEq(aTokenSupplyBefore, 0);
     assertEq(ghoReserveBefore.liquidityIndex, 1e27);
-    (uint256 capacity, uint256 level) =
+    (, uint256 level) =
       IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).getFacilitatorBucket(AaveV3EthereumAssets.GHO_A_TOKEN);
 
-    defaultTest("UpgradePayload3_4", AaveV3Ethereum.POOL, address(proposal));
+    defaultTest("UpgradePayloadProto3_4", AaveV3Ethereum.POOL, address(proposal));
 
     DataTypes.ReserveDataLegacy memory ghoReserveAfter =
       AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
@@ -57,13 +52,12 @@ contract UpgradePayload3_4_Test is ProtocolV3TestBase {
     assertEq(ghoReserveBefore.currentLiquidityRate, ghoReserveAfter.currentLiquidityRate);
     assertEq(ghoReserveBefore.currentVariableBorrowRate, ghoReserveAfter.currentVariableBorrowRate);
     assertEq(variableDebtBefore, IERC20(ghoReserveAfter.variableDebtTokenAddress).totalSupply());
-    // this should actually not be true
+    // aToken totalSupply should equal the previous level
+    // this is true, because the aToken index is 1, so no accrual to the aToken has ever happened before
     assertEq(level, IERC20(ghoReserveAfter.aTokenAddress).totalSupply(), "WRONG_A_TOKEN_SUPPLY");
     // vb should stay at zero
     assertEq(
-      virtualBalanceBefore,
-      AaveV3Ethereum.POOL.getVirtualUnderlyingBalance(AaveV3EthereumAssets.GHO_UNDERLYING),
-      "WRONG_VIRTUAL_BALANCE"
+      AaveV3Ethereum.POOL.getVirtualUnderlyingBalance(AaveV3EthereumAssets.GHO_UNDERLYING), 0, "WRONG_VIRTUAL_BALANCE"
     );
   }
 }

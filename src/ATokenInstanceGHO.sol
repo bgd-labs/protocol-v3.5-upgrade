@@ -8,7 +8,7 @@ import {
   IInitializableAToken,
   Errors,
   VersionedInitializable
-} from "aave-v3-origin/contracts/protocol/tokenization/AToken.sol";
+} from "v3.3/contracts/protocol/tokenization/AToken.sol";
 import {AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
 
@@ -17,7 +17,7 @@ import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
  * - bumped revision
  * - special method to clear the existing GHO facilitator
  */
-contract ATokenInstance is AToken {
+contract ATokenInstanceGHO is AToken {
   uint256 public constant ATOKEN_REVISION = 2;
 
   constructor(IPool pool) AToken(pool) {}
@@ -43,9 +43,7 @@ contract ATokenInstance is AToken {
     _setSymbol(aTokenSymbol);
     _setDecimals(aTokenDecimals);
 
-    _treasury = treasury;
     _underlyingAsset = underlyingAsset;
-    _incentivesController = incentivesController;
 
     _domainSeparator = _calculateDomainSeparator();
 
@@ -61,9 +59,8 @@ contract ATokenInstance is AToken {
     );
   }
 
-  // special method to clear the existing GHO facilitator
-  // TODO: onlyOwner or similar
-  function resolveFacilitator(uint256 amount) external {
+  // special method to repay the facilitator, by burning GHO
+  function resolveFacilitator(uint256 amount) external onlyPoolAdmin {
     IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).burn(amount);
   }
 }

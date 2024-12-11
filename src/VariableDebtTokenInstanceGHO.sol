@@ -15,10 +15,10 @@ import {
  * - bumped revision
  * - added noop updateDiscountDistribution function for backwards compatibility with stkAAVE
  */
-contract VariableDebtTokenInstance is VariableDebtToken {
+contract VariableDebtTokenInstanceGHO is VariableDebtToken {
   uint256 public constant DEBT_TOKEN_REVISION = 4;
 
-  constructor(IPool pool) VariableDebtToken(pool) {}
+  constructor(IPool pool, address rewardsController) VariableDebtToken(pool, rewardsController) {}
 
   /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
@@ -29,7 +29,6 @@ contract VariableDebtTokenInstance is VariableDebtToken {
   function initialize(
     IPool initializingPool,
     address underlyingAsset,
-    IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
     string memory debtTokenName,
     string memory debtTokenSymbol,
@@ -41,14 +40,13 @@ contract VariableDebtTokenInstance is VariableDebtToken {
     _setDecimals(debtTokenDecimals);
 
     _underlyingAsset = underlyingAsset;
-    _incentivesController = incentivesController;
 
     _domainSeparator = _calculateDomainSeparator();
 
     emit Initialized(
       underlyingAsset,
       address(POOL),
-      address(incentivesController),
+      address(REWARDS_CONTROLLER),
       debtTokenDecimals,
       debtTokenName,
       debtTokenSymbol,
