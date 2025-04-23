@@ -14,7 +14,7 @@ import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainn
 
 import {UpgradeTest, IERC20} from "./UpgradeTest.t.sol";
 
-contract MainnetTest is UpgradeTest("mainnet", 22089018) {
+contract MainnetTest is UpgradeTest("mainnet", 22331905) {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   function test_upgrade() public override {

@@ -5,7 +5,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract MainnetEtherFiTest is UpgradeTest("mainnet", 22089018) {
+contract MainnetEtherFiTest is UpgradeTest("mainnet", 22331905) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployMainnetEtherfi();
   }
