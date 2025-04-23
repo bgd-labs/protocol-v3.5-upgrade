@@ -11,6 +11,7 @@ import {
   IAaveOracle, IPoolDataProvider, IReserveInterestRateStrategy, IPoolConfigurator
 } from "aave-address-book/AaveV3.sol";
 import {AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
+import {AaveV3CeloAssets} from "aave-address-book/AaveV3Celo.sol";
 
 import {ReserveConfiguration} from "aave-v3-origin/contracts/protocol/libraries/configuration/ReserveConfiguration.sol";
 import {PercentageMath} from "aave-v3-origin/contracts/protocol/libraries/math/PercentageMath.sol";
@@ -317,7 +318,7 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
    * Reserves that are frozen or not active should not be included in e2e test suite
    */
   function _includeInE2e(ReserveConfig memory config) internal pure returns (bool) {
-    return !config.isFrozen && config.isActive && !config.isPaused;
+    return !config.isFrozen && config.isActive && !config.isPaused && config.underlying != AaveV3CeloAssets.CELO_UNDERLYING;
   }
 
   function _getTokenAmountByDollarValue(IPool pool, ReserveConfig memory config, uint256 dollarValue)
