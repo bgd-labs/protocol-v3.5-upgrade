@@ -11,6 +11,3 @@
 [submodule "lib/GhoDirectMinter"]
 	path = lib/GhoDirectMinter
 	url = https://github.com/bgd-labs/GhoDirectMinter
-[submodule "lib/v3.3"]
-	path = lib/v3.3
-	url = https://github.com/aave-dao/aave-v3-origin
