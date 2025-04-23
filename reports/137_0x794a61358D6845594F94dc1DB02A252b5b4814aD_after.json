@@ -324,13 +324,13 @@
       "label": null,
       "balanceDiff": null,
       "stateDiff": {
-        "0x7b2f1db823434eb2c3257b921622f3b73c33ed78ab6344072b7d0d89829cce01": {
-          "previousValue": "0x0067dc366f000000000002000000000000000000000000000000000000000000",
-          "newValue": "0x0067dc366f000000000003000000000000000000000000000000000000000000"
+        "0x0de2b21138735878e0660eef23d1131fad23d66157bfa1c473a82b60c5169926": {
+          "previousValue": "0x006808e6aa000000000002000000000000000000000000000000000000000000",
+          "newValue": "0x006808e6aa000000000003000000000000000000000000000000000000000000"
         },
-        "0x7b2f1db823434eb2c3257b921622f3b73c33ed78ab6344072b7d0d89829cce02": {
-          "previousValue": "0x000000000000000000093a80000000000000680a5af000000000000000000000",
-          "newValue": "0x000000000000000000093a80000000000000680a5af000000000000067dc3670"
+        "0x0de2b21138735878e0660eef23d1131fad23d66157bfa1c473a82b60c5169927": {
+          "previousValue": "0x000000000000000000093a8000000000000068370b2b00000000000000000000",
+          "newValue": "0x000000000000000000093a8000000000000068370b2b0000000000006808e6ab"
         }
       }
     },
@@ -827,19 +827,19 @@
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x106578bb534f35c205461eb759ffecadaeb950c7999aaf0c26695cb6a02e96d4": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000f70f7fdcae9171b",
-          "newValue": "0x000000000000021d7f258fdf51e3998600000000000000000f70f7fdcae9171b"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "newValue": "0x000000000000021dd93f52fc7070818900000000000000000000000000000000"
         },
         "0x106578bb534f35c205461eb759ffecadaeb950c7999aaf0c26695cb6a02e96d5": {
-          "previousValue": "0x000000000000021d7f258fdf51e3998600000000000000000000000000000000",
+          "previousValue": "0x000000000000021dd93f52fc7070818900000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x2074557ae98d029f93e2e7da626a163f4ed6d3b09e02107794c8172629f3fa30": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000004ac09a542244ea5e",
-          "newValue": "0x00000000000011e448f6c778bd0a1f7900000000000000004ac09a542244ea5e"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "newValue": "0x00000000000011071792c8d1b83b32c000000000000000000000000000000000"
         },
         "0x2074557ae98d029f93e2e7da626a163f4ed6d3b09e02107794c8172629f3fa31": {
-          "previousValue": "0x00000000000011e448f6c778bd0a1f7900000000000000000000000000000000",
+          "previousValue": "0x00000000000011071792c8d1b83b32c000000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
@@ -847,155 +847,155 @@
           "newValue": "0x000000000000000000000000ce599b87e84b4db7f0602823ba17a6f747a9186d"
         },
         "0x36b11cd1c4e5e1587251c74b00c0b8ed2cffd67f65e30014b56f2887c4780880": {
-          "previousValue": "0x00000000000000000000000000000000000000000000000025b7818f57365d1c",
-          "newValue": "0x000000000000031ac9ef2b777d30a270000000000000000025b7818f57365d1c"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "newValue": "0x00000000000004590d8f528fceed31bd00000000000000000000000000000000"
         },
         "0x36b11cd1c4e5e1587251c74b00c0b8ed2cffd67f65e30014b56f2887c4780881": {
-          "previousValue": "0x000000000000031ac9ef2b777d30a27000000000000000000000000000000000",
+          "previousValue": "0x00000000000004590d8f528fceed31bd00000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x436c14203ee76e79d5652d508249351bf2aad2332f57381e04c70b85c9582d84": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000000000071109a42",
-          "newValue": "0x000000000000000000000ef1f5b70d0300000000000000000000000071109a42"
+          "previousValue": "0x000000000000000000000000000000000000000000000000000000000dead4fa",
+          "newValue": "0x000000000000000000000ff8e96602640000000000000000000000000dead4fa"
         },
         "0x436c14203ee76e79d5652d508249351bf2aad2332f57381e04c70b85c9582d85": {
-          "previousValue": "0x000000000000000000000ef1f5b70d0300000000000000000000000000000000",
+          "previousValue": "0x000000000000000000000ff8e966026400000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x475379e27c527238398e15278e7dc727f37d51a0b9441c05bf145844c06f9864": {
           "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "newValue": "0x00000000000113aac393848643040b7300000000000000000000000000000000"
+          "newValue": "0x000000000000e88dfebd4f9356fc263600000000000000000000000000000000"
         },
         "0x475379e27c527238398e15278e7dc727f37d51a0b9441c05bf145844c06f9865": {
-          "previousValue": "0x00000000000113aac393848643040b7300000000000000000000000000000000",
+          "previousValue": "0x000000000000e88dfebd4f9356fc263600000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x4eb4e5a6e8e7d99cfc6b20a4316cf17fcae80ee90389b4de8cfd0d3328359b47": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000002e0c",
-          "newValue": "0x00000000000000000000000005708caf00000000000000000000000000002e0c"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000766",
+          "newValue": "0x00000000000000000000000006a364ed00000000000000000000000000000766"
         },
         "0x4eb4e5a6e8e7d99cfc6b20a4316cf17fcae80ee90389b4de8cfd0d3328359b48": {
-          "previousValue": "0x00000000000000000000000005708caf00000000000000000000000000000000",
-          "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          "previousValue": "0x00000000000000000000000006a364ed0000000000000000000000000000000a",
+          "newValue": "0x000000000000000000000000000000000000000000000000000000000000000a"
         },
         "0x5086f8006fb47d4e8b7d07ce95e816ef3f62d9d614c3cca018dfb9c36698b5a6": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000000000085859d8b",
-          "newValue": "0x0000000000000000000000e60e90eced00000000000000000000000085859d8b"
+          "previousValue": "0x000000000000000000000000000000000000000000000000000000000e568dcc",
+          "newValue": "0x0000000000000000000000ff870861920000000000000000000000000e568dcc"
         },
         "0x5086f8006fb47d4e8b7d07ce95e816ef3f62d9d614c3cca018dfb9c36698b5a7": {
-          "previousValue": "0x0000000000000000000000e60e90eced00000000000000000000000000000000",
+          "previousValue": "0x0000000000000000000000ff8708619200000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x7106c69342d46bbeee5f28f376a6e3d96f0a8e1d092c714a8fe8243ea96d0a22": {
-          "previousValue": "0x00000000000000000000000000000000000000000000000008a7c9af8a45ba1d",
-          "newValue": "0x00000000000066f054556cbc5d1fbeff000000000000000008a7c9af8a45ba1d"
+          "previousValue": "0x000000000000000000000000000000000000000000000000008d530ca292a29a",
+          "newValue": "0x000000000000629ba0141f768d7321830000000000000000008d530ca292a29a"
         },
         "0x7106c69342d46bbeee5f28f376a6e3d96f0a8e1d092c714a8fe8243ea96d0a23": {
-          "previousValue": "0x00000000000066f054556cbc5d1fbeff00000000000000000000000000000000",
+          "previousValue": "0x000000000000629ba0141f768d73218300000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x7bdd64832954533ce1bb06477375d759a0b8390bd9a186c07915b18bf5315b14": {
-          "previousValue": "0x00000000000000000000000000000000000000000000000000000000baa86d65",
-          "newValue": "0x00000000000000000000106871af4e37000000000000000000000000baa86d65"
+          "previousValue": "0x00000000000000000000000000000000000000000000000000000000184cc4d5",
+          "newValue": "0x000000000000000000000e12ec795ebc000000000000000000000000184cc4d5"
         },
         "0x7bdd64832954533ce1bb06477375d759a0b8390bd9a186c07915b18bf5315b15": {
-          "previousValue": "0x00000000000000000000106871af4e3700000000000000000000000000000000",
+          "previousValue": "0x000000000000000000000e12ec795ebc00000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x941c128c64297ffd326e06b574a93ab8d1689d30e9b35988d8356693bef75149": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000011b7bbad8c6fb29a2",
-          "newValue": "0x0000000000000cb2e027978029381c6700000000000000011b7bbad8c6fb29a2"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "newValue": "0x0000000000000c10b86680347995873d00000000000000000000000000000000"
         },
         "0x941c128c64297ffd326e06b574a93ab8d1689d30e9b35988d8356693bef7514a": {
-          "previousValue": "0x0000000000000cb2e027978029381c6700000000000000000000000000000000",
+          "previousValue": "0x0000000000000c10b86680347995873d00000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x9690560edd96b8ad42bbefadc2405558072125d86547c092bfe966b61dcb42fd": {
-          "previousValue": "0x00000000000000000000000000000000000000000000002027d959d6d5934d84",
-          "newValue": "0x000000000000e7dd9e685b5779740cd0000000000000002027d959d6d5934d84"
+          "previousValue": "0x00000000000000000000000000000000000000000000000310aa415b1d6899b8",
+          "newValue": "0x000000000001df0b35fc4eec31674d95000000000000000310aa415b1d6899b8"
         },
         "0x9690560edd96b8ad42bbefadc2405558072125d86547c092bfe966b61dcb42fe": {
-          "previousValue": "0x000000000000e7dd9e685b5779740cd000000000000000000000000000000000",
+          "previousValue": "0x000000000001df0b35fc4eec31674d9500000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0x9d6c1570366f1668d7d7e0495b449910ee14e6c30b1e0ba28bdbefd7bc9bcf67": {
-          "previousValue": "0x00000000000000000000000000000000000000000000000024363e3b4ca12a18",
-          "newValue": "0x000000000000211f30002f7b4cccffb3000000000000000024363e3b4ca12a18"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "newValue": "0x0000000000002137cfa49c9586bcb84500000000000000000000000000000000"
         },
         "0x9d6c1570366f1668d7d7e0495b449910ee14e6c30b1e0ba28bdbefd7bc9bcf68": {
-          "previousValue": "0x000000000000211f30002f7b4cccffb300000000000000000000000000000000",
+          "previousValue": "0x0000000000002137cfa49c9586bcb84500000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xc5ebd5b2073c8b001a486e0ad6da181e63a9cd81f1cc46f94ddc191acb130f07": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000006402",
-          "newValue": "0x00000000000000000000001e02d0cd3700000000000000000000000000006402"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000a37",
+          "newValue": "0x00000000000000000000001d1554b3fa00000000000000000000000000000a37"
         },
         "0xc5ebd5b2073c8b001a486e0ad6da181e63a9cd81f1cc46f94ddc191acb130f08": {
-          "previousValue": "0x00000000000000000000001e02d0cd3700000000000000000000000000000000",
+          "previousValue": "0x00000000000000000000001d1554b3fa00000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xca010918639239bf801c94ca836090ead9d417e28ae959ef1d15b158188e4f91": {
-          "previousValue": "0x00000000000000000000000000000000000000000000000009398766265f883f",
-          "newValue": "0x00000000000000895a22cafee5351b8a000000000000000009398766265f883f"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "newValue": "0x000000000000008956211e1cce0f520a00000000000000000000000000000000"
         },
         "0xca010918639239bf801c94ca836090ead9d417e28ae959ef1d15b158188e4f92": {
-          "previousValue": "0x00000000000000895a22cafee5351b8a00000000000000000000000000000000",
+          "previousValue": "0x000000000000008956211e1cce0f520a00000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xd449fc9fb262d3f5e51cacbd5c816fb9866cc63c91d2a0e5827976b5261df636": {
-          "previousValue": "0x00000000000000000000000000000000000000000000000000001496f60ec107",
-          "newValue": "0x00000000000001a50cd595907128cfa7000000000000000000001496f60ec107"
+          "previousValue": "0x000000000000000000000000000000000000000000000000000001a34883fb20",
+          "newValue": "0x00000000000001976b149aa77350f7440000000000000000000001a34883fb20"
         },
         "0xd449fc9fb262d3f5e51cacbd5c816fb9866cc63c91d2a0e5827976b5261df637": {
-          "previousValue": "0x00000000000001a50cd595907128cfa700000000000000000000000000000000",
+          "previousValue": "0x00000000000001976b149aa77350f74400000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xd87cce9b5faabfdec37f32d8c75e0689cf8e2c9faac27b070479c3cf61dba3f5": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000cedf0768319f531",
-          "newValue": "0x00000000001cf50d1331b2cf7894a56400000000000000000cedf0768319f531"
+          "previousValue": "0x00000000000000000000000000000000000000000000000002218f5ee9271d76",
+          "newValue": "0x000000000011763fdf7e2ea27921ca6d000000000000000002218f5ee9271d76"
         },
         "0xd87cce9b5faabfdec37f32d8c75e0689cf8e2c9faac27b070479c3cf61dba3f6": {
-          "previousValue": "0x00000000001cf50d1331b2cf7894a56400000000000000000000000000000000",
+          "previousValue": "0x000000000011763fdf7e2ea27921ca6d00000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xdf1a6bcffc84e5022e593141ae5e116942c789b8d0a6e6292fbaa854107f9924": {
-          "previousValue": "0x00000000000000000000000000000000000000000000003501383c8dcf143056",
-          "newValue": "0x00000000001dc3c9b300fa64365b075c000000000000003501383c8dcf143056"
+          "previousValue": "0x000000000000000000000000000000000000000000000004b4e3d75962548214",
+          "newValue": "0x000000000020665b63ae1b94b3d5fc1e0000000000000004b4e3d75962548214"
         },
         "0xdf1a6bcffc84e5022e593141ae5e116942c789b8d0a6e6292fbaa854107f9925": {
-          "previousValue": "0x00000000001dc3c9b300fa64365b075c00000000000000000000000000000000",
+          "previousValue": "0x000000000020665b63ae1b94b3d5fc1e00000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xe38ffc20ad6c0cd9645840a827602aa56201288cee68bb886d2290fbc4e3bcc1": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000244306a2092b532",
-          "newValue": "0x000000000000032be8b622f3d66261a800000000000000000244306a2092b532"
+          "previousValue": "0x00000000000000000000000000000000000000000000000000609dee1290d1e6",
+          "newValue": "0x000000000000028c164f5f39be641277000000000000000000609dee1290d1e6"
         },
         "0xe38ffc20ad6c0cd9645840a827602aa56201288cee68bb886d2290fbc4e3bcc2": {
-          "previousValue": "0x000000000000032be8b622f3d66261a800000000000000000000000000000000",
+          "previousValue": "0x000000000000028c164f5f39be64127700000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xeeb9fc6b56d0057b9686686f34d26bca7121e2d8faa7e5edce017b6b6611f4fb": {
-          "previousValue": "0x000000000000000000000000000000000000000000000000005365f377d36e5c",
-          "newValue": "0x0000000000012da3625b6e924507c6750000000000000000005365f377d36e5c"
+          "previousValue": "0x000000000000000000000000000000000000000000000000000c21b32dcfd23b",
+          "newValue": "0x0000000000012c64c10887cf735c6bd10000000000000000000c21b32dcfd23b"
         },
         "0xeeb9fc6b56d0057b9686686f34d26bca7121e2d8faa7e5edce017b6b6611f4fc": {
-          "previousValue": "0x0000000000012da3625b6e924507c67500000000000000000000000000000000",
+          "previousValue": "0x0000000000012c64c10887cf735c6bd100000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xfc8cf3b078b74c390422232f5effbbda16d920b580936e190b4535084eb74818": {
-          "previousValue": "0x00000000000000000000000000000000000000000000000000003da00d41e2a7",
-          "newValue": "0x0000000000000bd9eea3a88b136f84ef000000000000000000003da00d41e2a7"
+          "previousValue": "0x00000000000000000000000000000000000000000000000000003ef821d574c3",
+          "newValue": "0x0000000000000a5db085707eea001b33000000000000000000003ef821d574c3"
         },
         "0xfc8cf3b078b74c390422232f5effbbda16d920b580936e190b4535084eb74819": {
-          "previousValue": "0x0000000000000bd9eea3a88b136f84ef00000000000000000000000000000000",
+          "previousValue": "0x0000000000000a5db085707eea001b3300000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         },
         "0xfdae0ec7002c89e3fdc586b7b310cf574e67fe20ce66b3c19fc2b0a374542550": {
-          "previousValue": "0x0000000000000000000000000000000000000000000000000333a1a3833e6681",
-          "newValue": "0x000000000000000c3cb10af63c6a226100000000000000000333a1a3833e6681"
+          "previousValue": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "newValue": "0x000000000000000c13587dc8cff8838400000000000000000000000000000000"
         },
         "0xfdae0ec7002c89e3fdc586b7b310cf574e67fe20ce66b3c19fc2b0a374542551": {
-          "previousValue": "0x000000000000000c3cb10af63c6a226100000000000000000000000000000000",
+          "previousValue": "0x000000000000000c13587dc8cff8838400000000000000000000000000000000",
           "newValue": "0x0000000000000000000000000000000000000000000000000000000000000000"
         }
       }
@@ -1928,7 +1928,7 @@
       "aToken": "0xf59036CAEBeA7dC4b86638DFA2E3C97dA9FcCd40",
       "aTokenName": "Aave Polygon wstETH",
       "aTokenSymbol": "aPolwstETH",
-      "aTokenUnderlyingBalance": "7767004067511432138382",
+      "aTokenUnderlyingBalance": "7515540802838974985771",
       "borrowCap": 570,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -1948,7 +1948,7 @@
       "oracle": "0xBD96b5ABBC6048c28184b462167E487533F2e35E",
       "oracleDecimals": 8,
       "oracleDescription": "Capped wstETH / stETH(ETH) / USD",
-      "oracleLatestAnswer": "235974158037",
+      "oracleLatestAnswer": "217774534500",
       "reserveFactor": 500,
       "supplyCap": 11500,
       "symbol": "wstETH",
@@ -1957,13 +1957,13 @@
       "variableDebtToken": "0x77fA66882a8854d883101Fb8501BD3CaD347Fc32",
       "variableDebtTokenName": "Aave Polygon Variable Debt wstETH",
       "variableDebtTokenSymbol": "variableDebtPolwstETH",
-      "virtualBalance": "7767004064777822064551"
+      "virtualBalance": "7515540800105364911940"
     },
     "0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a": {
       "aToken": "0xc45A479877e1e9Dfe9FcD4056c699575a1045dAA",
       "aTokenName": "Aave Polygon SUSHI",
       "aTokenSymbol": "aPolSUSHI",
-      "aTokenUnderlyingBalance": "59972756678601742086659",
+      "aTokenUnderlyingBalance": "56981519542208973724889",
       "borrowCap": 180000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -1983,7 +1983,7 @@
       "oracle": "0x49B0c695039243BBfEb8EcD054EB70061fd54aa0",
       "oracleDecimals": 8,
       "oracleDescription": "SUSHI / USD",
-      "oracleLatestAnswer": "67203383",
+      "oracleLatestAnswer": "67517155",
       "reserveFactor": 2000,
       "supplyCap": 299320,
       "symbol": "SUSHI",
@@ -1992,13 +1992,13 @@
       "variableDebtToken": "0x34e2eD44EF7466D5f9E0b782B5c08b57475e7907",
       "variableDebtTokenName": "Aave Polygon Variable Debt SUSHI",
       "variableDebtTokenSymbol": "variableDebtPolSUSHI",
-      "virtualBalance": "59968070284721333476455"
+      "virtualBalance": "56976833148328565114685"
     },
     "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270": {
       "aToken": "0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97",
       "aTokenName": "Aave Polygon WMATIC",
       "aTokenSymbol": "aPolWMATIC",
-      "aTokenUnderlyingBalance": "35983430927127283607734108",
+      "aTokenUnderlyingBalance": "39168993445340326160366622",
       "borrowCap": 67000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2018,7 +2018,7 @@
       "oracle": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
       "oracleDecimals": 8,
       "oracleDescription": "MATIC / USD",
-      "oracleLatestAnswer": "21256281",
+      "oracleLatestAnswer": "22206268",
       "reserveFactor": 2000,
       "supplyCap": 105000000,
       "symbol": "WPOL",
@@ -2027,13 +2027,13 @@
       "variableDebtToken": "0x4a1c3aD6Ed28a636ee1751C69071f6be75DEb8B8",
       "variableDebtTokenName": "Aave Polygon Variable Debt WMATIC",
       "variableDebtTokenSymbol": "variableDebtPolWMATIC",
-      "virtualBalance": "35983430927127283607734108"
+      "virtualBalance": "39168993445340326160366622"
     },
     "0x172370d5Cd63279eFa6d502DAB29171933a610AF": {
       "aToken": "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf",
       "aTokenName": "Aave Polygon CRV",
       "aTokenSymbol": "aPolCRV",
-      "aTokenUnderlyingBalance": "84491753050665498709533",
+      "aTokenUnderlyingBalance": "80411463642251841315172",
       "borrowCap": 300000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2053,7 +2053,7 @@
       "oracle": "0x336584C8E6Dc19637A5b36206B1c79923111b405",
       "oracleDecimals": 8,
       "oracleDescription": "CRV / USD",
-      "oracleLatestAnswer": "44609999",
+      "oracleLatestAnswer": "68283000",
       "reserveFactor": 3500,
       "supplyCap": 1400000,
       "symbol": "CRV",
@@ -2062,13 +2062,13 @@
       "variableDebtToken": "0x77CA01483f379E58174739308945f044e1a764dc",
       "variableDebtTokenName": "Aave Polygon Variable Debt CRV",
       "variableDebtTokenSymbol": "variableDebtPolCRV",
-      "virtualBalance": "84491345466526129594233"
+      "virtualBalance": "80411056058112472199872"
     },
     "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6": {
       "aToken": "0x078f358208685046a11C85e8ad32895DED33A249",
       "aTokenName": "Aave Polygon WBTC",
       "aTokenSymbol": "aPolWBTC",
-      "aTokenUnderlyingBalance": "128896296843",
+      "aTokenUnderlyingBalance": "124911963726",
       "borrowCap": 851,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2088,7 +2088,7 @@
       "oracle": "0xc907E116054Ad103354f2D350FD2514433D57F6f",
       "oracleDecimals": 8,
       "oracleDescription": "BTC / USD",
-      "oracleLatestAnswer": "8499058200000",
+      "oracleLatestAnswer": "9394170000000",
       "reserveFactor": 5000,
       "supplyCap": 3100,
       "symbol": "WBTC",
@@ -2097,14 +2097,14 @@
       "variableDebtToken": "0x92b42c66840C7AD907b4BF74879FF3eF7c529473",
       "variableDebtTokenName": "Aave Polygon Variable Debt WBTC",
       "variableDebtTokenSymbol": "variableDebtPolWBTC",
-      "virtualBalance": "128896257335"
+      "virtualBalance": "124911924218"
     },
     "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174": {
       "aToken": "0x625E7708f30cA75bfd92586e17077590C60eb4cD",
       "aTokenName": "Aave Polygon USDC",
       "aTokenSymbol": "aPolUSDC",
-      "aTokenUnderlyingBalance": "988265082544",
-      "borrowCap": 43500000,
+      "aTokenUnderlyingBalance": "1097660359509",
+      "borrowCap": 14000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
       "decimals": 6,
@@ -2123,22 +2123,22 @@
       "oracle": "0x17E33D122FC34c7ad8FBd4a1995Dff9c8aE675eb",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC/USD",
-      "oracleLatestAnswer": "99992988",
+      "oracleLatestAnswer": "99994750",
       "reserveFactor": 6000,
-      "supplyCap": 48000000,
+      "supplyCap": 16000000,
       "symbol": "USDC",
       "underlying": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
       "usageAsCollateralEnabled": true,
       "variableDebtToken": "0xFCCf3cAbbe80101232d343252614b6A3eE81C989",
       "variableDebtTokenName": "Aave Polygon Variable Debt USDC",
       "variableDebtTokenSymbol": "variableDebtPolUSDC",
-      "virtualBalance": "988086856941"
+      "virtualBalance": "1097482133906"
     },
     "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7": {
       "aToken": "0x8Eb270e296023E9D92081fdF967dDd7878724424",
       "aTokenName": "Aave Polygon GHST",
       "aTokenSymbol": "aPolGHST",
-      "aTokenUnderlyingBalance": "1424446218007790966261365",
+      "aTokenUnderlyingBalance": "1418568528785038716464081",
       "borrowCap": 220000,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -2158,7 +2158,7 @@
       "oracle": "0xDD229Ce42f11D8Ee7fFf29bDB71C7b81352e11be",
       "oracleDecimals": 8,
       "oracleDescription": "GHST / USD",
-      "oracleLatestAnswer": "42074642",
+      "oracleLatestAnswer": "49558953",
       "reserveFactor": 3500,
       "supplyCap": 4650000,
       "symbol": "GHST",
@@ -2167,13 +2167,13 @@
       "variableDebtToken": "0xCE186F6Cccb0c955445bb9d10C59caE488Fea559",
       "variableDebtTokenName": "Aave Polygon Variable Debt GHST",
       "variableDebtTokenSymbol": "variableDebtPolGHST",
-      "virtualBalance": "1424446218007790966261365"
+      "virtualBalance": "1418568528785038716464081"
     },
     "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4": {
       "aToken": "0xEA1132120ddcDDA2F119e99Fa7A27a0d036F7Ac9",
       "aTokenName": "Aave Polygon STMATIC",
       "aTokenSymbol": "aPolSTMATIC",
-      "aTokenUnderlyingBalance": "1301800822035054214777715",
+      "aTokenUnderlyingBalance": "1098208370855301206517302",
       "borrowCap": 0,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -2193,7 +2193,7 @@
       "oracle": "0x6D02E35031C4D99ee3A6A2BA47FaD0cFE355cA8f",
       "oracleDecimals": 8,
       "oracleDescription": "Capped stMATIC / MATIC / USD",
-      "oracleLatestAnswer": "24471996",
+      "oracleLatestAnswer": "25565700",
       "reserveFactor": 2000,
       "supplyCap": 61000000,
       "symbol": "stMATIC",
@@ -2202,13 +2202,13 @@
       "variableDebtToken": "0x6b030Ff3FB9956B1B69f475B77aE0d3Cf2CC5aFa",
       "variableDebtTokenName": "Aave Polygon Variable Debt STMATIC",
       "variableDebtTokenSymbol": "variableDebtPolSTMATIC",
-      "virtualBalance": "1301800822035054214777715"
+      "virtualBalance": "1098208370855301206517302"
     },
     "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359": {
       "aToken": "0xA4D94019934D8333Ef880ABFFbF2FDd611C762BD",
       "aTokenName": "Aave Polygon USDCn",
       "aTokenSymbol": "aPolUSDCn",
-      "aTokenUnderlyingBalance": "16432373137706",
+      "aTokenUnderlyingBalance": "17561742898827",
       "borrowCap": 90000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2228,7 +2228,7 @@
       "oracle": "0x17E33D122FC34c7ad8FBd4a1995Dff9c8aE675eb",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC/USD",
-      "oracleLatestAnswer": "99992988",
+      "oracleLatestAnswer": "99994750",
       "reserveFactor": 2000,
       "supplyCap": 100000000,
       "symbol": "USDC",
@@ -2237,13 +2237,13 @@
       "variableDebtToken": "0xE701126012EC0290822eEA17B794454d1AF8b030",
       "variableDebtTokenName": "Aave Polygon Variable Debt USDCn",
       "variableDebtTokenSymbol": "variableDebtPolUSDCn",
-      "virtualBalance": "16432372321539"
+      "virtualBalance": "17561742082660"
     },
     "0x4e3Decbb3645551B8A19f0eA1678079FCB33fB4c": {
       "aToken": "0x6533afac2E7BCCB20dca161449A13A32D391fb00",
       "aTokenName": "Aave Polygon JEUR",
       "aTokenSymbol": "aPolJEUR",
-      "aTokenUnderlyingBalance": "14663345710669195890484",
+      "aTokenUnderlyingBalance": "20534283263891052191361",
       "borrowCap": 100000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2263,7 +2263,7 @@
       "oracle": "0x73366Fe0AA0Ded304479862808e02506FE556a98",
       "oracleDecimals": 8,
       "oracleDescription": "EUR / USD",
-      "oracleLatestAnswer": "108384000",
+      "oracleLatestAnswer": "114093000",
       "reserveFactor": 2000,
       "supplyCap": 120000,
       "symbol": "jEUR",
@@ -2272,13 +2272,13 @@
       "variableDebtToken": "0x44705f578135cC5d703b4c9c122528C73Eb87145",
       "variableDebtTokenName": "Aave Polygon Variable Debt JEUR",
       "variableDebtTokenSymbol": "variableDebtPolJEUR",
-      "virtualBalance": "14661265691238642786928"
+      "virtualBalance": "20532203244460499087805"
     },
     "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39": {
       "aToken": "0x191c10Aa4AF7C30e871E70C95dB0E4eb77237530",
       "aTokenName": "Aave Polygon LINK",
       "aTokenSymbol": "aPolLINK",
-      "aTokenUnderlyingBalance": "486114683235066231485390",
+      "aTokenUnderlyingBalance": "465662702053633502795346",
       "borrowCap": 163702,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2298,7 +2298,7 @@
       "oracle": "0xd9FFdb71EbE7496cC440152d43986Aae0AB76665",
       "oracleDecimals": 8,
       "oracleDescription": "LINK / USD",
-      "oracleLatestAnswer": "1436120000",
+      "oracleLatestAnswer": "1513691000",
       "reserveFactor": 2000,
       "supplyCap": 1600000,
       "symbol": "LINK",
@@ -2307,13 +2307,13 @@
       "variableDebtToken": "0x953A573793604aF8d41F306FEb8274190dB4aE0e",
       "variableDebtTokenName": "Aave Polygon Variable Debt LINK",
       "variableDebtTokenSymbol": "variableDebtPolLINK",
-      "virtualBalance": "486114676713222582550271"
+      "virtualBalance": "465662695531789853860227"
     },
     "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619": {
       "aToken": "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8",
       "aTokenName": "Aave Polygon WETH",
       "aTokenSymbol": "aPolWETH",
-      "aTokenUnderlyingBalance": "14977078072471676150184",
+      "aTokenUnderlyingBalance": "12028884744352234214007",
       "borrowCap": 14795,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2333,7 +2333,7 @@
       "oracle": "0xF9680D99D6C9589e2a93a78A04A279e509205945",
       "oracleDecimals": 8,
       "oracleDescription": "ETH / USD",
-      "oracleLatestAnswer": "197083930000",
+      "oracleLatestAnswer": "181380000000",
       "reserveFactor": 1500,
       "supplyCap": 50000,
       "symbol": "WETH",
@@ -2342,13 +2342,13 @@
       "variableDebtToken": "0x0c84331e39d6658Cd6e6b9ba04736cC4c4734351",
       "variableDebtTokenName": "Aave Polygon Variable Debt WETH",
       "variableDebtTokenSymbol": "variableDebtPolWETH",
-      "virtualBalance": "14977078072471676150184"
+      "virtualBalance": "12028884744352234214007"
     },
     "0x85955046DF4668e1DD369D2DE9f3AEB98DD2A369": {
       "aToken": "0x724dc807b04555b71ed48a6896b6F41593b8C637",
       "aTokenName": "Aave Polygon DPI",
       "aTokenSymbol": "aPolDPI",
-      "aTokenUnderlyingBalance": "225734217650359902817",
+      "aTokenUnderlyingBalance": "222754931270621889412",
       "borrowCap": 779,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2368,7 +2368,7 @@
       "oracle": "0x2e48b7924FBe04d575BA229A59b64547d9da16e9",
       "oracleDecimals": 8,
       "oracleDescription": "DPI / USD",
-      "oracleLatestAnswer": "7564721156",
+      "oracleLatestAnswer": "7370496910",
       "reserveFactor": 3500,
       "supplyCap": 1417,
       "symbol": "DPI",
@@ -2377,14 +2377,14 @@
       "variableDebtToken": "0xf611aEb5013fD2c0511c9CD55c7dc5C1140741A6",
       "variableDebtTokenName": "Aave Polygon Variable Debt DPI",
       "variableDebtTokenSymbol": "variableDebtPolDPI",
-      "virtualBalance": "225734217650359902817"
+      "virtualBalance": "222754931270621889412"
     },
     "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063": {
       "aToken": "0x82E64f49Ed5EC1bC6e43DAD4FC8Af9bb3A2312EE",
       "aTokenName": "Aave Polygon DAI",
       "aTokenSymbol": "aPolDAI",
-      "aTokenUnderlyingBalance": "1095115698434655428440442",
-      "borrowCap": 30000000,
+      "aTokenUnderlyingBalance": "2262381245528116096512575",
+      "borrowCap": 16000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
       "decimals": 18,
@@ -2403,22 +2403,22 @@
       "oracle": "0xF86577E7d27Ed35b85A7645c58bAaA64453fe32B",
       "oracleDecimals": 8,
       "oracleDescription": "Capped DAI/USD",
-      "oracleLatestAnswer": "99991900",
+      "oracleLatestAnswer": "100008998",
       "reserveFactor": 2500,
-      "supplyCap": 45000000,
+      "supplyCap": 18000000,
       "symbol": "DAI",
       "underlying": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
       "usageAsCollateralEnabled": true,
       "variableDebtToken": "0x8619d80FB0141ba7F184CbF22fd724116D9f7ffC",
       "variableDebtTokenName": "Aave Polygon Variable Debt DAI",
       "variableDebtTokenSymbol": "variableDebtPolDAI",
-      "virtualBalance": "1094954802456864683723984"
+      "virtualBalance": "2262220349550325351796117"
     },
     "0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3": {
       "aToken": "0x8ffDf2DE812095b1D19CB146E4c004587C0A0692",
       "aTokenName": "Aave Polygon BAL",
       "aTokenSymbol": "aPolBAL",
-      "aTokenUnderlyingBalance": "156414035752210719943242",
+      "aTokenUnderlyingBalance": "156868261049287368860380",
       "borrowCap": 290000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2438,7 +2438,7 @@
       "oracle": "0xD106B538F2A868c28Ca1Ec7E298C3325E0251d66",
       "oracleDecimals": 8,
       "oracleDescription": "BAL / USD",
-      "oracleLatestAnswer": "148726311",
+      "oracleLatestAnswer": "98495000",
       "reserveFactor": 2000,
       "supplyCap": 361000,
       "symbol": "BAL",
@@ -2447,13 +2447,13 @@
       "variableDebtToken": "0xA8669021776Bc142DfcA87c21b4A52595bCbB40a",
       "variableDebtTokenName": "Aave Polygon Variable Debt BAL",
       "variableDebtTokenSymbol": "variableDebtPolBAL",
-      "virtualBalance": "156413401817703724679091"
+      "virtualBalance": "156867627114780373596229"
     },
     "0xD6DF932A45C0f255f85145f286eA0b292B21C90B": {
       "aToken": "0xf329e36C7bF6E5E86ce2150875a84Ce77f477375",
       "aTokenName": "Aave Polygon AAVE",
       "aTokenSymbol": "aPolAAVE",
-      "aTokenUnderlyingBalance": "55966170548678580733167",
+      "aTokenUnderlyingBalance": "48951931723964412336947",
       "borrowCap": 0,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -2473,7 +2473,7 @@
       "oracle": "0x72484B12719E23115761D5DA1646945632979bB6",
       "oracleDecimals": 8,
       "oracleDescription": "AAVE / USD",
-      "oracleLatestAnswer": "17440430172",
+      "oracleLatestAnswer": "16781728000",
       "reserveFactor": 0,
       "supplyCap": 100000,
       "symbol": "AAVE",
@@ -2482,13 +2482,13 @@
       "variableDebtToken": "0xE80761Ea617F66F96274eA5e8c37f03960ecC679",
       "variableDebtTokenName": "Aave Polygon Variable Debt AAVE",
       "variableDebtTokenSymbol": "variableDebtPolAAVE",
-      "virtualBalance": "55966170548678580733167"
+      "virtualBalance": "48951931723964412336947"
     },
     "0xE0B52e49357Fd4DAf2c15e02058DCE6BC0057db4": {
       "aToken": "0x8437d7C167dFB82ED4Cb79CD44B7a32A1dd95c77",
       "aTokenName": "Aave Polygon AGEUR",
       "aTokenSymbol": "aPolAGEUR",
-      "aTokenUnderlyingBalance": "2536492885045461885797",
+      "aTokenUnderlyingBalance": "2536204183107282524645",
       "borrowCap": 250000,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -2508,7 +2508,7 @@
       "oracle": "0x73366Fe0AA0Ded304479862808e02506FE556a98",
       "oracleDecimals": 8,
       "oracleDescription": "EUR / USD",
-      "oracleLatestAnswer": "108384000",
+      "oracleLatestAnswer": "114093000",
       "reserveFactor": 2000,
       "supplyCap": 300000,
       "symbol": "EURA",
@@ -2517,13 +2517,13 @@
       "variableDebtToken": "0x3ca5FA07689F266e907439aFd1fBB59c44fe12f6",
       "variableDebtTokenName": "Aave Polygon Variable Debt AGEUR",
       "variableDebtTokenSymbol": "variableDebtPolAGEUR",
-      "virtualBalance": "2533698914906946214794"
+      "virtualBalance": "2533410212968766853642"
     },
     "0xE111178A87A3BFf0c8d18DECBa5798827539Ae99": {
       "aToken": "0x38d693cE1dF5AaDF7bC62595A37D667aD57922e5",
       "aTokenName": "Aave Polygon EURS",
       "aTokenSymbol": "aPolEURS",
-      "aTokenUnderlyingBalance": "91263718",
+      "aTokenUnderlyingBalance": "111373092",
       "borrowCap": 3000000,
       "borrowingEnabled": true,
       "debtCeiling": 67500000,
@@ -2543,7 +2543,7 @@
       "oracle": "0x73366Fe0AA0Ded304479862808e02506FE556a98",
       "oracleDecimals": 8,
       "oracleDescription": "EUR / USD",
-      "oracleLatestAnswer": "108384000",
+      "oracleLatestAnswer": "114093000",
       "reserveFactor": 2000,
       "supplyCap": 4000000,
       "symbol": "EURS",
@@ -2552,13 +2552,13 @@
       "variableDebtToken": "0x5D557B07776D12967914379C71a1310e917C7555",
       "variableDebtTokenName": "Aave Polygon Variable Debt EURS",
       "variableDebtTokenSymbol": "variableDebtPolEURS",
-      "virtualBalance": "91262127"
+      "virtualBalance": "111371501"
     },
     "0xa3Fa99A148fA48D14Ed51d610c367C61876997F1": {
       "aToken": "0xeBe517846d0F36eCEd99C735cbF6131e1fEB775D",
       "aTokenName": "Aave Polygon MIMATIC",
       "aTokenSymbol": "aPolMIMATIC",
-      "aTokenUnderlyingBalance": "9988850431083136915846",
+      "aTokenUnderlyingBalance": "9995342865950802215305",
       "borrowCap": 700000,
       "borrowingEnabled": true,
       "debtCeiling": 18000000,
@@ -2578,7 +2578,7 @@
       "oracle": "0x4ae2Ab1af7e3b0092dbF3A4B20ec3de8fC834873",
       "oracleDecimals": 8,
       "oracleDescription": "Capped MAI/USD",
-      "oracleLatestAnswer": "100014066",
+      "oracleLatestAnswer": "99878498",
       "reserveFactor": 9500,
       "supplyCap": 900000,
       "symbol": "miMATIC",
@@ -2587,13 +2587,13 @@
       "variableDebtToken": "0x18248226C16BF76c032817854E7C83a2113B4f06",
       "variableDebtTokenName": "Aave Polygon Variable Debt MIMATIC",
       "variableDebtTokenSymbol": "variableDebtPolMIMATIC",
-      "virtualBalance": "9988850431083136915846"
+      "virtualBalance": "9995342865950802215305"
     },
     "0xc2132D05D31c914a87C6611C10748AEb04B58e8F": {
       "aToken": "0x6ab707Aca953eDAeFBc4fD23bA73294241490620",
       "aTokenName": "Aave Polygon USDT",
       "aTokenSymbol": "aPolUSDT",
-      "aTokenUnderlyingBalance": "18040945086151",
+      "aTokenUnderlyingBalance": "15474614705996",
       "borrowCap": 85000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2613,7 +2613,7 @@
       "oracle": "0xaA574f4f6E124E77a7a1B5Ed91c8b407000A7730",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDT/USD",
-      "oracleLatestAnswer": "99960752",
+      "oracleLatestAnswer": "100029000",
       "reserveFactor": 2500,
       "supplyCap": 90000000,
       "symbol": "USDT",
@@ -2622,13 +2622,13 @@
       "variableDebtToken": "0xfb00AC187a8Eb5AFAE4eACE434F493Eb62672df7",
       "variableDebtTokenName": "Aave Polygon Variable Debt USDT",
       "variableDebtTokenSymbol": "variableDebtPolUSDT",
-      "virtualBalance": "18040769957431"
+      "virtualBalance": "15474439577276"
     },
     "0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6": {
       "aToken": "0x80cA0d8C38d2e2BcbaB66aA1648Bd1C7160500FE",
       "aTokenName": "Aave Polygon MATICX",
       "aTokenSymbol": "aPolMATICX",
-      "aTokenUnderlyingBalance": "35007143928501899258795321",
+      "aTokenUnderlyingBalance": "21110156427897647017343554",
       "borrowCap": 1,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -2648,7 +2648,7 @@
       "oracle": "0xB0A72A5e454890e9715e059e8df8582a6B383DE3",
       "oracleDecimals": 8,
       "oracleDescription": "Capped MaticX / MATIC / USD",
-      "oracleLatestAnswer": "24427762",
+      "oracleLatestAnswer": "25623923",
       "reserveFactor": 2000,
       "supplyCap": 120000000,
       "symbol": "MaticX",
@@ -2657,7 +2657,7 @@
       "variableDebtToken": "0xB5b46F918C2923fC7f26DB76e8a6A6e9C4347Cf9",
       "variableDebtTokenName": "Aave Polygon Variable Debt MATICX",
       "variableDebtTokenSymbol": "variableDebtPolMATICX",
-      "virtualBalance": "35007143928268802923734372"
+      "virtualBalance": "21110156427664550682282605"
     }
   },
   "strategies": {
