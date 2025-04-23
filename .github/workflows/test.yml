@@ -24,6 +24,8 @@ jobs:
 
   test-sol:
     name: Foundry build n test
+    secrets:
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

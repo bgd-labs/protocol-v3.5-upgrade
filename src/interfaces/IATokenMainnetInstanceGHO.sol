@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
+
+interface IATokenMainnetInstanceGHO {
+  /**
+   * @notice Resolves the facilitator by burning the specified amount of underlying GHO tokens.
+   * @dev This function can be called only once because `UpgradePayload` will remove
+   *      this contract as a facilitator from the GHO token.
+   * @param amount The amount of underlying GHO tokens to burn.
+   */
+  function resolveFacilitator(uint256 amount) external;
+}

@@ -29,6 +29,8 @@ gnosis = "${RPC_GNOSIS}"
 zkEVM = "${RPC_ZKEVM}"
 celo = "${RPC_CELO}"
 zksync = "${RPC_ZKSYNC}"
+linea = "${RPC_LINEA}"
+sonic = "${RPC_SONIC}"
 
 [etherscan]
 mainnet = { key = "${ETHERSCAN_API_KEY_MAINNET}", chain = 1 }
