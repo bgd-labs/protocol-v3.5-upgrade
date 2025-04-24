@@ -41,18 +41,23 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
       AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
     assertFalse(reserveData.configuration.getFlashLoanEnabled());
 
-
     super.test_upgrade();
 
-    assertEq(IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).balanceOf(AaveV3EthereumAssets.GHO_A_TOKEN), 0);
-    assertEq(AaveV3Ethereum.POOL.getVirtualUnderlyingBalance(AaveV3EthereumAssets.GHO_UNDERLYING), 0);
+    assertEq(
+      IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).balanceOf(AaveV3EthereumAssets.GHO_A_TOKEN),
+      ghoATokenCapacity - ghoATokenLevel
+    );
+    assertEq(
+      AaveV3Ethereum.POOL.getVirtualUnderlyingBalance(AaveV3EthereumAssets.GHO_UNDERLYING),
+      ghoATokenCapacity - ghoATokenLevel
+    );
 
     (facilitatorCapacity, facilitatorLevel) =
       IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).getFacilitatorBucket(_payload.FACILITATOR());
     assertEq(facilitatorCapacity, ghoATokenCapacity);
-    assertEq(facilitatorLevel, ghoATokenLevel);
+    assertEq(facilitatorLevel, ghoATokenCapacity);
 
-    assertEq(IERC20(AaveV3EthereumAssets.GHO_A_TOKEN).totalSupply(), ghoATokenLevel);
+    assertEq(IERC20(AaveV3EthereumAssets.GHO_A_TOKEN).totalSupply(), ghoATokenCapacity);
 
     (ghoATokenCapacity, ghoATokenLevel) =
       IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).getFacilitatorBucket(AaveV3EthereumAssets.GHO_A_TOKEN);
@@ -63,8 +68,7 @@ contract MainnetTest is UpgradeTest("mainnet", 22331905) {
 
     assertTrue(AaveV3Ethereum.ACL_MANAGER.isRiskAdmin(_payload.FACILITATOR()));
 
-    reserveData =
-      AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
+    reserveData = AaveV3Ethereum.POOL.getReserveData(AaveV3EthereumAssets.GHO_UNDERLYING);
     assertEq(reserveData.configuration.getSupplyCap(), 1);
     assertEq(reserveData.configuration.getReserveFactor(), 100_00);
     assertTrue(reserveData.configuration.getFlashLoanEnabled());

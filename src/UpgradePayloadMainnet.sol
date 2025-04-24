@@ -10,6 +10,7 @@ import {ConfiguratorInputTypes} from "aave-v3-origin/contracts/protocol/librarie
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 import {MiscEthereum} from "aave-address-book/MiscEthereum.sol";
 import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
+import {GhoEthereum} from "aave-address-book/GhoEthereum.sol";
 
 import {IGhoDirectMinter} from "gho-direct-minter/interfaces/IGhoDirectMinter.sol";
 import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
@@ -18,6 +19,7 @@ import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
 import {IATokenMainnetInstanceGHO} from "./interfaces/IATokenMainnetInstanceGHO.sol";
 import {IOldATokenMainnetInstanceGHO} from "./interfaces/IOldATokenMainnetInstanceGHO.sol";
 import {IVariableDebtTokenMainnetInstanceGHO} from "./interfaces/IVariableDebtTokenMainnetInstanceGHO.sol";
+import {IGhoBucketSteward} from "./interfaces/IGhoBucketSteward.sol";
 
 import {UpgradePayload} from "./UpgradePayload.sol";
 
@@ -164,6 +166,18 @@ contract UpgradePayloadMainnet is UpgradePayload {
 
     // 15. Enable flashloans for GHO
     POOL_CONFIGURATOR.setReserveFlashLoaning({asset: AaveV3EthereumAssets.GHO_UNDERLYING, enabled: true});
+
+    // 16. Mint supply on the instance
+    if (capacity > level) {
+      IGhoDirectMinter(FACILITATOR).mintAndSupply(capacity - level);
+    }
+
+    // 17. Allow risk council to control the bucket capacity
+    address[] memory vaults = new address[](1);
+    vaults[0] = FACILITATOR;
+    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, true);
+    vaults[0] = AaveV3EthereumAssets.GHO_A_TOKEN;
+    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, false);
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {

@@ -62,6 +62,11 @@ abstract contract UpgradeTest is ProtocolV3TestBase {
     }
   }
 
+  function test_gas() external {
+    executePayload(vm, address(_getPayload()));
+    vm.snapshotGasLastCall("Execution", NETWORK);
+  }
+
   function _getTestPayload() internal returns (address) {
     address deployed = _getDeployedPayload();
     if (deployed == address(0)) return _getPayload();
