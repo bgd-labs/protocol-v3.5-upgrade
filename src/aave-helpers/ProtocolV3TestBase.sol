@@ -318,7 +318,8 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
    * Reserves that are frozen or not active should not be included in e2e test suite
    */
   function _includeInE2e(ReserveConfig memory config) internal pure returns (bool) {
-    return !config.isFrozen && config.isActive && !config.isPaused && config.underlying != AaveV3CeloAssets.CELO_UNDERLYING;
+    return
+      !config.isFrozen && config.isActive && !config.isPaused && config.underlying != AaveV3CeloAssets.CELO_UNDERLYING;
   }
 
   function _getTokenAmountByDollarValue(IPool pool, ReserveConfig memory config, uint256 dollarValue)
