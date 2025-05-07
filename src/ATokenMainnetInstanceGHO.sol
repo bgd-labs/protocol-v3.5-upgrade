@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
-import {ATokenInstance} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
+import {ATokenInstance, IInitializableAToken, Errors} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
 
 import {AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 
@@ -24,11 +24,45 @@ contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
     ATokenInstance(pool, rewardsController, treasury)
   {}
 
-  /// @inheritdoc IATokenMainnetInstanceGHO
-  function resolveFacilitator(uint256 amount) external override onlyPoolAdmin {
+  /// @inheritdoc IInitializableAToken
+  function initialize(
+    IPool initializingPool,
+    address underlyingAsset,
+    uint8 aTokenDecimals,
+    string calldata aTokenName,
+    string calldata aTokenSymbol,
+    bytes calldata params
+  ) public virtual override initializer {
+    // @note this is the default initialization function
+    // the same as the `ATokenInstance.initialize` function
+    // but contains the additional logic for deleting the deprecated variables
+
     delete _deprecated_ghoVariableDebtToken;
     delete _deprecated_ghoTreasury;
 
+    require(initializingPool == POOL, Errors.PoolAddressesDoNotMatch());
+    _setName(aTokenName);
+    _setSymbol(aTokenSymbol);
+    _setDecimals(aTokenDecimals);
+
+    _underlyingAsset = underlyingAsset;
+
+    _domainSeparator = _calculateDomainSeparator();
+
+    emit Initialized(
+      underlyingAsset,
+      address(POOL),
+      address(TREASURY),
+      address(REWARDS_CONTROLLER),
+      aTokenDecimals,
+      aTokenName,
+      aTokenSymbol,
+      params
+    );
+  }
+
+  /// @inheritdoc IATokenMainnetInstanceGHO
+  function resolveFacilitator(uint256 amount) external override onlyPoolAdmin {
     // @note This action is needed to remove this aToken from facilitator list.
     //       In order to do this, a facilitator should have it's bucket level set to 0.
     //       The facilitator bucket of this token (capacity and level) will be transferred

@@ -10,6 +10,7 @@ import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolConfigurator} from "aave-v3-origin/contracts/interfaces/IPoolConfigurator.sol";
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
 import {ConfiguratorInputTypes} from "aave-v3-origin/contracts/protocol/libraries/types/ConfiguratorInputTypes.sol";
+import {IncentivizedERC20} from "aave-v3-origin/contracts/protocol/tokenization/base/IncentivizedERC20.sol";
 
 /**
  * @title UpgradePayload
@@ -26,6 +27,8 @@ contract UpgradePayload {
     address vTokenImpl;
   }
 
+  error WrongAddresses();
+
   IPoolAddressesProvider public immutable POOL_ADDRESSES_PROVIDER;
   address public immutable POOL_DATA_PROVIDER;
   IPool public immutable POOL;
@@ -40,11 +43,20 @@ contract UpgradePayload {
     POOL_ADDRESSES_PROVIDER = params.poolAddressesProvider;
     POOL_DATA_PROVIDER = params.poolDataProvider;
 
-    POOL = IPool(params.poolAddressesProvider.getPool());
+    IPool pool = IPool(params.poolAddressesProvider.getPool());
+    POOL = pool;
     POOL_CONFIGURATOR = IPoolConfigurator(params.poolAddressesProvider.getPoolConfigurator());
 
+    if (IPool(params.poolImpl).ADDRESSES_PROVIDER() != params.poolAddressesProvider) {
+      revert WrongAddresses();
+    }
     POOL_IMPL = params.poolImpl;
     POOL_CONFIGURATOR_IMPL = params.poolConfiguratorImpl;
+
+    // @note There is no `POOL` function in the IAToken interface
+    if (IncentivizedERC20(params.aTokenImpl).POOL() != pool || IncentivizedERC20(params.vTokenImpl).POOL() != pool) {
+      revert WrongAddresses();
+    }
     A_TOKEN_IMPL = params.aTokenImpl;
     V_TOKEN_IMPL = params.vTokenImpl;
   }

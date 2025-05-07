@@ -45,6 +45,14 @@ contract VariableDebtTokenMainnetInstanceGHO is VariableDebtToken, IVariableDebt
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
+    // @note this is the default initialization function
+    // the same as the `VariableDebtTokenInstance.initialize` function
+    // but contains the additional logic for deleting the deprecated variables
+
+    delete _deprecated_ghoAToken;
+    delete _deprecated_discountToken;
+    delete _deprecated_discountRateStrategy;
+
     require(initializingPool == POOL, Errors.PoolAddressesDoNotMatch());
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
@@ -53,10 +61,6 @@ contract VariableDebtTokenMainnetInstanceGHO is VariableDebtToken, IVariableDebt
     _underlyingAsset = underlyingAsset;
 
     _domainSeparator = _calculateDomainSeparator();
-
-    delete _deprecated_ghoAToken;
-    delete _deprecated_discountToken;
-    delete _deprecated_discountRateStrategy;
 
     emit Initialized(
       underlyingAsset,

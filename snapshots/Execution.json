@@ -1,15 +1,17 @@
 {
   "arbitrum": "4096640",
-  "avalanche": "2873469",
+  "avalanche": "2873526",
   "base": "2607237",
-  "bnb": "1796326",
+  "bnb": "1796383",
   "celo": "1150360",
-  "gnosis": "1771804",
-  "linea": "1586075",
-  "mainnet": "9012182",
+  "gnosis": "1771861",
+  "linea": "1586132",
+  "mainnet": "9528017",
+  "mainnetEtherFi": "1023039",
+  "mainnetLido": "1848600",
   "metis": "1160032",
   "optimism": "3008499",
-  "polygon": "4508183",
+  "polygon": "4508240",
   "scroll": "1169719",
-  "sonic": "747682"
+  "sonic": "747739"
 }

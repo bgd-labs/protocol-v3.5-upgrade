@@ -6,6 +6,10 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
 contract MainnetEtherFiTest is UpgradeTest("mainnet", 22331905) {
+  constructor() {
+    NETWORK_SUB_NAME = "EtherFi";
+  }
+
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployMainnetEtherfi();
   }
