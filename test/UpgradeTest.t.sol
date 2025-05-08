@@ -17,6 +17,10 @@ import {IFlashLoanReceiver} from "aave-v3-origin/contracts/misc/flashloan/interf
 
 import {UpgradePayload} from "../src/UpgradePayload.sol";
 
+interface NewPool {
+  function RESERVE_INTEREST_RATE_STRATEGY() external returns (address);
+}
+
 abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
   using SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -54,6 +58,29 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     );
   }
 
+  /**
+   * On the upgrade we assume all interest rates are already the same.
+   * This test simply validates that assumption.
+   */
+  function test_assumption_interestRates() external {
+    UpgradePayload _payload = UpgradePayload(_getTestPayload());
+    IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
+    IPool pool = IPool(addressesProvider.getPool());
+    address[] memory reserves = pool.getReservesList();
+    address[] memory irs = new address[](reserves.length);
+    for (uint256 i = 0; i < reserves.length; i++) {
+      DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserves[i]);
+      irs[i] = reserveData.interestRateStrategyAddress;
+    }
+
+    executePayload(vm, address(_payload));
+
+    address commonIr = NewPool(address(pool)).RESERVE_INTEREST_RATE_STRATEGY();
+    for (uint256 i = 0; i < reserves.length; i++) {
+      assertEq(irs[i], commonIr);
+    }
+  }
+
   function test_upgrade() public virtual {
     UpgradePayload _payload = UpgradePayload(_getTestPayload());
 
@@ -61,11 +88,10 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
 
     IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
     IPool pool = IPool(addressesProvider.getPool());
+    address[] memory reserves = pool.getReservesList();
     IPoolDataProvider poolDataProvider = IPoolDataProvider(addressesProvider.getPoolDataProvider());
-
     assertEq(pool.FLASHLOAN_PREMIUM_TO_PROTOCOL(), 100_00);
 
-    address[] memory reserves = pool.getReservesList();
     for (uint256 i = 0; i < reserves.length; i++) {
       address reserve = reserves[i];
       assertTrue(poolDataProvider.getIsVirtualAccActive(reserve));
