@@ -53,6 +53,7 @@ import {UpgradePayloadMainnet} from "../src/UpgradePayloadMainnet.sol";
 import {ATokenMainnetInstanceGHO} from "../src/ATokenMainnetInstanceGHO.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
 import {PoolInstanceWithCustomInitialize} from "../src/PoolInstanceWithCustomInitialize.sol";
+import {MainnetCorePoolInstanceWithCustomInitialize} from "../src/MainnetCorePoolInstanceWithCustomInitialize.sol";
 import {L2PoolInstanceWithCustomInitialize} from "../src/L2PoolInstanceWithCustomInitialize.sol";
 import {PoolConfiguratorWithCustomInitialize} from "../src/PoolConfiguratorWithCustomInitialize.sol";
 
@@ -119,7 +120,7 @@ library DeploymentLibrary {
   }
 
   // L1s
-  function _deployMainnet() internal returns (address) {
+  function _deployMainnetCore() internal returns (address) {
     DeployParameters memory deployParams;
 
     deployParams.pool = address(AaveV3Ethereum.POOL);
@@ -264,7 +265,7 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      type(PoolInstanceWithCustomInitialize).creationCode,
+      isMainnetCore ? type(MainnetCorePoolInstanceWithCustomInitialize).creationCode : type(PoolInstanceWithCustomInitialize).creationCode,
       abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
@@ -293,13 +294,13 @@ library DeploymentLibrary {
     );
 
     if (isMainnetCore) {
-      return _deployMainnet(payloadParams);
+      return _deployMainnetCore(payloadParams);
     } else {
       return GovV3Helpers.deployDeterministic(type(UpgradePayload).creationCode, abi.encode(payloadParams));
     }
   }
 
-  function _deployMainnet(UpgradePayload.ConstructorParams memory params) private returns (address) {
+  function _deployMainnetCore(UpgradePayload.ConstructorParams memory params) private returns (address) {
     // its the council used on other GHO stewards
     // might make sense to have on address book
     address council = 0x8513e6F37dBc52De87b166980Fa3F50639694B60;
@@ -403,7 +404,7 @@ contract Deploymetis is MetisScript {
 
 contract Deploymainnet is EthereumScript {
   function run() external broadcast {
-    DeploymentLibrary._deployMainnet();
+    DeploymentLibrary._deployMainnetCore();
   }
 }
 
