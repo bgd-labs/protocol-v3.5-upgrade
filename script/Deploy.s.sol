@@ -129,7 +129,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Ethereum.COLLECTOR);
 
-    return _deployL1(deployParams, true);
+    return _deployMainnetCore(deployParams);
   }
 
   function _deployMainnetLido() internal returns (address) {
@@ -141,7 +141,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3EthereumLido.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3EthereumLido.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deployMainnetEtherfi() internal returns (address) {
@@ -153,7 +153,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3EthereumEtherFi.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3EthereumEtherFi.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deployGnosis() internal returns (address) {
@@ -165,7 +165,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Gnosis.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Gnosis.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deployBNB() internal returns (address) {
@@ -177,7 +177,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3BNB.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3BNB.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deployAvalanche() internal returns (address) {
@@ -189,7 +189,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Avalanche.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Avalanche.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deployPolygon() internal returns (address) {
@@ -201,7 +201,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Polygon.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Polygon.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deployLinea() internal returns (address) {
@@ -213,7 +213,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Linea.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Linea.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deploySonic() internal returns (address) {
@@ -225,7 +225,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Sonic.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Sonic.COLLECTOR);
 
-    return _deployL1(deployParams, false);
+    return _deployL1(deployParams);
   }
 
   function _deployCelo() internal returns (address) {
@@ -260,16 +260,28 @@ library DeploymentLibrary {
     return _deployPayload(deployParams, payloadParams, false);
   }
 
-  function _deployL1(DeployParameters memory deployParams, bool isMainnetCore) internal returns (address) {
+  function _deployL1(DeployParameters memory deployParams) internal returns (address) {
     UpgradePayload.ConstructorParams memory payloadParams;
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      isMainnetCore ? type(MainnetCorePoolInstanceWithCustomInitialize).creationCode : type(PoolInstanceWithCustomInitialize).creationCode,
+      type(PoolInstanceWithCustomInitialize).creationCode,
       abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
-    return _deployPayload(deployParams, payloadParams, isMainnetCore);
+    return _deployPayload({deployParams: deployParams, payloadParams: payloadParams, isMainnetCore: false});
+  }
+
+  function _deployMainnetCore(DeployParameters memory deployParams) internal returns (address) {
+    UpgradePayload.ConstructorParams memory payloadParams;
+
+    payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
+    payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
+      type(MainnetCorePoolInstanceWithCustomInitialize).creationCode,
+      abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
+    );
+
+    return _deployPayload({deployParams: deployParams, payloadParams: payloadParams, isMainnetCore: true});
   }
 
   function _deployPayload(
