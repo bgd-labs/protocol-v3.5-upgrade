@@ -13,10 +13,12 @@ library CustomInitialize {
       address currentReserveAddress = _reservesList[i];
       DataTypes.ReserveData storage currentReserve = _reserves[currentReserveAddress];
 
-      // @note The value `__deprecatedVirtualUnderlyingBalance` was deprecated in v3.4 and
-      //       moved to `virtualUnderlyingBalance` which in it own turn takes the place of the
-      //       `unbacked` variable that was in the v3.3 version of the reserve but removed in v3.4.
-      //       So we need to move the value from the old variable to the new one.
+      // @note The storage slot for `__deprecatedVirtualUnderlyingBalance` was deprecated in v3.4.
+      //       Its purpose was effectively moved to `virtualUnderlyingBalance`. This `virtualUnderlyingBalance` slot,
+      //       in turn, reuses the storage location previously occupied by the `unbacked` variable
+      //       (which existed in v3.3 reserves but was removed in v3.4).
+      //       Therefore, this function migrates the value from the old `__deprecatedVirtualUnderlyingBalance` slot
+      //       to the new `virtualUnderlyingBalance` slot (and zeroes out the old slot).
 
       uint128 currentVB = currentReserve.__deprecatedVirtualUnderlyingBalance;
       if (currentVB != 0) {

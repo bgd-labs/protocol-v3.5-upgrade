@@ -123,7 +123,7 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x0000000000000000000000005cc4f782cfe249286476a7effd9d7bd215768194",
-          "newValue": "0x000000000000000000000000ae7fa9087fa9e420c44e5d4cbfe3e165a99a782a",
+          "newValue": "0x00000000000000000000000045198bd30427021d7f7121bd610f99e9bfef42b0",
           "label": "Implementation slot"
         }
       }
@@ -150,7 +150,11 @@
         },
         "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc": {
           "previousValue": "0x00000000000000000000000046dcd5f4600319b02649fd76b55aa6c1035ca478",
+<<<<<<< HEAD
           "newValue": "0x0000000000000000000000005decade8774ad2c4d3bd1be2f8a366c4d280ec04",
+=======
+          "newValue": "0x0000000000000000000000007aa81242654e89ee42cdbceb0dc9d1628304c06b",
+>>>>>>> origin/docs/fix-types-and-bad-english
           "label": "Implementation slot"
         },
         "0x37b7fc6fa4a96109d1745c7f989f397f19e6bafe7d5438dd5a1507240efe1fb6": {

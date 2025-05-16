@@ -2,7 +2,6 @@
 pragma solidity ^0.8.10;
 
 import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
 import {ITransparentProxyFactory} from
   "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
 
@@ -53,7 +52,6 @@ contract UpgradePayload {
     POOL_IMPL = params.poolImpl;
     POOL_CONFIGURATOR_IMPL = params.poolConfiguratorImpl;
 
-    // @note There is no `POOL` function in the IAToken interface
     if (IncentivizedERC20(params.aTokenImpl).POOL() != pool || IncentivizedERC20(params.vTokenImpl).POOL() != pool) {
       revert WrongAddresses();
     }
@@ -62,22 +60,22 @@ contract UpgradePayload {
   }
 
   function execute() external virtual {
-    // 1. Upgrade configurator implementation
-    // to be able to use v3.4 interfaces for the configurator
+    // 1. Upgrade `PoolConfigurator` implementation.
+    //    This enables usage of v3.4 interfaces and logic within the `PoolConfigurator` for subsequent steps.
     POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
 
     _defaultUpgrade();
   }
 
   function _defaultUpgrade() internal {
-    // 2. Upgrade pool implementation
-    // to be able to use v3.4 interfaces for the pool
+    // 2. Upgrade `Pool` implementation.
+    //    This enables usage of v3.4 interfaces and logic within the `Pool`.
     POOL_ADDRESSES_PROVIDER.setPoolImpl(POOL_IMPL);
 
-    // 3. Set a new pool data provider
+    // 3. Set the new `PoolDataProvider` implementation.
     POOL_ADDRESSES_PROVIDER.setPoolDataProvider(POOL_DATA_PROVIDER);
 
-    // 4. Update aTokens and vTokens for all reserves
+    // 4. Update AToken and VariableDebtToken implementations for all reserves.
     address[] memory reserves = POOL.getReservesList();
     uint256 length = reserves.length;
     for (uint256 i = 0; i < length; i++) {

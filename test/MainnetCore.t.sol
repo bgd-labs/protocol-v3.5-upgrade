@@ -100,7 +100,7 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22431434) {
       );
     assertEq(theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity);
 
-    // milkmath check reading from etherscan,w hcih also matches what is shown here: https://aave.tokenlogic.xyz/gho-revenue
+    // milkmath check reading from Etherscan, which also matches what is shown here: https://aave.tokenlogic.xyz/gho-revenue
     assertApproxEqAbs(reserveData.accruedToTreasury, 2_453_753_496504028593200000, 1_000);
 
     IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(
@@ -111,12 +111,12 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22431434) {
     assertEq(oldGHOInterestRateData.variableRateSlope2, newGHOInterestRateData.variableRateSlope2);
     assertEq(oldGHOInterestRateData.optimalUsageRatio, newGHOInterestRateData.optimalUsageRatio);
 
-    // test updateDiscountDistribution function in the vToken of the GHO aToken
+    // Test the updateDiscountDistribution function in the GHO vToken.
     VariableDebtTokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_V_TOKEN).updateDiscountDistribution(
       address(0), address(0), 0, 0, 0
     );
 
-    // test delegation functionalities in the AAVE aToken
+    // Test the delegation functionalities in the AAVE AToken.
     IATokenWithDelegation(AaveV3EthereumAssets.AAVE_A_TOKEN).getDelegates(address(this));
     IATokenWithDelegation(AaveV3EthereumAssets.AAVE_A_TOKEN).getPowersCurrent(address(this));
   }

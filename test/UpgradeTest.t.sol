@@ -137,10 +137,10 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       }
 
       filteredReserves[length] = reserves[i];
-      // the amount flashed does not really matter
-      // we're limiting it on the test as we know that the vBalanceDelta in some cases is slightly negative
-      // and for some assets `deal` does not work, so we fallback to user transfers which for most assets don't have enough funds
-      // to "deal" the whole available VirtualUnderlyingBalance
+      // The amount flashed does not really matter.
+      // We're limiting it in the test because we know that the vBalanceDelta can sometimes be slightly negative,
+      // and for some assets, `deal` does not work. Therefore, we fall back to user transfers, which for most assets,
+      // do not provide enough funds to 'deal' the entire available VirtualUnderlyingBalance.
       amounts[length] = oldVirtualUnderlyingBalances[i] / 2;
       interestRateModes[length] = 0;
 
@@ -152,7 +152,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       mstore(interestRateModes, length)
     }
 
-    // bytes("") is for explicitly empty errors (EvmError: Revert)
+    // Using bytes("") to expect a revert without a reason string (an "empty" error, like EvmError: Revert).
     vm.expectRevert(bytes(""));
     POOL.flashLoan({
       receiverAddress: address(this),

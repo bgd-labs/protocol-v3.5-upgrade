@@ -11,12 +11,12 @@ import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
 import {IATokenMainnetInstanceGHO} from "./interfaces/IATokenMainnetInstanceGHO.sol";
 
 contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
-  // These are additional variables that were in the v3.3 AToken for the GHO aToken
-  // but there is no such variables in all other aTokens in both v3.3 and v3.4
-  // so we need to clean them in case in future versions of aTokens it will be
-  // needed to add new storage variables.
-  // If we don't clean them, then the aToken for the GHO token will have non zero values
-  // in these new variables that may be added in the future.
+  // These are additional storage variables that were present in the v3.3 AToken implementation specific to the GHO aToken.
+  // However, such variables do not exist in other AToken implementations (for other assets) in either v3.3 or v3.4.
+  // Therefore, these slots need to be cleaned (zeroed out) in case future AToken versions
+  // require the addition of new storage variables at these specific slots.
+  // If these slots are not cleaned, the GHO AToken contract would retain non-zero values
+  // at these storage locations, potentially conflicting with new variables introduced in future standard AToken upgrades.
   address private _deprecated_ghoVariableDebtToken;
   address private _deprecated_ghoTreasury;
 
@@ -33,9 +33,9 @@ contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
     string calldata aTokenSymbol,
     bytes calldata params
   ) public virtual override initializer {
-    // @note this is the default initialization function
-    // the same as the `ATokenInstance.initialize` function
-    // but contains the additional logic for deleting the deprecated variables
+    // @note This is the standard initialization function,
+    //       similar to `ATokenInstance.initialize`,
+    //       but it includes additional logic to delete the deprecated storage variables specific to the old GHO AToken.
 
     delete _deprecated_ghoVariableDebtToken;
     delete _deprecated_ghoTreasury;
@@ -63,10 +63,10 @@ contract ATokenMainnetInstanceGHO is ATokenInstance, IATokenMainnetInstanceGHO {
 
   /// @inheritdoc IATokenMainnetInstanceGHO
   function resolveFacilitator(uint256 amount) external override onlyPoolAdmin {
-    // @note This action is needed to remove this aToken from facilitator list.
-    //       In order to do this, a facilitator should have it's bucket level set to 0.
-    //       The facilitator bucket of this token (capacity and level) will be transferred
-    //       to a new `GhoDirectMinter` contract.
+    // @note This action is necessary to remove this AToken contract from the GHO facilitator list.
+    //       To achieve this, a facilitator must have its bucket level reduced to 0.
+    //       The facilitator bucket (both capacity and level) previously associated with this AToken
+    //       will be effectively transferred to a new `GhoDirectMinter` contract (which becomes the new facilitator).
     IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).burn(amount);
   }
 }
