@@ -16,7 +16,7 @@ import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainn
 
 import {UpgradeTest, IERC20} from "./UpgradeTest.t.sol";
 
-contract MainnetTest is UpgradeTest("mainnet", 22431434) {
+contract MainnetCoreTest is UpgradeTest("mainnet", 22431434) {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
 
@@ -122,7 +122,7 @@ contract MainnetTest is UpgradeTest("mainnet", 22431434) {
   }
 
   function _getPayload() internal virtual override returns (address) {
-    return DeploymentLibrary._deployMainnet();
+    return DeploymentLibrary._deployMainnetCore();
   }
 
   function _getDeployedPayload() internal virtual override returns (address) {
