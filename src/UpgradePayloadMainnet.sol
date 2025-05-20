@@ -108,7 +108,9 @@ contract UpgradePayloadMainnet is UpgradePayload {
     //    of the previous facilitator (the GHO AToken).
     (uint256 capacityFromOldFacilitator, uint256 levelFromOldFacilitator) =
       IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).getFacilitatorBucket(AaveV3EthereumAssets.GHO_A_TOKEN);
-    IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).addFacilitator(FACILITATOR, "CoreGhoDirectMinter", uint128(capacityFromOldFacilitator));
+    IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).addFacilitator(
+      FACILITATOR, "CoreGhoDirectMinter", uint128(capacityFromOldFacilitator)
+    );
 
     // The `levelFromOldFacilitator` represents the GHO principal the old GHO AToken facilitator minted.
     // Any GHO held directly by the GHO_A_TOKEN contract needs to be swept to the treasury.
@@ -174,6 +176,11 @@ contract UpgradePayloadMainnet is UpgradePayload {
       IDelegationAwareAToken(AaveV3EthereumAssets.UNI_A_TOKEN).delegateUnderlyingTo(address(0));
     }
 
+    // TODO: Before doing the upgrade we will also clean up the existing deficit.
+    // This code is not yet implemented as the exact execution depends on the state of the protocol at execution time.
+    // If umbrella is live by then, the proposal will cover the deficit via umbrella.
+    // If not, we will give the umbrella role to the executor and clear the deficit from here.
+
     // 12. Execute the default v3.4 upgrade steps (updates Pool to `PoolInstanceWithCustomInitialize`, PoolDataProvider,
     //     and standard AToken/VariableDebtToken implementations).
     //     Inside `PoolInstanceWithCustomInitialize.initialize()`:
@@ -235,7 +242,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
     vaults[0] = FACILITATOR;
     IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, true);
     vaults[0] = AaveV3EthereumAssets.GHO_A_TOKEN;
-    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator( vaults, false);
+    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, false);
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {
