@@ -5,9 +5,9 @@ import {
   VariableDebtToken,
   IPool,
   IInitializableDebtToken,
-  VersionedInitializable,
   Errors
 } from "aave-v3-origin/contracts/protocol/tokenization/VariableDebtToken.sol";
+import {VersionedInitializable} from "aave-v3-origin/contracts/misc/aave-upgradeability/VersionedInitializable.sol";
 
 import {IVariableDebtTokenMainnetInstanceGHO} from "./interfaces/IVariableDebtTokenMainnetInstanceGHO.sol";
 

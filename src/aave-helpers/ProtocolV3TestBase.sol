@@ -15,6 +15,7 @@ import {AaveV3CeloAssets} from "aave-address-book/AaveV3Celo.sol";
 
 import {ReserveConfiguration} from "aave-v3-origin/contracts/protocol/libraries/configuration/ReserveConfiguration.sol";
 import {PercentageMath} from "aave-v3-origin/contracts/protocol/libraries/math/PercentageMath.sol";
+import {WadRayMath} from "aave-v3-origin/contracts/protocol/libraries/math/WadRayMath.sol";
 import {Errors} from "aave-v3-origin/contracts/protocol/libraries/helpers/Errors.sol";
 import {DataTypes} from "aave-v3-origin/contracts/protocol/libraries/types/DataTypes.sol";
 import {MockAggregator} from "aave-v3-origin/contracts/mocks/oracle/CLAggregators/MockAggregator.sol";
@@ -58,6 +59,7 @@ struct InterestStrategyValues {
 contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using PercentageMath for uint256;
+  using WadRayMath for uint256;
   using SafeERC20 for IERC20;
 
   MockFlashLoanReceiver internal flashLoanReceiver;
@@ -498,16 +500,12 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
   }
 
   struct FlashLoanVars {
-    address treasury;
     uint256 underlyingTokenBalanceOfATokenBefore;
     uint256 debtTokenBalanceOfUserBefore;
-    uint256 underlyingTokenBalanceOfTreasuryBefore;
     uint256 flashLoanPremiumTotal;
-    uint256 flashLoanPremiumToAToken;
     uint256 flashLoanPremiumToProtocol;
     uint256 underlyingTokenBalanceOfATokenAfter;
     uint256 debtTokenBalanceOfUserAfter;
-    uint256 underlyingTokenBalanceOfTreasuryAfter;
     uint256[] interestRateModes;
     uint256[] amounts;
     address[] assets;
@@ -525,11 +523,10 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
 
     vm.startPrank(user);
 
-    vars.treasury = IAToken(config.aToken).RESERVE_TREASURY_ADDRESS();
+    DataTypes.ReserveDataLegacy memory reserveDataBefore = pool.getReserveData(config.underlying);
 
     vars.underlyingTokenBalanceOfATokenBefore = IERC20(config.underlying).balanceOf(config.aToken);
     vars.debtTokenBalanceOfUserBefore = IERC20(config.variableDebtToken).balanceOf(user);
-    vars.underlyingTokenBalanceOfTreasuryBefore = IERC20(config.underlying).balanceOf(vars.treasury);
 
     if (interestRateMode == 0) {
       vars.flashLoanPremiumTotal = pool.FLASHLOAN_PREMIUM_TOTAL();
@@ -537,7 +534,6 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
 
       vars.flashLoanPremiumTotal = amount.percentMul(vars.flashLoanPremiumTotal);
       vars.flashLoanPremiumToProtocol = vars.flashLoanPremiumTotal.percentMul(vars.flashLoanPremiumToProtocol);
-      vars.flashLoanPremiumToAToken = vars.flashLoanPremiumTotal - vars.flashLoanPremiumToProtocol;
 
       deal2(config.underlying, receiverAddress, vars.flashLoanPremiumTotal);
     }
@@ -565,17 +561,17 @@ contract ProtocolV3TestBase is RawProtocolV3TestBase, CommonTestBase {
 
     vars.underlyingTokenBalanceOfATokenAfter = IERC20(config.underlying).balanceOf(config.aToken);
     vars.debtTokenBalanceOfUserAfter = IERC20(config.variableDebtToken).balanceOf(user);
-    vars.underlyingTokenBalanceOfTreasuryAfter = IERC20(config.underlying).balanceOf(vars.treasury);
+    DataTypes.ReserveDataLegacy memory reserveDataAfter = pool.getReserveData(config.underlying);
 
     if (interestRateMode == 0) {
       assertEq(
-        vars.underlyingTokenBalanceOfATokenBefore + vars.flashLoanPremiumToAToken,
+        vars.underlyingTokenBalanceOfATokenBefore + vars.flashLoanPremiumToProtocol,
         vars.underlyingTokenBalanceOfATokenAfter,
         "11"
       );
       assertEq(
-        vars.underlyingTokenBalanceOfTreasuryBefore + vars.flashLoanPremiumToProtocol,
-        vars.underlyingTokenBalanceOfTreasuryAfter,
+        reserveDataBefore.accruedToTreasury + vars.flashLoanPremiumToProtocol.rayDiv(reserveDataAfter.liquidityIndex),
+        reserveDataAfter.accruedToTreasury,
         "12"
       );
 
