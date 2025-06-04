@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
+import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
 import {
   ProtocolV3TestBase,
   IPool,
@@ -41,6 +42,9 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
 
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl(NETWORK), BLOCK_NUMBER);
+    if (block.chainid == 1) {
+      GovV3Helpers.executePayload(vm, 295);
+    }
   }
 
   function test_execution() public virtual {

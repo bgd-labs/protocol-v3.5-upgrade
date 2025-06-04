@@ -15,6 +15,7 @@ import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethe
 import {MiscEthereum} from "aave-address-book/MiscEthereum.sol";
 import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
 import {GhoEthereum} from "aave-address-book/GhoEthereum.sol";
+import {UmbrellaEthereum} from "aave-address-book/UmbrellaEthereum.sol";
 
 import {IGhoDirectMinter} from "gho-direct-minter/interfaces/IGhoDirectMinter.sol";
 import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
@@ -28,6 +29,18 @@ import {IVariableDebtTokenMainnetInstanceGHO} from "./interfaces/IVariableDebtTo
 import {IGhoBucketSteward} from "./interfaces/IGhoBucketSteward.sol";
 
 import {UpgradePayload} from "./UpgradePayload.sol";
+
+interface IDeficitSteward {
+  /**
+   * @notice Pulls funds to resolve `deficitOffset` on the maximum possible amount.
+   * @dev If current allowance or treasury balance is less than the `deficitOffsetToCover` the function will revert.
+   * @param reserve Reserve address
+   * @return The amount of `deficitOffset` eliminated
+   */
+  function coverDeficitOffset(address reserve) external returns (uint256);
+
+  function grantRole(bytes32 role, address account) external;
+}
 
 /**
  * @title UpgradePayloadMainnet
@@ -48,6 +61,8 @@ contract UpgradePayloadMainnet is UpgradePayload {
     address ghoFacilitatorImpl;
     address council;
   }
+
+  bytes32 public constant FINANCE_COMMITTEE_ROLE = keccak256("FINANCE_COMITTEE_ROLE");
 
   address public immutable A_TOKEN_GHO_IMPL;
   address public immutable V_TOKEN_GHO_IMPL;
@@ -95,6 +110,15 @@ contract UpgradePayloadMainnet is UpgradePayload {
   }
 
   function execute() external override {
+    // 0. cover the existing reserve deficit for GHO
+    uint256 currentDeficitGHO = AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING);
+    if (currentDeficitGHO != 0) {
+      IDeficitSteward(UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD).grantRole(FINANCE_COMMITTEE_ROLE, address(this));
+      IDeficitSteward(UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD).coverDeficitOffset(
+        AaveV3EthereumAssets.GHO_UNDERLYING
+      );
+    }
+
     // Initial GHO State:
     // - Scaled total supply of GHO AToken: 0
     // - GHO reserve's `virtualUnderlyingBalance`: 0
@@ -175,11 +199,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
       // This action requires the caller to have the "Pool Admin" role in the ACL.
       IDelegationAwareAToken(AaveV3EthereumAssets.UNI_A_TOKEN).delegateUnderlyingTo(address(0));
     }
-
-    // TODO: Before doing the upgrade we will also clean up the existing deficit.
-    // This code is not yet implemented as the exact execution depends on the state of the protocol at execution time.
-    // If umbrella is live by then, the proposal will cover the deficit via umbrella.
-    // If not, we will give the umbrella role to the executor and clear the deficit from here.
 
     // 12. Execute the default v3.4 upgrade steps (updates Pool to `PoolInstanceWithCustomInitialize`, PoolDataProvider,
     //     and standard AToken/VariableDebtToken implementations).
