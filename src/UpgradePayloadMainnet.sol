@@ -113,6 +113,8 @@ contract UpgradePayloadMainnet is UpgradePayload {
     // 0. cover the existing reserve deficit for GHO
     uint256 currentDeficitGHO = AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING);
     if (currentDeficitGHO != 0) {
+      // granting the FINANCE_COMITTEE_ROLE to the short executor (this), as it's required to cover the deficit
+      // the role is not revoked, as generally it makes sense that the short executor can use the steward
       IDeficitSteward(UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD).grantRole(FINANCE_COMMITTEE_ROLE, address(this));
       IDeficitSteward(UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD).coverDeficitOffset(
         AaveV3EthereumAssets.GHO_UNDERLYING
