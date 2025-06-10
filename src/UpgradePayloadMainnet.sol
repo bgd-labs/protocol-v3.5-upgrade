@@ -117,6 +117,7 @@ contract UpgradePayloadMainnet is UpgradePayload {
       IDeficitSteward(UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD).coverDeficitOffset(
         AaveV3EthereumAssets.GHO_UNDERLYING
       );
+      require(AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING) == 0, "Deficit not covered");
     }
 
     // Initial GHO State:
