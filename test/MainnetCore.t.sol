@@ -2,7 +2,10 @@
 pragma solidity ^0.8.0;
 
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
+import {UmbrellaEthereum} from "aave-address-book/UmbrellaEthereum.sol";
+
 import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import {ReserveConfiguration} from "aave-v3-origin/contracts/protocol/libraries/configuration/ReserveConfiguration.sol";
 import {WadRayMath} from "aave-v3-origin/contracts/protocol/libraries/math/WadRayMath.sol";
 import {DataTypes} from "aave-v3-origin/contracts/protocol/libraries/types/DataTypes.sol";
@@ -56,7 +59,22 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22623489) {
       reserveData.interestRateStrategyAddress
     ).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
 
+    uint256 previousAllowanceToDeficitOffsetClinicSteward = IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).allowance(
+      address(this), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
+    );
+
     super.test_upgrade();
+
+    assertEq(
+      IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).allowance(
+        address(this), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
+      ),
+      0
+    );
+    assertEq(
+      IERC20(AaveV3EthereumAssets.GHO_A_TOKEN).allowance(address(this), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD),
+      previousAllowanceToDeficitOffsetClinicSteward
+    );
 
     uint256 ghoDeficitAfter = AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING);
     assertEq(ghoDeficitAfter, 0);

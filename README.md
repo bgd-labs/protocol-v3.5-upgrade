@@ -56,25 +56,26 @@ This sequence includes the general steps plus specific GHO migration steps, exec
 **Execution Steps (Inside `execute()` function):**
 
 0. **Cover existing GHO deficit:** Existing `GHO` deficit is covered via the deficit steward.
-1. **Grant Facilitator Risk Admin:** The `ACL_MANAGER` grants the `RISK_ADMIN` role to the `GhoDirectMinter` contract (`FACILITATOR`). This allows `FACILITATOR` to call `setSupplyCap`.
-2. **Add New Facilitator to GhoToken:**
+1. **Update Deficit Steward Allowance:** The payload checks for any allowance of the underlying `GHO` token granted to the `DEFICIT_OFFSET_CLINIC_STEWARD`. If an allowance exists, it is revoked for the underlying `GHO`, and a new approval for the same amount is granted for the `GHO AToken` (`aGHO`). This adapts the deficit coverage mechanism to utilize aTokens instead of the underlying GHO.
+2. **Grant Facilitator Risk Admin:** The `ACL_MANAGER` grants the `RISK_ADMIN` role to the `GhoDirectMinter` contract (`FACILITATOR`). This allows `FACILITATOR` to call `setSupplyCap`.
+3. **Add New Facilitator to GhoToken:**
    - The current GHO bucket capacity and level of the old `aGHO` facilitator are fetched from the `GhoToken`.
    - The new `GhoDirectMinter` (`FACILITATOR`) is added as a GHO facilitator to the `GhoToken` contract (`IGhoToken(...).addFacilitator(...)`) using the fetched capacity.
-3. **Distribute Old aGHO Fees:** `IOldATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).distributeFeesToTreasury()` is called to send any accumulated GHO fees in the old aToken contract to the treasury. This is a required step to make the balance of the `GHO_A_TOKEN` equal to zero.
-4. **Upgrade PoolConfigurator Implementation:** The `PoolConfigurator` contract is updated to the new `PoolConfiguratorWithCustomInitialize` implementation.
-5. **Upgrade aGHO to Custom Intermediate Implementation:** `POOL_CONFIGURATOR.updateAToken` is called for the GHO asset, setting its implementation to the custom `ATokenMainnetInstanceGHO` (`A_TOKEN_GHO_IMPL`). This implementation includes the `resolveFacilitator` function and storage cleanup logic.
-6. **Mint and Supply by New Facilitator:** The `mintAndSupply` function of the new `GhoDirectMinter` (`FACILITATOR`) is called, minting GHO equal to the old `aGHO` facilitator's `level` and supplying it to the Aave pool, receiving `aGHO` tokens in return.
-7. **Resolve Old Facilitator:** `IATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).resolveFacilitator(level)` is called. This function on the _custom_ `aGHO` implementation burns the underlying GHO token amount equal to `level` (balancing the mint in step 6) and clears the deprecated storage slots within the `aGHO` contract proxy's storage.
-8. **Remove Old Facilitator:** `IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).removeFacilitator(AaveV3EthereumAssets.GHO_A_TOKEN)` is called. Since its level is now 0 (due to the burn in step 7), the old `aGHO` contract is successfully removed as a facilitator from the `GhoToken`.
-9. **Set GHO Reserve Factor:** `POOL_CONFIGURATOR.setReserveFactor` sets GHO's reserve factor to 100% (`10000`).
-10. **Set GHO Supply Cap:** `POOL_CONFIGURATOR.setSupplyCap` sets GHO's supply cap to 1 wei, effectively preventing user GHO deposits.
-11. **Execute Default Upgrade Steps:** The `_defaultUpgrade()` function is called, performing steps 2, 3, and 4 from the "General Upgrade Sequence" above (Upgrade Pool Implementation, Set New PoolDataProvider, Update AToken/VariableDebtToken Implementations for standard tokens), skipping GHO and AAVE tokens as specified by the overridden `_needToUpdateReserve` function.
-12. **Upgrade vGHO to Custom Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` is called for GHO, setting its implementation to the custom `VariableDebtTokenMainnetInstanceGHO` (`V_TOKEN_GHO_IMPL`). This version includes storage cleanup and a no-op `updateDiscountDistribution` function for compatibility.
-13. **Upgrade aAAVE Implementation:** `POOL_CONFIGURATOR.updateAToken` updates the AAVE AToken to the `ATokenWithDelegationInstance` (`A_TOKEN_WITH_DELEGATION_IMPL`).
-14. **Upgrade vAAVE Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` updates the AAVE VariableDebtToken to the standard `VariableDebtTokenInstance` (`V_TOKEN_IMPL`).
-15. **Enable GHO Flash Loans:** `POOL_CONFIGURATOR.setReserveFlashLoaning` is called to enable flash loans for the GHO reserve.
-16. **Mint GHO to the Pool:** The `mintAndSupply` function is called once again to mint the remaining (non-borrowed) capacity as supply to the pool.
-17. **Add Steward Permissions:** `setControlledFacilitator` is called on the bucket facilitator to migrate permissions to the new facilitator.
+4. **Distribute Old aGHO Fees:** `IOldATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).distributeFeesToTreasury()` is called to send any accumulated GHO fees in the old aToken contract to the treasury. This is a required step to make the balance of the `GHO_A_TOKEN` equal to zero.
+5. **Upgrade PoolConfigurator Implementation:** The `PoolConfigurator` contract is updated to the new `PoolConfiguratorWithCustomInitialize` implementation.
+6. **Upgrade aGHO to Custom Intermediate Implementation:** `POOL_CONFIGURATOR.updateAToken` is called for the GHO asset, setting its implementation to the custom `ATokenMainnetInstanceGHO` (`A_TOKEN_GHO_IMPL`). This implementation includes the `resolveFacilitator` function and storage cleanup logic.
+7. **Mint and Supply by New Facilitator:** The `mintAndSupply` function of the new `GhoDirectMinter` (`FACILITATOR`) is called, minting GHO equal to the old `aGHO` facilitator's `level` and supplying it to the Aave pool, receiving `aGHO` tokens in return.
+8. **Resolve Old Facilitator:** `IATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).resolveFacilitator(level)` is called. This function on the _custom_ `aGHO` implementation burns the underlying GHO token amount equal to `level` (balancing the mint in step 6) and clears the deprecated storage slots within the `aGHO` contract proxy's storage.
+9. **Remove Old Facilitator:** `IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).removeFacilitator(AaveV3EthereumAssets.GHO_A_TOKEN)` is called. Since its level is now 0 (due to the burn in step 7), the old `aGHO` contract is successfully removed as a facilitator from the `GhoToken`.
+10. **Set GHO Reserve Factor:** `POOL_CONFIGURATOR.setReserveFactor` sets GHO's reserve factor to 100% (`10000`).
+11. **Set GHO Supply Cap:** `POOL_CONFIGURATOR.setSupplyCap` sets GHO's supply cap to 1 wei, effectively preventing user GHO deposits.
+12. **Execute Default Upgrade Steps:** The `_defaultUpgrade()` function is called, performing steps 2, 3, and 4 from the "General Upgrade Sequence" above (Upgrade Pool Implementation, Set New PoolDataProvider, Update AToken/VariableDebtToken Implementations for standard tokens), skipping GHO and AAVE tokens as specified by the overridden `_needToUpdateReserve` function.
+13. **Upgrade vGHO to Custom Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` is called for GHO, setting its implementation to the custom `VariableDebtTokenMainnetInstanceGHO` (`V_TOKEN_GHO_IMPL`). This version includes storage cleanup and a no-op `updateDiscountDistribution` function for compatibility.
+14. **Upgrade aAAVE Implementation:** `POOL_CONFIGURATOR.updateAToken` updates the AAVE AToken to the `ATokenWithDelegationInstance` (`A_TOKEN_WITH_DELEGATION_IMPL`).
+15. **Upgrade vAAVE Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` updates the AAVE VariableDebtToken to the standard `VariableDebtTokenInstance` (`V_TOKEN_IMPL`).
+16. **Enable GHO Flash Loans:** `POOL_CONFIGURATOR.setReserveFlashLoaning` is called to enable flash loans for the GHO reserve.
+17. **Mint GHO to the Pool:** The `mintAndSupply` function is called once again to mint the remaining (non-borrowed) capacity as supply to the pool.
+18. **Add Steward Permissions:** `setControlledFacilitator` is called on the bucket facilitator to migrate permissions to the new facilitator.
 
 ### Libraries
 
