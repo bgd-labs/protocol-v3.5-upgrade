@@ -75,3 +75,9 @@ This sequence includes the general steps plus specific GHO migration steps, exec
 15. **Enable GHO Flash Loans:** `POOL_CONFIGURATOR.setReserveFlashLoaning` is called to enable flash loans for the GHO reserve.
 16. **Mint GHO to the Pool:** The `mintAndSupply` function is called once again to mint the remaining (non-borrowed) capacity as supply to the pool.
 17. **Add Steward Permissions:** `setControlledFacilitator` is called on the bucket facilitator to migrate permissions to the new facilitator.
+
+### Libraries
+
+For non-zksync networks, the following libraries are used:
+
+`FOUNDRY_LIBRARIES=src/contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic:0x5047AD5e603Ec4a2AB58aaE2321C07D8f4De6a8a,src/contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic:0x6E2aFD57a161d12f34f416c29619BFeAcAC8AA18,src/contracts/protocol/libraries/logic/EModeLogic.sol:EModeLogic:0x7fcE69A2bA3e78EeB36798cde2c94C70f3A043af,src/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0x4fDB5d360f946CFD25b14F346f748204c0C6a2F4,src/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0x5934b283f7120500253f277CCcF4521528aE34D6,src/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0x564c42578A1b270EaE16c25Da39d901245881d1F,src/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x1eF34B91afC368174F579067D1DB94325cDC7946`
