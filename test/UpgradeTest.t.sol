@@ -85,6 +85,17 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     }
   }
 
+  function test_assumption_unbacked() external {
+    UpgradePayload _payload = UpgradePayload(_getTestPayload());
+    IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
+    IPool pool = IPool(addressesProvider.getPool());
+    address[] memory reserves = pool.getReservesList();
+    for (uint256 i = 0; i < reserves.length; i++) {
+      DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserves[i]);
+      assertEq(reserveData.unbacked, 0);
+    }
+  }
+
   function test_upgrade() public virtual {
     UpgradePayload _payload = UpgradePayload(_getTestPayload());
 
@@ -103,7 +114,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
       address aToken = pool.getReserveAToken(reserve);
 
       assertGe(IERC20(reserve).balanceOf(aToken), pool.getVirtualUnderlyingBalance(reserve));
-
       DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserve);
 
       uint256 virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
