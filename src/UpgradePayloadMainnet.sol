@@ -125,15 +125,16 @@ contract UpgradePayloadMainnet is UpgradePayload {
 
     // 1. Approve the Deficit Offset Clinic Steward to spend GHO ATokens instead of underlying
     uint256 allowanceToDeficitOffsetClinicSteward = IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).allowance(
-      address(this), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
+      address(AaveV3Ethereum.COLLECTOR), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
     );
-    if (allowanceToDeficitOffsetClinicSteward > 0) {
-      IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).approve(UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD, 0);
-
-      IERC20(AaveV3EthereumAssets.GHO_A_TOKEN).approve(
-        UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD, allowanceToDeficitOffsetClinicSteward
-      );
-    }
+    AaveV3Ethereum.COLLECTOR.approve(
+      IERC20(AaveV3EthereumAssets.GHO_UNDERLYING), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD, 0
+    );
+    AaveV3Ethereum.COLLECTOR.approve(
+      IERC20(AaveV3EthereumAssets.GHO_A_TOKEN),
+      UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD,
+      allowanceToDeficitOffsetClinicSteward
+    );
 
     // Initial GHO State:
     // - Scaled total supply of GHO AToken: 0

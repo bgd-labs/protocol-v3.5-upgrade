@@ -60,20 +60,23 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22623489) {
     ).getInterestRateDataBps(AaveV3EthereumAssets.GHO_UNDERLYING);
 
     uint256 previousAllowanceToDeficitOffsetClinicSteward = IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).allowance(
-      address(this), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
+      address(AaveV3Ethereum.COLLECTOR), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
     );
+    uint256 deficitBefore = AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING);
 
     super.test_upgrade();
 
     assertEq(
       IERC20(AaveV3EthereumAssets.GHO_UNDERLYING).allowance(
-        address(this), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
+        address(AaveV3Ethereum.COLLECTOR), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
       ),
       0
     );
     assertEq(
-      IERC20(AaveV3EthereumAssets.GHO_A_TOKEN).allowance(address(this), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD),
-      previousAllowanceToDeficitOffsetClinicSteward
+      IERC20(AaveV3EthereumAssets.GHO_A_TOKEN).allowance(
+        address(AaveV3Ethereum.COLLECTOR), UmbrellaEthereum.DEFICIT_OFFSET_CLINIC_STEWARD
+      ),
+      previousAllowanceToDeficitOffsetClinicSteward - deficitBefore
     );
 
     uint256 ghoDeficitAfter = AaveV3Ethereum.POOL.getReserveDeficit(AaveV3EthereumAssets.GHO_UNDERLYING);
