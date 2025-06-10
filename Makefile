@@ -24,6 +24,6 @@ git-diff :
 		{ if (in_diff_block && !/^diff --git/) { buffer = buffer $$0 "\n" } } \
 		END { if (in_diff_block && skip_block == 0) { printf "%s", buffer } }' > diffs/${out}.diff
 #  --resume --verify --etherscan-api-key ${ETHERSCAN_API_KEY_ARBITRUM}
-deploy :; FOUNDRY_PROFILE=${chain} forge script script/Deploy.s.sol:Deploy${chain} --rpc-url ${chain} --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --slow --broadcast --verify
+deploy :; FOUNDRY_PROFILE=${chain} forge script script/Deploy.s.sol:Deploy${chain} --rpc-url ${chain} --ledger --mnemonic-indexes ${MNEMONIC_INDEX} --sender ${LEDGER_SENDER} --slow --broadcast --verify --resume
 
 deploy-zk :; FOUNDRY_PROFILE=zksync forge script zksync/script/Deploy.s.sol:Deployzksync --zksync --system-mode=true --rpc-url zksync --private-key ${PRIVATE_KEY} --sender ${SENDER} --verify --slow --broadcast
