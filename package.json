@@ -13,6 +13,8 @@
   "author": "",
   "license": "BUSL-1.1",
   "dependencies": {
-    "@bgd-labs/aave-cli": "^1.2.3"
+    "@bgd-labs/aave-cli": "^1.2.3",
+    "@bgd-labs/cli": "^0.0.31",
+    "prettier": "^3.5.3"
   }
 }

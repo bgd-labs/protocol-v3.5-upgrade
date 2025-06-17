@@ -43,8 +43,8 @@
       "eModeCategory": 5,
       "label": "rsETH LST main",
       "liquidationBonus": 10100,
-      "liquidationThreshold": 9450,
-      "ltv": 9250
+      "liquidationThreshold": 9500,
+      "ltv": 9300
     },
     "6": {
       "borrowableBitmap": "76",
@@ -69,7 +69,7 @@
       "aToken": "0x18eFE565A5373f430e2F809b97De30335B3ad96A",
       "aTokenName": "Aave Ethereum Lido GHO",
       "aTokenSymbol": "aEthLidoGHO",
-      "aTokenUnderlyingBalance": "15990124403980682726751502",
+      "aTokenUnderlyingBalance": "11003124664982222729574626",
       "borrowCap": 55000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -97,13 +97,13 @@
       "variableDebtToken": "0x18577F0f4A0B2Ee6F4048dB51c7acd8699F97DB8",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt GHO",
       "variableDebtTokenSymbol": "variableDebtEthLidoGHO",
-      "virtualBalance": "15990124403980682726751502"
+      "virtualBalance": "11003124664982222729574626"
     },
     "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0": {
       "aToken": "0xC035a7cf15375cE2706766804551791aD035E0C2",
       "aTokenName": "Aave Ethereum Lido wstETH",
       "aTokenSymbol": "aEthLidowstETH",
-      "aTokenUnderlyingBalance": "88859746343898667877195",
+      "aTokenUnderlyingBalance": "76903857659741376353990",
       "borrowCap": 280000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -123,7 +123,7 @@
       "oracle": "0xe1D97bF61901B075E9626c8A2340a7De385861Ef",
       "oracleDecimals": 8,
       "oracleDescription": "Capped wstETH / stETH(ETH) / USD",
-      "oracleLatestAnswer": "315178807197",
+      "oracleLatestAnswer": "334512216598",
       "reserveFactor": 500,
       "supplyCap": 650000,
       "symbol": "wstETH",
@@ -132,13 +132,13 @@
       "variableDebtToken": "0xE439edd2625772AA635B437C099C607B6eb7d35f",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt wstETH",
       "variableDebtTokenSymbol": "variableDebtEthLidowstETH",
-      "virtualBalance": "88859746343898667877195"
+      "virtualBalance": "76903857659741376353990"
     },
     "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497": {
       "aToken": "0xc2015641564a5914A17CB9A92eC8d8feCfa8f2D0",
       "aTokenName": "Aave Ethereum Lido sUSDe",
       "aTokenSymbol": "aEthLidosUSDe",
-      "aTokenUnderlyingBalance": "14854642793384413117625857",
+      "aTokenUnderlyingBalance": "12658023062969262266358113",
       "borrowCap": 1000,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -158,7 +158,7 @@
       "oracle": "0x42bc86f2f08419280a99d8fbEa4672e7c30a86ec",
       "oracleDecimals": 8,
       "oracleDescription": "Capped sUSDe / USDT / USD",
-      "oracleLatestAnswer": "117620389",
+      "oracleLatestAnswer": "117731607",
       "reserveFactor": 1000,
       "supplyCap": 60000000,
       "symbol": "sUSDe",
@@ -167,13 +167,13 @@
       "variableDebtToken": "0x2ABbAab3EF4e4A899d39e7EC996b5715E76b399a",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt sUSDe",
       "variableDebtTokenSymbol": "variableDebtEthLidosUSDe",
-      "virtualBalance": "14854642793384413117625857"
+      "virtualBalance": "12658023062969262266358113"
     },
     "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": {
       "aToken": "0x2A1FBcb52Ed4d9b23daD17E1E8Aed4BB0E6079b8",
       "aTokenName": "Aave Ethereum Lido USDC",
       "aTokenSymbol": "aEthLidoUSDC",
-      "aTokenUnderlyingBalance": "575463068888",
+      "aTokenUnderlyingBalance": "403163148080",
       "borrowCap": 27600000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -193,7 +193,7 @@
       "oracle": "0x3f73F03aa83B2A48ed27E964eD0fDb590332095B",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC / USD",
-      "oracleLatestAnswer": "99978985",
+      "oracleLatestAnswer": "99980343",
       "reserveFactor": 1000,
       "supplyCap": 30000000,
       "symbol": "USDC",
@@ -202,13 +202,13 @@
       "variableDebtToken": "0xeD90dE2D824Ee766c6Fd22E90b12e598f681dc9F",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt USDC",
       "variableDebtTokenSymbol": "variableDebtEthLidoUSDC",
-      "virtualBalance": "575463068888"
+      "virtualBalance": "403163148080"
     },
     "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7": {
       "aToken": "0x56D919E7B25aA42F3F8a4BC77b8982048F2E84B4",
       "aTokenName": "Aave Ethereum Lido rsETH",
       "aTokenSymbol": "aEthLidorsETH",
-      "aTokenUnderlyingBalance": "42886817329925447729608",
+      "aTokenUnderlyingBalance": "36721028800455211811149",
       "borrowCap": 1,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -228,7 +228,7 @@
       "oracle": "0x7292C95A5f6A501a9c4B34f6393e221F2A0139c3",
       "oracleDecimals": 8,
       "oracleDescription": "Capped rsETH / ETH / USD",
-      "oracleLatestAnswer": "273755105532",
+      "oracleLatestAnswer": "290534255291",
       "reserveFactor": 15,
       "supplyCap": 65000,
       "symbol": "rsETH",
@@ -237,13 +237,13 @@
       "variableDebtToken": "0x2c2163f120cf58631368981BC16e90190Bc6C644",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt rsETH",
       "variableDebtTokenSymbol": "variableDebtEthLidorsETH",
-      "virtualBalance": "42886817329925447729608"
+      "virtualBalance": "36721028800455211811149"
     },
     "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": {
       "aToken": "0xfA1fDbBD71B0aA16162D76914d69cD8CB3Ef92da",
       "aTokenName": "Aave Ethereum Lido WETH",
       "aTokenSymbol": "aEthLidoWETH",
-      "aTokenUnderlyingBalance": "26803049906502381165815",
+      "aTokenUnderlyingBalance": "17467374299977200379814",
       "borrowCap": 810000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -263,7 +263,7 @@
       "oracle": "0x5424384B256154046E9667dDFaaa5e550145215e",
       "oracleDecimals": 8,
       "oracleDescription": "ETH / USD",
-      "oracleLatestAnswer": "261695000000",
+      "oracleLatestAnswer": "277558000000",
       "reserveFactor": 1000,
       "supplyCap": 900000,
       "symbol": "WETH",
@@ -272,13 +272,13 @@
       "variableDebtToken": "0x91b7d78BF92db564221f6B5AeE744D1727d1Dd1e",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt WETH",
       "variableDebtTokenSymbol": "variableDebtEthLidoWETH",
-      "virtualBalance": "26803049906502381165815"
+      "virtualBalance": "17467374299977200379814"
     },
     "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110": {
       "aToken": "0x74e5664394998f13B07aF42446380ACef637969f",
       "aTokenName": "Aave Ethereum Lido ezETH",
       "aTokenSymbol": "aEthLidoezETH",
-      "aTokenUnderlyingBalance": "179519101584294178381796",
+      "aTokenUnderlyingBalance": "179114589109531219933695",
       "borrowCap": 100,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -298,7 +298,7 @@
       "oracle": "0xF3d49021fF3bbBFDfC1992A4b09E5D1d141D044C",
       "oracleDecimals": 8,
       "oracleDescription": "Capped ezETH / ezETH(ETH) / USD",
-      "oracleLatestAnswer": "274962852268",
+      "oracleLatestAnswer": "291833353282",
       "reserveFactor": 1500,
       "supplyCap": 240000,
       "symbol": "ezETH",
@@ -307,13 +307,13 @@
       "variableDebtToken": "0x08e1bba76D27841dD91FAb4b3a636A0D5CF8c3E9",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt ezETH",
       "variableDebtTokenSymbol": "variableDebtEthLidoezETH",
-      "virtualBalance": "179519101584294178381796"
+      "virtualBalance": "179114589109531219933695"
     },
     "0xdC035D45d973E3EC169d2276DDab16f1e407384F": {
       "aToken": "0x09AA30b182488f769a9824F15E6Ce58591Da4781",
       "aTokenName": "Aave Ethereum Lido USDS",
       "aTokenSymbol": "aEthLidoUSDS",
-      "aTokenUnderlyingBalance": "6213016329120283777133717",
+      "aTokenUnderlyingBalance": "5569827298235306583429545",
       "borrowCap": 180000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -333,7 +333,7 @@
       "oracle": "0x94C7FD62fd0506e71d8142E9D36687fC72A86B02",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDS/USD",
-      "oracleLatestAnswer": "99998382",
+      "oracleLatestAnswer": "99979057",
       "reserveFactor": 1000,
       "supplyCap": 200000000,
       "symbol": "USDS",
@@ -342,17 +342,17 @@
       "variableDebtToken": "0x2D9fe18b6c35FE439cC15D932cc5C943bf2d901E",
       "variableDebtTokenName": "Aave Ethereum Lido Variable Debt USDS",
       "variableDebtTokenSymbol": "variableDebtEthLidoUSDS",
-      "virtualBalance": "6213016329120283777133717"
+      "virtualBalance": "5569827298235306583429545"
     }
   },
   "strategies": {
     "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f": {
       "address": "0x8958b1C39269167527821f8c276Ef7504883f2fa",
-      "baseVariableBorrowRate": "12500000000000000000000000",
-      "maxVariableBorrowRate": "557500000000000000000000000",
+      "baseVariableBorrowRate": "40000000000000000000000000",
+      "maxVariableBorrowRate": "505000000000000000000000000",
       "optimalUsageRatio": "920000000000000000000000000",
-      "variableRateSlope1": "45000000000000000000000000",
-      "variableRateSlope2": "500000000000000000000000000"
+      "variableRateSlope1": "15000000000000000000000000",
+      "variableRateSlope2": "450000000000000000000000000"
     },
     "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0": {
       "address": "0x8958b1C39269167527821f8c276Ef7504883f2fa",
@@ -389,9 +389,9 @@
     "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": {
       "address": "0x8958b1C39269167527821f8c276Ef7504883f2fa",
       "baseVariableBorrowRate": "0",
-      "maxVariableBorrowRate": "876200000000000000000000000",
+      "maxVariableBorrowRate": "875900000000000000000000000",
       "optimalUsageRatio": "900000000000000000000000000",
-      "variableRateSlope1": "26200000000000000000000000",
+      "variableRateSlope1": "25900000000000000000000000",
       "variableRateSlope2": "850000000000000000000000000"
     },
     "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110": {

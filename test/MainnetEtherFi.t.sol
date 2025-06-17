@@ -4,8 +4,10 @@ pragma solidity ^0.8.0;
 import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
+import {Deployments} from "../src/Deployments.sol";
 
-contract MainnetEtherFiTest is UpgradeTest("mainnet", 22623489) {
+/// forge-config: default.evm_version = 'cancun'
+contract MainnetEtherFiTest is UpgradeTest("mainnet", 22686946) {
   constructor() {
     NETWORK_SUB_NAME = "EtherFi";
   }
@@ -15,6 +17,6 @@ contract MainnetEtherFiTest is UpgradeTest("mainnet", 22623489) {
   }
 
   function _getDeployedPayload() internal virtual override returns (address) {
-    return address(0);
+    return Deployments.MAINNET_ETHERFI;
   }
 }

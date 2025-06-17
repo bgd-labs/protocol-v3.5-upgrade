@@ -19,8 +19,10 @@ import {UpgradePayloadMainnet, IGhoDirectMinter, IGhoToken} from "../src/Upgrade
 import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
 
 import {UpgradeTest, IERC20} from "./UpgradeTest.t.sol";
+import {Deployments} from "../src/Deployments.sol";
 
-contract MainnetCoreTest is UpgradeTest("mainnet", 22623489) {
+/// forge-config: default.evm_version = 'cancun'
+contract MainnetCoreTest is UpgradeTest("mainnet", 22686825) {
   using SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
@@ -129,7 +131,7 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22623489) {
     assertEq(theoreticalAvailableGhoLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableGhoLiquidity);
 
     // milkmath check reading from Etherscan, which also matches what is shown here: https://aave.tokenlogic.xyz/gho-revenue
-    assertApproxEqAbs(reserveData.accruedToTreasury, 2_790_576e18, 1e18);
+    assertApproxEqAbs(reserveData.accruedToTreasury, 2_854_699e18, 1e18);
 
     IDefaultInterestRateStrategyV2.InterestRateData memory newGHOInterestRateData = IDefaultInterestRateStrategyV2(
       reserveData.interestRateStrategyAddress
@@ -225,6 +227,6 @@ contract MainnetCoreTest is UpgradeTest("mainnet", 22623489) {
   }
 
   function _getDeployedPayload() internal virtual override returns (address) {
-    return address(0);
+    return Deployments.MAINNET_CORE;
   }
 }

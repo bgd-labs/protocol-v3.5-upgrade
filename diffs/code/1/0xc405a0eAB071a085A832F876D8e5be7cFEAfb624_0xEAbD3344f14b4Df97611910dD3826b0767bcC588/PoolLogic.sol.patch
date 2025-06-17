@@ -1,0 +1,142 @@
+===================================================================
+--- lib/aave-v3-origin/src/contracts/protocol/libraries/logic/PoolLogic.sol
++++ lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/PoolLogic.sol
+@@ -4,15 +4,17 @@
+ import {GPv2SafeERC20} from "../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol";
+ import {Address} from "../../../dependencies/openzeppelin/contracts/Address.sol";
+ import {IERC20} from "../../../dependencies/openzeppelin/contracts/IERC20.sol";
+ import {IAToken} from "../../../interfaces/IAToken.sol";
++import {IPool} from "../../../interfaces/IPool.sol";
+ import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
+ import {Errors} from "../helpers/Errors.sol";
+ import {WadRayMath} from "../math/WadRayMath.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ReserveLogic} from "./ReserveLogic.sol";
+ import {ValidationLogic} from "./ValidationLogic.sol";
+ import {GenericLogic} from "./GenericLogic.sol";
++import {IsolationModeLogic} from "./IsolationModeLogic.sol";
+ 
+ /**
+  * @title PoolLogic library
+  * @author Aave
+@@ -23,15 +25,8 @@
+     using WadRayMath for uint256;
+     using ReserveLogic for DataTypes.ReserveData;
+     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+ 
+-    // See `IPool` for descriptions
+-    event MintedToTreasury(address indexed reserve, uint256 amountMinted);
+-    event IsolationModeTotalDebtUpdated(
+-        address indexed asset,
+-        uint256 totalDebt
+-    );
+-
+     /**
+      * @notice Initialize an asset reserve and add the reserve to the list of reserves
+      * @param reservesData The state of all the reserves
+      * @param reservesList The addresses of all the active reserves
+@@ -42,18 +37,17 @@
+         mapping(address => DataTypes.ReserveData) storage reservesData,
+         mapping(uint256 => address) storage reservesList,
+         DataTypes.InitReserveParams memory params
+     ) external returns (bool) {
+-        require(Address.isContract(params.asset), Errors.NOT_CONTRACT);
++        require(Address.isContract(params.asset), Errors.NotContract());
+         reservesData[params.asset].init(
+             params.aTokenAddress,
+-            params.variableDebtAddress,
+-            params.interestRateStrategyAddress
++            params.variableDebtAddress
+         );
+ 
+         bool reserveAlreadyAdded = reservesData[params.asset].id != 0 ||
+             reservesList[0] == params.asset;
+-        require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
++        require(!reserveAlreadyAdded, Errors.ReserveAlreadyAdded());
+ 
+         for (uint16 i = 0; i < params.reservesCount; i++) {
+             if (reservesList[i] == address(0)) {
+                 reservesData[params.asset].id = i;
+@@ -63,16 +57,50 @@
+         }
+ 
+         require(
+             params.reservesCount < params.maxNumberReserves,
+-            Errors.NO_MORE_RESERVES_ALLOWED
++            Errors.NoMoreReservesAllowed()
+         );
+         reservesData[params.asset].id = params.reservesCount;
+         reservesList[params.reservesCount] = params.asset;
+         return true;
+     }
+ 
+     /**
++     * @notice Accumulates interest to all indexes of the reserve
++     * @param reserve The state of the reserve
++     */
++    function executeSyncIndexesState(
++        DataTypes.ReserveData storage reserve
++    ) external {
++        DataTypes.ReserveCache memory reserveCache = reserve.cache();
++
++        reserve.updateState(reserveCache);
++    }
++
++    /**
++     * @notice Updates interest rates on the reserve data
++     * @param reserve The state of the reserve
++     * @param asset The address of the asset
++     * @param interestRateStrategyAddress The address of the interest rate
++     */
++    function executeSyncRatesState(
++        DataTypes.ReserveData storage reserve,
++        address asset,
++        address interestRateStrategyAddress
++    ) external {
++        DataTypes.ReserveCache memory reserveCache = reserve.cache();
++
++        reserve.updateInterestRatesAndVirtualBalance(
++            reserveCache,
++            asset,
++            0,
++            0,
++            interestRateStrategyAddress
++        );
++    }
++
++    /**
+      * @notice Rescue and transfer tokens locked in this contract
+      * @param token The address of the token
+      * @param to The address of the recipient
+      * @param amount The amount of token to transfer
+@@ -116,9 +144,9 @@
+                     amountToMint,
+                     normalizedIncome
+                 );
+ 
+-                emit MintedToTreasury(assetAddress, amountToMint);
++                emit IPool.MintedToTreasury(assetAddress, amountToMint);
+             }
+         }
+     }
+ 
+@@ -133,12 +161,16 @@
+         address asset
+     ) external {
+         require(
+             reservesData[asset].configuration.getDebtCeiling() == 0,
+-            Errors.DEBT_CEILING_NOT_ZERO
++            Errors.DebtCeilingNotZero()
+         );
+-        reservesData[asset].isolationModeTotalDebt = 0;
+-        emit IsolationModeTotalDebtUpdated(asset, 0);
++
++        IsolationModeLogic.setIsolationModeTotalDebt(
++            reservesData[asset],
++            asset,
++            0
++        );
+     }
+ 
+     /**
+      * @notice Sets the liquidation grace period of the asset

@@ -1,6 +1,16 @@
 {
   "chainId": 146,
-  "eModes": {},
+  "eModes": {
+    "1": {
+      "borrowableBitmap": "4",
+      "collateralBitmap": "8",
+      "eModeCategory": 1,
+      "label": "stS/wS",
+      "liquidationBonus": 10100,
+      "liquidationThreshold": 9000,
+      "ltv": 8700
+    }
+  },
   "poolConfig": {
     "oracle": "0xD63f7658C66B2934Bd234D79D06aEF5290734B30",
     "pool": "0x5362dBb1e601abF3a4c14c22ffEdA64042E5eAA3",
@@ -14,8 +24,8 @@
       "aToken": "0x6C5E14A212c1C3e4Baf6f871ac9B1a969918c131",
       "aTokenName": "Aave Sonic wS",
       "aTokenSymbol": "aSonwS",
-      "aTokenUnderlyingBalance": "103232050760805285580466380",
-      "borrowCap": 50000000,
+      "aTokenUnderlyingBalance": "80262664963022004062609414",
+      "borrowCap": 100000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
       "decimals": 18,
@@ -34,7 +44,7 @@
       "oracle": "0xc76dFb89fF298145b417d221B2c747d84952e01d",
       "oracleDecimals": 8,
       "oracleDescription": "S / USD",
-      "oracleLatestAnswer": "53050000",
+      "oracleLatestAnswer": "40708000",
       "reserveFactor": 1500,
       "supplyCap": 192000000,
       "symbol": "wS",
@@ -43,13 +53,13 @@
       "variableDebtToken": "0xF6089B790Fbf8F4812a79a31CFAbeB00B06BA7BD",
       "variableDebtTokenName": "Aave Sonic Variable Debt wS",
       "variableDebtTokenSymbol": "variableDebtSonwS",
-      "virtualBalance": "103232050760805285580466380"
+      "virtualBalance": "80262664963022004062609414"
     },
     "0x29219dd400f2Bf60E5a23d13Be72B486D4038894": {
       "aToken": "0x578Ee1ca3a8E1b54554Da1Bf7C583506C4CD11c6",
       "aTokenName": "Aave Sonic USDC",
       "aTokenSymbol": "aSonUSDC",
-      "aTokenUnderlyingBalance": "298077758227353",
+      "aTokenUnderlyingBalance": "194079031417715",
       "borrowCap": 110000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -69,22 +79,22 @@
       "oracle": "0x7A8443a2a5D772db7f1E40DeFe32db485108F128",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC/USD",
-      "oracleLatestAnswer": "99997878",
+      "oracleLatestAnswer": "99976098",
       "reserveFactor": 1000,
-      "supplyCap": 470000000,
+      "supplyCap": 560000000,
       "symbol": "USDC.e",
       "underlying": "0x29219dd400f2Bf60E5a23d13Be72B486D4038894",
       "usageAsCollateralEnabled": true,
       "variableDebtToken": "0x2273caBAd63b7D247A6b107E723c803fc49953A0",
       "variableDebtTokenName": "Aave Sonic Variable Debt USDC",
       "variableDebtTokenSymbol": "variableDebtSonUSDC",
-      "virtualBalance": "298077758227353"
+      "virtualBalance": "194079031417715"
     },
     "0x50c42dEAcD8Fc9773493ED674b675bE577f2634b": {
       "aToken": "0xe18Ab82c81E7Eecff32B8A82B1b7d2d23F1EcE96",
       "aTokenName": "Aave Sonic WETH",
       "aTokenSymbol": "aSonWETH",
-      "aTokenUnderlyingBalance": "3530388498374170895845",
+      "aTokenUnderlyingBalance": "16366149962475374075845",
       "borrowCap": 26400,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -104,7 +114,7 @@
       "oracle": "0x824364077993847f71293B24ccA8567c00c2de11",
       "oracleDecimals": 8,
       "oracleDescription": "ETH / USD",
-      "oracleLatestAnswer": "181204000000",
+      "oracleLatestAnswer": "277792253900",
       "reserveFactor": 1500,
       "supplyCap": 30000,
       "symbol": "WETH",
@@ -113,7 +123,42 @@
       "variableDebtToken": "0x07B1adFB7d5795Cf21baE8a77Eceb222F2FafBCE",
       "variableDebtTokenName": "Aave Sonic Variable Debt WETH",
       "variableDebtTokenSymbol": "variableDebtSonWETH",
-      "virtualBalance": "3530388498374170895845"
+      "virtualBalance": "16366149962475374075845"
+    },
+    "0xE5DA20F15420aD15DE0fa650600aFc998bbE3955": {
+      "aToken": "0xeAa74D7F42267eB907092AF4Bc700f667EeD0B8B",
+      "aTokenName": "Aave Sonic stS",
+      "aTokenSymbol": "aSonstS",
+      "aTokenUnderlyingBalance": "26304283400685418949129211",
+      "borrowCap": 1,
+      "borrowingEnabled": false,
+      "debtCeiling": 0,
+      "decimals": 18,
+      "id": 3,
+      "interestRateStrategy": "0xdFf435BCcf782f11187D3a4454d96702eD78e092",
+      "isActive": true,
+      "isBorrowableInIsolation": false,
+      "isFlashloanable": true,
+      "isFrozen": false,
+      "isPaused": false,
+      "isSiloed": false,
+      "liquidationBonus": 11000,
+      "liquidationProtocolFee": 1000,
+      "liquidationThreshold": 6800,
+      "ltv": 6600,
+      "oracle": "0x5BA5D5213B47DFE020B1F8d6fB54Db3F74F9ea9a",
+      "oracleDecimals": 8,
+      "oracleDescription": "Capped stS / S / USD",
+      "oracleLatestAnswer": "41681243",
+      "reserveFactor": 1000,
+      "supplyCap": 30000000,
+      "symbol": "stS",
+      "underlying": "0xE5DA20F15420aD15DE0fa650600aFc998bbE3955",
+      "usageAsCollateralEnabled": true,
+      "variableDebtToken": "0x333cFdCB6457C409e4f0C88F3806252bEe5fe425",
+      "variableDebtTokenName": "Aave Sonic Variable Debt stS",
+      "variableDebtTokenSymbol": "variableDebtSonstS",
+      "virtualBalance": "26304283400685418949129211"
     }
   },
   "strategies": {
@@ -128,9 +173,9 @@
     "0x29219dd400f2Bf60E5a23d13Be72B486D4038894": {
       "address": "0xdFf435BCcf782f11187D3a4454d96702eD78e092",
       "baseVariableBorrowRate": "0",
-      "maxVariableBorrowRate": "490000000000000000000000000",
+      "maxVariableBorrowRate": "485000000000000000000000000",
       "optimalUsageRatio": "900000000000000000000000000",
-      "variableRateSlope1": "90000000000000000000000000",
+      "variableRateSlope1": "85000000000000000000000000",
       "variableRateSlope2": "400000000000000000000000000"
     },
     "0x50c42dEAcD8Fc9773493ED674b675bE577f2634b": {
@@ -140,6 +185,14 @@
       "optimalUsageRatio": "900000000000000000000000000",
       "variableRateSlope1": "27000000000000000000000000",
       "variableRateSlope2": "800000000000000000000000000"
+    },
+    "0xE5DA20F15420aD15DE0fa650600aFc998bbE3955": {
+      "address": "0xdFf435BCcf782f11187D3a4454d96702eD78e092",
+      "baseVariableBorrowRate": "0",
+      "maxVariableBorrowRate": "3100000000000000000000000000",
+      "optimalUsageRatio": "450000000000000000000000000",
+      "variableRateSlope1": "100000000000000000000000000",
+      "variableRateSlope2": "3000000000000000000000000000"
     }
   }
 }

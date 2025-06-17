@@ -1,0 +1,11 @@
+===================================================================
+--- lib/aave-address-book/lib/aave-v3-core/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol
++++ lib/aave-v3-origin-private/src/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: LGPL-3.0-or-later
+-pragma solidity 0.8.10;
++pragma solidity ^0.8.10;
+ 
+ import {IERC20} from "../../openzeppelin/contracts/IERC20.sol";
+ 
+ /// @title Gnosis Protocol v2 Safe ERC20 Transfer Library
