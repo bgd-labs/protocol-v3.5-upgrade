@@ -4,10 +4,10 @@
 [submodule "lib/aave-v3-origin-private"]
 	path = lib/aave-v3-origin-private
 	url = https://github.com/bgd-labs/aave-v3-origin-private
-	branch = v3.4.0
-[submodule "lib/GhoDirectMinter"]
-	path = lib/GhoDirectMinter
-	url = https://github.com/bgd-labs/GhoDirectMinter
+	branch = v3.5.0
 [submodule "lib/aave-helpers"]
 	path = lib/aave-helpers
 	url = https://github.com/bgd-labs/aave-helpers
+[submodule "lib/GhoDirectMinter"]
+	path = lib/GhoDirectMinter
+	url = https://github.com/bgd-labs/GhoDirectMinter
