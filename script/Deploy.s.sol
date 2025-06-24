@@ -19,18 +19,16 @@ import {
 
 import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
 
-import {AaveProtocolDataProvider} from "aave-v3-origin/contracts/helpers/AaveProtocolDataProvider.sol";
-
+import {PoolInstance} from "aave-v3-origin/contracts/instances/PoolInstance.sol";
+import {L2PoolInstance} from "aave-v3-origin/contracts/instances/L2PoolInstance.sol";
 import {ATokenInstance} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
 import {VariableDebtTokenInstance} from "aave-v3-origin/contracts/instances/VariableDebtTokenInstance.sol";
 import {ATokenWithDelegationInstance} from "aave-v3-origin/contracts/instances/ATokenWithDelegationInstance.sol";
+import {VariableDebtTokenMainnetInstanceGHO} from
+  "aave-v3-origin/contracts/instances/VariableDebtTokenMainnetInstanceGHO.sol";
 
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
-import {IReserveInterestRateStrategy} from "aave-v3-origin/contracts/interfaces/IReserveInterestRateStrategy.sol";
-import {IAaveIncentivesController} from "aave-v3-origin/contracts/interfaces/IAaveIncentivesController.sol";
-
-import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
 
 import {AaveV3Polygon, AaveV3PolygonAssets} from "aave-address-book/AaveV3Polygon.sol";
 import {AaveV3Avalanche, AaveV3AvalancheAssets} from "aave-address-book/AaveV3Avalanche.sol";
@@ -49,13 +47,7 @@ import {AaveV3Sonic, AaveV3SonicAssets} from "aave-address-book/AaveV3Sonic.sol"
 import {AaveV3Celo, AaveV3CeloAssets} from "aave-address-book/AaveV3Celo.sol";
 
 import {UpgradePayload} from "../src/UpgradePayload.sol";
-import {UpgradePayloadMainnet} from "../src/UpgradePayloadMainnet.sol";
-import {ATokenMainnetInstanceGHO} from "../src/ATokenMainnetInstanceGHO.sol";
-import {VariableDebtTokenMainnetInstanceGHO} from "../src/VariableDebtTokenMainnetInstanceGHO.sol";
-import {PoolInstanceWithCustomInitialize} from "../src/PoolInstanceWithCustomInitialize.sol";
-import {MainnetCorePoolInstanceWithCustomInitialize} from "../src/MainnetCorePoolInstanceWithCustomInitialize.sol";
-import {L2PoolInstanceWithCustomInitialize} from "../src/L2PoolInstanceWithCustomInitialize.sol";
-import {PoolConfiguratorWithCustomInitialize} from "../src/PoolConfiguratorWithCustomInitialize.sol";
+import {UpgradePayloadMainnetCore} from "../src/UpgradePayloadMainnetCore.sol";
 
 library DeploymentLibrary {
   // rollups
@@ -253,7 +245,7 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      type(L2PoolInstanceWithCustomInitialize).creationCode,
+      type(L2PoolInstance).creationCode,
       abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
@@ -265,8 +257,7 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      type(PoolInstanceWithCustomInitialize).creationCode,
-      abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
+      type(PoolInstance).creationCode, abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
     return _deployPayload({deployParams: deployParams, payloadParams: payloadParams, isMainnetCore: false});
@@ -277,8 +268,7 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = GovV3Helpers.deployDeterministic(
-      type(MainnetCorePoolInstanceWithCustomInitialize).creationCode,
-      abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
+      type(PoolInstance).creationCode, abi.encode(deployParams.poolAddressesProvider, deployParams.interestRateStrategy)
     );
 
     return _deployPayload({deployParams: deployParams, payloadParams: payloadParams, isMainnetCore: true});
@@ -289,13 +279,6 @@ library DeploymentLibrary {
     UpgradePayload.ConstructorParams memory payloadParams,
     bool isMainnetCore
   ) private returns (address) {
-    payloadParams.poolConfiguratorImpl =
-      GovV3Helpers.deployDeterministic(type(PoolConfiguratorWithCustomInitialize).creationCode);
-
-    payloadParams.poolDataProvider = GovV3Helpers.deployDeterministic(
-      type(AaveProtocolDataProvider).creationCode, abi.encode(deployParams.poolAddressesProvider)
-    );
-
     payloadParams.aTokenImpl = GovV3Helpers.deployDeterministic(
       type(ATokenInstance).creationCode,
       abi.encode(deployParams.pool, deployParams.rewardsController, deployParams.treasury)
@@ -313,21 +296,6 @@ library DeploymentLibrary {
   }
 
   function _deployMainnetCore(UpgradePayload.ConstructorParams memory params) private returns (address) {
-    // its the council used on other GHO stewards
-    // might make sense to have on address book
-    address council = 0x8513e6F37dBc52De87b166980Fa3F50639694B60;
-
-    // Deploy a new GHO facilitator for the proto pool
-    address ghoFacilitatorImpl = GovV3Helpers.deployDeterministic(
-      type(GhoDirectMinter).creationCode,
-      abi.encode(AaveV3Ethereum.POOL_ADDRESSES_PROVIDER, AaveV3Ethereum.COLLECTOR, AaveV3EthereumAssets.GHO_UNDERLYING)
-    );
-
-    address aTokenImplGho = GovV3Helpers.deployDeterministic(
-      type(ATokenMainnetInstanceGHO).creationCode,
-      abi.encode(AaveV3Ethereum.POOL, AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER, AaveV3Ethereum.COLLECTOR)
-    );
-
     address vTokenImplGho = GovV3Helpers.deployDeterministic(
       type(VariableDebtTokenMainnetInstanceGHO).creationCode,
       abi.encode(AaveV3Ethereum.POOL, AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER)
@@ -339,20 +307,15 @@ library DeploymentLibrary {
     );
 
     return GovV3Helpers.deployDeterministic(
-      type(UpgradePayloadMainnet).creationCode,
+      type(UpgradePayloadMainnetCore).creationCode,
       abi.encode(
-        UpgradePayloadMainnet.ConstructorMainnetParams({
+        UpgradePayloadMainnetCore.ConstructorMainnetParams({
           poolAddressesProvider: IPoolAddressesProvider(address(AaveV3Ethereum.POOL_ADDRESSES_PROVIDER)),
-          poolDataProvider: params.poolDataProvider,
           poolImpl: params.poolImpl,
-          poolConfiguratorImpl: params.poolConfiguratorImpl,
           aTokenImpl: params.aTokenImpl,
           vTokenImpl: params.vTokenImpl,
-          aTokenGhoImpl: aTokenImplGho,
           vTokenGhoImpl: vTokenImplGho,
-          aTokenWithDelegationImpl: aTokenWithDelegationImpl,
-          ghoFacilitatorImpl: ghoFacilitatorImpl,
-          council: council
+          aTokenWithDelegationImpl: aTokenWithDelegationImpl
         })
       )
     );
