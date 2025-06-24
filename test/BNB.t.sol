@@ -5,7 +5,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract BNBTest is UpgradeTest("bnb", 48610486) {
+contract BNBTest is UpgradeTest("bnb", 51616765) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployBNB();
   }

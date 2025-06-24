@@ -2,7 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
+
 import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
+
+import {WadRayMath} from "aave-v3-origin/contracts/protocol/libraries/math/WadRayMath.sol";
+import {IFlashLoanReceiver} from "aave-v3-origin/contracts/misc/flashloan/interfaces/IFlashLoanReceiver.sol";
+
 import {
   ProtocolV3TestBase,
   IPool,
@@ -14,8 +19,6 @@ import {
   SafeERC20
 } from "../src/aave-helpers/ProtocolV3TestBase.sol";
 
-import {IFlashLoanReceiver} from "aave-v3-origin/contracts/misc/flashloan/interfaces/IFlashLoanReceiver.sol";
-
 import {UpgradePayload} from "../src/UpgradePayload.sol";
 
 interface NewPool {
@@ -23,6 +26,7 @@ interface NewPool {
 }
 
 abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
+  using WadRayMath for uint256;
   using SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -93,22 +97,20 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
     IPool pool = IPool(addressesProvider.getPool());
     address[] memory reserves = pool.getReservesList();
-    IPoolDataProvider poolDataProvider = IPoolDataProvider(addressesProvider.getPoolDataProvider());
-    assertEq(pool.FLASHLOAN_PREMIUM_TO_PROTOCOL(), 100_00);
 
     for (uint256 i = 0; i < reserves.length; i++) {
       address reserve = reserves[i];
-      assertTrue(poolDataProvider.getIsVirtualAccActive(reserve));
+
+      DataTypes.ReserveDataLegacy memory reserveData = POOL.getReserveData(reserve);
 
       address aToken = pool.getReserveAToken(reserve);
+      address vToken = pool.getReserveVariableDebtToken(reserve);
 
-      assertGe(IERC20(reserve).balanceOf(aToken), pool.getVirtualUnderlyingBalance(reserve));
-
-      DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserve);
-
-      uint256 virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
-        >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
-      assertEq(virtualAccActiveFlag, 1);
+      uint256 theoreticalAvailableLiquidityAfterAllRepayments =
+        IERC20(vToken).totalSupply() + POOL.getVirtualUnderlyingBalance(reserve) + POOL.getReserveDeficit(reserve);
+      uint256 theoreticalMaximumWithdrawableLiquidity = IERC20(aToken).totalSupply()
+        + uint256(reserveData.accruedToTreasury).rayMul(POOL.getReserveNormalizedIncome(reserve));
+      assertGe(theoreticalAvailableLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableLiquidity);
     }
   }
 
