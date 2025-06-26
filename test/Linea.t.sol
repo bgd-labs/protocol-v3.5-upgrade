@@ -5,7 +5,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract LineaTest is UpgradeTest("linea", 20096182) {
+contract LineaTest is UpgradeTest("linea", 20341322) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployLinea();
   }

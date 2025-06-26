@@ -12,7 +12,7 @@ import {UpgradePayloadMainnetCore} from "../src/UpgradePayloadMainnetCore.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract MainnetCoreTest is UpgradeTest("mainnet", 22724716) {
+contract MainnetCoreTest is UpgradeTest("mainnet", 22787955) {
   function test_upgrade() public override {
     super.test_upgrade();
 

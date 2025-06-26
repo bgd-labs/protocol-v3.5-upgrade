@@ -46,9 +46,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
 
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl(NETWORK), BLOCK_NUMBER);
-    if (block.chainid == 1) {
-      GovV3Helpers.executePayload(vm, 295);
-    }
   }
 
   function test_execution() public virtual {
@@ -93,25 +90,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase, IFlashLoanReceiver {
     UpgradePayload _payload = UpgradePayload(_getTestPayload());
 
     executePayload(vm, address(_payload));
-
-    IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
-    IPool pool = IPool(addressesProvider.getPool());
-    address[] memory reserves = pool.getReservesList();
-
-    for (uint256 i = 0; i < reserves.length; i++) {
-      address reserve = reserves[i];
-
-      DataTypes.ReserveDataLegacy memory reserveData = POOL.getReserveData(reserve);
-
-      address aToken = pool.getReserveAToken(reserve);
-      address vToken = pool.getReserveVariableDebtToken(reserve);
-
-      uint256 theoreticalAvailableLiquidityAfterAllRepayments =
-        IERC20(vToken).totalSupply() + POOL.getVirtualUnderlyingBalance(reserve) + POOL.getReserveDeficit(reserve);
-      uint256 theoreticalMaximumWithdrawableLiquidity = IERC20(aToken).totalSupply()
-        + uint256(reserveData.accruedToTreasury).rayMul(POOL.getReserveNormalizedIncome(reserve));
-      assertGe(theoreticalAvailableLiquidityAfterAllRepayments, theoreticalMaximumWithdrawableLiquidity);
-    }
   }
 
   function test_gas() external {

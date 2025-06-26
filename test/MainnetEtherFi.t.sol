@@ -5,7 +5,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract MainnetEtherFiTest is UpgradeTest("mainnet", 22724716) {
+contract MainnetEtherFiTest is UpgradeTest("mainnet", 22787955) {
   constructor() {
     NETWORK_SUB_NAME = "EtherFi";
   }
