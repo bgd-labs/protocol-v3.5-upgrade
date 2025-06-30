@@ -31,8 +31,6 @@ import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolA
 import {IReserveInterestRateStrategy} from "aave-v3-origin/contracts/interfaces/IReserveInterestRateStrategy.sol";
 import {IAaveIncentivesController} from "aave-v3-origin/contracts/interfaces/IAaveIncentivesController.sol";
 
-import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
-
 import {AaveV3Polygon, AaveV3PolygonAssets} from "aave-address-book/AaveV3Polygon.sol";
 import {AaveV3Avalanche, AaveV3AvalancheAssets} from "aave-address-book/AaveV3Avalanche.sol";
 import {AaveV3Optimism, AaveV3OptimismAssets} from "aave-address-book/AaveV3Optimism.sol";
@@ -327,16 +325,6 @@ library DeploymentLibrary {
   }
 
   function _deployMainnetCore(UpgradePayload.ConstructorParams memory params) private returns (address) {
-    // its the council used on other GHO stewards
-    // might make sense to have on address book
-    address council = 0x8513e6F37dBc52De87b166980Fa3F50639694B60;
-
-    // Deploy a new GHO facilitator for the proto pool
-    address ghoFacilitatorImpl = GovV3Helpers.deployDeterministic(
-      type(GhoDirectMinter).creationCode,
-      abi.encode(AaveV3Ethereum.POOL_ADDRESSES_PROVIDER, AaveV3Ethereum.COLLECTOR, AaveV3EthereumAssets.GHO_UNDERLYING)
-    );
-
     address aTokenImplGho = GovV3Helpers.deployDeterministic(
       type(ATokenMainnetInstanceGHO).creationCode,
       abi.encode(AaveV3Ethereum.POOL, AaveV3Ethereum.DEFAULT_INCENTIVES_CONTROLLER, AaveV3Ethereum.COLLECTOR)
@@ -364,9 +352,7 @@ library DeploymentLibrary {
           vTokenImpl: params.vTokenImpl,
           aTokenGhoImpl: aTokenImplGho,
           vTokenGhoImpl: vTokenImplGho,
-          aTokenWithDelegationImpl: aTokenWithDelegationImpl,
-          ghoFacilitatorImpl: ghoFacilitatorImpl,
-          council: council
+          aTokenWithDelegationImpl: aTokenWithDelegationImpl
         })
       )
     );

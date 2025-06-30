@@ -18,10 +18,6 @@ import {GovernanceV3Ethereum} from "aave-address-book/GovernanceV3Ethereum.sol";
 import {GhoEthereum} from "aave-address-book/GhoEthereum.sol";
 import {UmbrellaEthereum} from "aave-address-book/UmbrellaEthereum.sol";
 
-import {IGhoDirectMinter} from "gho-direct-minter/interfaces/IGhoDirectMinter.sol";
-import {GhoDirectMinter} from "gho-direct-minter/GhoDirectMinter.sol";
-import {IGhoToken} from "gho-direct-minter/interfaces/IGhoToken.sol";
-
 import {IDelegationToken} from "./interfaces/IDelegationToken.sol";
 import {IDelegationAwareAToken} from "./interfaces/IDelegationAwareAToken.sol";
 import {IATokenMainnetInstanceGHO} from "./interfaces/IATokenMainnetInstanceGHO.sol";
@@ -59,8 +55,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
     address aTokenGhoImpl;
     address vTokenGhoImpl;
     address aTokenWithDelegationImpl;
-    address ghoFacilitatorImpl;
-    address council;
   }
 
   bytes32 public constant FINANCE_COMMITTEE_ROLE = keccak256("FINANCE_COMITTEE_ROLE");
@@ -69,8 +63,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
   address public immutable V_TOKEN_GHO_IMPL;
 
   address public immutable A_TOKEN_WITH_DELEGATION_IMPL;
-
-  address public immutable FACILITATOR; // New GhoDirectMinter instance
 
   constructor(ConstructorMainnetParams memory params)
     UpgradePayload(
@@ -95,19 +87,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
     A_TOKEN_GHO_IMPL = params.aTokenGhoImpl;
     V_TOKEN_GHO_IMPL = params.vTokenGhoImpl;
     A_TOKEN_WITH_DELEGATION_IMPL = params.aTokenWithDelegationImpl;
-
-    if (
-      IGhoDirectMinter(params.ghoFacilitatorImpl).POOL() != pool
-        || address(IGhoDirectMinter(params.ghoFacilitatorImpl).POOL_CONFIGURATOR())
-          != params.poolAddressesProvider.getPoolConfigurator()
-    ) {
-      revert WrongAddresses();
-    }
-    FACILITATOR = ITransparentProxyFactory(MiscEthereum.TRANSPARENT_PROXY_FACTORY).create(
-      params.ghoFacilitatorImpl,
-      MiscEthereum.PROXY_ADMIN,
-      abi.encodeWithSelector(GhoDirectMinter.initialize.selector, GovernanceV3Ethereum.EXECUTOR_LVL_1, params.council)
-    );
   }
 
   function execute() external override {
@@ -136,34 +115,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
       allowanceToDeficitOffsetClinicSteward
     );
 
-    // Initial GHO State:
-    // - Scaled total supply of GHO AToken: 0
-    // - GHO reserve's `virtualUnderlyingBalance`: 0
-    // - GHO balance of the `GHO_A_TOKEN` contract: Some initial balance.
-
-    // 2. Grant the `RISK_ADMIN` role to the new facilitator (`FACILITATOR`) to allow it to call
-    //    the `setSupplyCap` function on the `PoolConfigurator`.
-    AaveV3Ethereum.ACL_MANAGER.addRiskAdmin(FACILITATOR);
-
-    // 3. Add the new `GhoDirectMinter` (`FACILITATOR`) as a GHO facilitator, initializing it with the bucket capacity
-    //    of the previous facilitator (the GHO AToken).
-    (uint256 capacityFromOldFacilitator, uint256 levelFromOldFacilitator) =
-      IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).getFacilitatorBucket(AaveV3EthereumAssets.GHO_A_TOKEN);
-    IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).addFacilitator(
-      FACILITATOR, "CoreGhoDirectMinter", uint128(capacityFromOldFacilitator)
-    );
-
-    // The `levelFromOldFacilitator` represents the GHO principal the old GHO AToken facilitator minted.
-    // Any GHO held directly by the GHO_A_TOKEN contract needs to be swept to the treasury.
-    // This ensures the GHO_A_TOKEN contract has a zero GHO balance.
-
-    // 4. Transfer the GHO balance held by the old `GHO_A_TOKEN` contract to the treasury.
-    IOldATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).distributeFeesToTreasury();
-    // GHO State After Step 3:
-    // - Scaled total supply of GHO AToken: 0.
-    // - GHO reserve's `virtualUnderlyingBalance`: 0.
-    // - GHO balance of the `GHO_A_TOKEN` contract: 0.
-
     // 5. Upgrade the `PoolConfigurator` to its new implementation. This is required to correctly upgrade
     //    the GHO AToken in the next step, as its `initialize` function might differ between v3.3 and v3.4.
     POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
@@ -180,42 +131,11 @@ contract UpgradePayloadMainnet is UpgradePayload {
       })
     );
 
-    // 7. The new `GhoDirectMinter` (`FACILITATOR`) mints GHO (amount equal to `levelFromOldFacilitator`) to itself
-    //    and then supplies this GHO to the (still v3.3) Aave Pool. In return, an equivalent amount of new GHO ATokens (aGHO)
-    //    are minted to `FACILITATOR`. This supply operation transfers GHO to the `GHO_A_TOKEN` contract.
-    //    The v3.3 Pool's internal GHO liquidity mechanisms are affected, but this does not change
-    //    the `virtualUnderlyingBalance` slot.
-    IGhoDirectMinter(FACILITATOR).mintAndSupply(levelFromOldFacilitator);
-    // GHO State After Step 6:
-    // - Scaled total supply of GHO AToken: `levelFromOldFacilitator`.
-    // - GHO reserve's `virtualUnderlyingBalance`: 0.
-    // - GHO balance of the `GHO_A_TOKEN` contract: `levelFromOldFacilitator`.
-
-    // 8. Call `resolveFacilitator` on the custom GHO AToken (`A_TOKEN_GHO_IMPL` instance at `GHO_A_TOKEN` address).
-    //    This burns underlying GHO (amount equal to `levelFromOldFacilitator`) from the `GHO_A_TOKEN` contract's balance.
-    //    This balances the GHO total supply (from GhoToken's perspective) against the earlier mint by FACILITATOR
-    //    and sets the GHO AToken's effective GHO backing to zero in its `GhoToken` facilitator record.
-    IATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).resolveFacilitator(levelFromOldFacilitator);
-    // GHO State After Step 7:
-    // - Scaled total supply of GHO AToken: `levelFromOldFacilitator`.
-    // - GHO reserve's `virtualUnderlyingBalance`: 0.
-    // - GHO balance of the `GHO_A_TOKEN` contract: 0.
-
-    // 9. Remove the GHO AToken (as the old facilitator) from `GhoToken`'s facilitator list. Its `level` in `GhoToken` is now zero.
-    IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).removeFacilitator(AaveV3EthereumAssets.GHO_A_TOKEN);
-
     // 10. Set GHO's reserve factor to 100% so all GHO interest income is accrued to the treasury.
     POOL_CONFIGURATOR.setReserveFactor(AaveV3EthereumAssets.GHO_UNDERLYING, 100_00);
 
     // 11. Set GHO's supply cap to 1 wei. This effectively prevents direct user deposits of GHO, as a cap of 0 previously signified 'unlimited'.
     POOL_CONFIGURATOR.setSupplyCap(AaveV3EthereumAssets.GHO_UNDERLYING, 1);
-
-    // 12. Check if the UNI AToken has delegated its underlying UNI voting power. If so, reset the delegation to address(0).
-    if (IDelegationToken(AaveV3EthereumAssets.UNI_UNDERLYING).delegates(AaveV3EthereumAssets.UNI_A_TOKEN) != address(0))
-    {
-      // This action requires the caller to have the "Pool Admin" role in the ACL.
-      IDelegationAwareAToken(AaveV3EthereumAssets.UNI_A_TOKEN).delegateUnderlyingTo(address(0));
-    }
 
     // 13. Execute the default v3.4 upgrade steps (updates Pool to `PoolInstanceWithCustomInitialize`, PoolDataProvider,
     //     and standard AToken/VariableDebtToken implementations).
@@ -223,10 +143,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
     //       - GHO-specific logic sets `accruedToTreasury` and `virtualAccActive=true`.
     //       - GHO reserve's `virtualUnderlyingBalance` is NOT explicitly set by this GHO-specific logic.
     _defaultUpgrade();
-    // GHO State After Step 12:
-    // - Scaled total supply of GHO AToken: `levelFromOldFacilitator`.
-    // - GHO reserve's `virtualUnderlyingBalance`: 0.
-    // - GHO balance of the `GHO_A_TOKEN` contract: 0.
 
     // 14. Upgrade the GHO VariableDebtToken (`GHO_V_TOKEN`) to its new custom implementation (`V_TOKEN_GHO_IMPL`).
     POOL_CONFIGURATOR.updateVariableDebtToken(
@@ -260,25 +176,6 @@ contract UpgradePayloadMainnet is UpgradePayload {
         params: ""
       })
     );
-
-    // 17. Enable flash loans for the GHO reserve.
-    POOL_CONFIGURATOR.setReserveFlashLoaning({asset: AaveV3EthereumAssets.GHO_UNDERLYING, enabled: true});
-
-    // 18. The new `GhoDirectMinter` (`FACILITATOR`) mints and supplies any remaining GHO bucket capacity (capacity - level) to the pool.
-    if (capacityFromOldFacilitator > levelFromOldFacilitator) {
-      IGhoDirectMinter(FACILITATOR).mintAndSupply(capacityFromOldFacilitator - levelFromOldFacilitator);
-    }
-    // GHO State After Step 17:
-    // - Scaled total supply of GHO AToken: `capacityFromOldFacilitator`.
-    // - GHO reserve's `virtualUnderlyingBalance`: `capacityFromOldFacilitator - levelFromOldFacilitator`.
-    // - GHO balance of the `GHO_A_TOKEN` contract: `capacityFromOldFacilitator - levelFromOldFacilitator`.
-
-    // 19. Migrate steward permissions for GHO bucket control.
-    address[] memory vaults = new address[](1);
-    vaults[0] = FACILITATOR;
-    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, true);
-    vaults[0] = AaveV3EthereumAssets.GHO_A_TOKEN;
-    IGhoBucketSteward(GhoEthereum.GHO_BUCKET_STEWARD).setControlledFacilitator(vaults, false);
   }
 
   function _needToUpdateReserve(address reserve) internal view virtual override returns (bool) {
