@@ -54,9 +54,13 @@ contract UpgradePayloadMainnetCore is UpgradePayload {
   }
 
   function execute() external override {
+    // 1. Perform default update. It will include:
+    //    - Upgrade `Pool` implementation.
+    //    - Update AToken and VariableDebtToken implementations for all reserves.
+    //      (except for the GHO (VariableDebtToken) and AAVE (AToken) reserves).
     _defaultUpgrade();
 
-    // 13. Upgrade the GHO VariableDebtToken (`GHO_V_TOKEN`) to its new custom implementation (`V_TOKEN_GHO_IMPL`).
+    // 2. Upgrade the GHO VariableDebtToken (`GHO_V_TOKEN`) to its new custom implementation (`V_TOKEN_GHO_IMPL`).
     POOL_CONFIGURATOR.updateVariableDebtToken(
       ConfiguratorInputTypes.UpdateDebtTokenInput({
         asset: AaveV3EthereumAssets.GHO_UNDERLYING,
@@ -67,7 +71,7 @@ contract UpgradePayloadMainnetCore is UpgradePayload {
       })
     );
 
-    // 14. Upgrade the AAVE AToken (`AAVE_A_TOKEN`) to the `ATokenWithDelegation` implementation (`A_TOKEN_WITH_DELEGATION_IMPL`).
+    // 3. Upgrade the AAVE AToken (`AAVE_A_TOKEN`) to the `ATokenWithDelegation` implementation (`A_TOKEN_WITH_DELEGATION_IMPL`).
     POOL_CONFIGURATOR.updateAToken(
       ConfiguratorInputTypes.UpdateATokenInput({
         asset: AaveV3EthereumAssets.AAVE_UNDERLYING,

@@ -56,11 +56,11 @@ contract UpgradePayload {
   }
 
   function _defaultUpgrade() internal {
-    // 2. Upgrade `Pool` implementation.
+    // 1. Upgrade `Pool` implementation.
     //    This enables usage of v3.4 interfaces and logic within the `Pool`.
     POOL_ADDRESSES_PROVIDER.setPoolImpl(POOL_IMPL);
 
-    // 4. Update AToken and VariableDebtToken implementations for all reserves.
+    // 2. Update AToken and VariableDebtToken implementations for all reserves.
     address[] memory reserves = POOL.getReservesList();
     uint256 length = reserves.length;
     for (uint256 i = 0; i < length; i++) {
