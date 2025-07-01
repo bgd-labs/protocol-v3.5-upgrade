@@ -56,22 +56,38 @@ This sequence includes the general steps plus specific GHO migration steps, exec
 **Execution Steps (Inside `execute()` function):**
 
 0. **Cover existing GHO deficit:** Existing `GHO` deficit is covered via the deficit steward.
-1. **Grant Facilitator Risk Admin:** The `ACL_MANAGER` grants the `RISK_ADMIN` role to the `GhoDirectMinter` contract (`FACILITATOR`). This allows `FACILITATOR` to call `setSupplyCap`.
-2. **Add New Facilitator to GhoToken:**
+1. **Update Deficit Steward Allowance:** The payload checks for any allowance of the underlying `GHO` token granted to the `DEFICIT_OFFSET_CLINIC_STEWARD`. If an allowance exists, it is revoked for the underlying `GHO`, and a new approval for the same amount is granted for the `GHO AToken` (`aGHO`). This adapts the deficit coverage mechanism to utilize aTokens instead of the underlying GHO.
+2. **Grant Facilitator Risk Admin:** The `ACL_MANAGER` grants the `RISK_ADMIN` role to the `GhoDirectMinter` contract (`FACILITATOR`). This allows `FACILITATOR` to call `setSupplyCap`.
+3. **Add New Facilitator to GhoToken:**
    - The current GHO bucket capacity and level of the old `aGHO` facilitator are fetched from the `GhoToken`.
    - The new `GhoDirectMinter` (`FACILITATOR`) is added as a GHO facilitator to the `GhoToken` contract (`IGhoToken(...).addFacilitator(...)`) using the fetched capacity.
-3. **Distribute Old aGHO Fees:** `IOldATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).distributeFeesToTreasury()` is called to send any accumulated GHO fees in the old aToken contract to the treasury. This is a required step to make the balance of the `GHO_A_TOKEN` equal to zero.
-4. **Upgrade PoolConfigurator Implementation:** The `PoolConfigurator` contract is updated to the new `PoolConfiguratorWithCustomInitialize` implementation.
-5. **Upgrade aGHO to Custom Intermediate Implementation:** `POOL_CONFIGURATOR.updateAToken` is called for the GHO asset, setting its implementation to the custom `ATokenMainnetInstanceGHO` (`A_TOKEN_GHO_IMPL`). This implementation includes the `resolveFacilitator` function and storage cleanup logic.
-6. **Mint and Supply by New Facilitator:** The `mintAndSupply` function of the new `GhoDirectMinter` (`FACILITATOR`) is called, minting GHO equal to the old `aGHO` facilitator's `level` and supplying it to the Aave pool, receiving `aGHO` tokens in return.
-7. **Resolve Old Facilitator:** `IATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).resolveFacilitator(level)` is called. This function on the _custom_ `aGHO` implementation burns the underlying GHO token amount equal to `level` (balancing the mint in step 6) and clears the deprecated storage slots within the `aGHO` contract proxy's storage.
-8. **Remove Old Facilitator:** `IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).removeFacilitator(AaveV3EthereumAssets.GHO_A_TOKEN)` is called. Since its level is now 0 (due to the burn in step 7), the old `aGHO` contract is successfully removed as a facilitator from the `GhoToken`.
-9. **Set GHO Reserve Factor:** `POOL_CONFIGURATOR.setReserveFactor` sets GHO's reserve factor to 100% (`10000`).
-10. **Set GHO Supply Cap:** `POOL_CONFIGURATOR.setSupplyCap` sets GHO's supply cap to 1 wei, effectively preventing user GHO deposits.
-11. **Execute Default Upgrade Steps:** The `_defaultUpgrade()` function is called, performing steps 2, 3, and 4 from the "General Upgrade Sequence" above (Upgrade Pool Implementation, Set New PoolDataProvider, Update AToken/VariableDebtToken Implementations for standard tokens), skipping GHO and AAVE tokens as specified by the overridden `_needToUpdateReserve` function.
-12. **Upgrade vGHO to Custom Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` is called for GHO, setting its implementation to the custom `VariableDebtTokenMainnetInstanceGHO` (`V_TOKEN_GHO_IMPL`). This version includes storage cleanup and a no-op `updateDiscountDistribution` function for compatibility.
-13. **Upgrade aAAVE Implementation:** `POOL_CONFIGURATOR.updateAToken` updates the AAVE AToken to the `ATokenWithDelegationInstance` (`A_TOKEN_WITH_DELEGATION_IMPL`).
-14. **Upgrade vAAVE Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` updates the AAVE VariableDebtToken to the standard `VariableDebtTokenInstance` (`V_TOKEN_IMPL`).
-15. **Enable GHO Flash Loans:** `POOL_CONFIGURATOR.setReserveFlashLoaning` is called to enable flash loans for the GHO reserve.
-16. **Mint GHO to the Pool:** The `mintAndSupply` function is called once again to mint the remaining (non-borrowed) capacity as supply to the pool.
-17. **Add Steward Permissions:** `setControlledFacilitator` is called on the bucket facilitator to migrate permissions to the new facilitator.
+4. **Distribute Old aGHO Fees:** `IOldATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).distributeFeesToTreasury()` is called to send any accumulated GHO fees in the old aToken contract to the treasury. This is a required step to make the balance of the `GHO_A_TOKEN` equal to zero.
+5. **Upgrade PoolConfigurator Implementation:** The `PoolConfigurator` contract is updated to the new `PoolConfiguratorWithCustomInitialize` implementation.
+6. **Upgrade aGHO to Custom Intermediate Implementation:** `POOL_CONFIGURATOR.updateAToken` is called for the GHO asset, setting its implementation to the custom `ATokenMainnetInstanceGHO` (`A_TOKEN_GHO_IMPL`). This implementation includes the `resolveFacilitator` function and storage cleanup logic.
+7. **Mint and Supply by New Facilitator:** The `mintAndSupply` function of the new `GhoDirectMinter` (`FACILITATOR`) is called, minting GHO equal to the old `aGHO` facilitator's `level` and supplying it to the Aave pool, receiving `aGHO` tokens in return.
+8. **Resolve Old Facilitator:** `IATokenMainnetInstanceGHO(AaveV3EthereumAssets.GHO_A_TOKEN).resolveFacilitator(level)` is called. This function on the _custom_ `aGHO` implementation burns the underlying GHO token amount equal to `level` (balancing the mint in step 6) and clears the deprecated storage slots within the `aGHO` contract proxy's storage.
+9. **Remove Old Facilitator:** `IGhoToken(AaveV3EthereumAssets.GHO_UNDERLYING).removeFacilitator(AaveV3EthereumAssets.GHO_A_TOKEN)` is called. Since its level is now 0 (due to the burn in step 7), the old `aGHO` contract is successfully removed as a facilitator from the `GhoToken`.
+10. **Set GHO Reserve Factor:** `POOL_CONFIGURATOR.setReserveFactor` sets GHO's reserve factor to 100% (`10000`).
+11. **Set GHO Supply Cap:** `POOL_CONFIGURATOR.setSupplyCap` sets GHO's supply cap to 1 wei, effectively preventing user GHO deposits.
+12. **Check and potentiall remove uni delegation**
+13. **Execute Default Upgrade Steps:** The `_defaultUpgrade()` function is called, performing steps 2, 3, and 4 from the "General Upgrade Sequence" above (Upgrade Pool Implementation, Set New PoolDataProvider, Update AToken/VariableDebtToken Implementations for standard tokens), skipping GHO and AAVE tokens as specified by the overridden `_needToUpdateReserve` function.
+14. **Upgrade vGHO to Custom Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` is called for GHO, setting its implementation to the custom `VariableDebtTokenMainnetInstanceGHO` (`V_TOKEN_GHO_IMPL`). This version includes storage cleanup and a no-op `updateDiscountDistribution` function for compatibility.
+15. **Upgrade aAAVE Implementation:** `POOL_CONFIGURATOR.updateAToken` updates the AAVE AToken to the `ATokenWithDelegationInstance` (`A_TOKEN_WITH_DELEGATION_IMPL`).
+16. **Upgrade vAAVE Implementation:** `POOL_CONFIGURATOR.updateVariableDebtToken` updates the AAVE VariableDebtToken to the standard `VariableDebtTokenInstance` (`V_TOKEN_IMPL`).
+17. **Enable GHO Flash Loans:** `POOL_CONFIGURATOR.setReserveFlashLoaning` is called to enable flash loans for the GHO reserve.
+18. **Mint GHO to the Pool:** The `mintAndSupply` function is called once again to mint the remaining (non-borrowed) capacity as supply to the pool.
+19. **Add Steward Permissions:** `setControlledFacilitator` is called on the bucket facilitator to migrate permissions to the new facilitator.
+
+### Libraries
+
+For non-zksync(shanghai) networks:
+
+`FOUNDRY_LIBRARIES=aave-v3-origin/contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic:0x5047AD5e603Ec4a2AB58aaE2321C07D8f4De6a8a,aave-v3-origin/contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic:0x6E2aFD57a161d12f34f416c29619BFeAcAC8AA18,aave-v3-origin/contracts/protocol/libraries/logic/EModeLogic.sol:EModeLogic:0x7fcE69A2bA3e78EeB36798cde2c94C70f3A043af,aave-v3-origin/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0x4fDB5d360f946CFD25b14F346f748204c0C6a2F4,aave-v3-origin/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0x5934b283f7120500253f277CCcF4521528aE34D6,aave-v3-origin/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0x564c42578A1b270EaE16c25Da39d901245881d1F,aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x1eF34B91afC368174F579067D1DB94325cDC7946`
+
+For linea(london):
+
+`FOUNDRY_LIBRARIES=aave-v3-origin/contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic:0x24B58926d2Dd490238C6366dc7b36357caBd71b9,aave-v3-origin/contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic:0xD379a9e4A925916cF69c16C34409F401a28d5A52,aave-v3-origin/contracts/protocol/libraries/logic/EModeLogic.sol:EModeLogic:0x23Bde27B7be7C2Eb741c3BcEF95384AAEc4f084c,aave-v3-origin/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0x001b936869b535B4AF6F77a9be033801B39fcfa6,aave-v3-origin/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0xED56ED0316FECBF93E3F5cA5aE70b8eF48ad4535,aave-v3-origin/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0xca1610aE2820d34EB717b43e3CB1dd33B7eC05FB,aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x8bd15bbd01e987D4b851818b6586AA6E16E65c62`
+
+For zksync(cancun):
+
+`FOUNDRY_LIBRARIES=aave-v3-origin/contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic:0x3db1dc584758daba133a59f776503b6c5d2dd1db,aave-v3-origin/contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic:0x511eaFe32D70Aad1f0F87BAe560cbC2Ec88B34Db,aave-v3-origin/contracts/protocol/libraries/logic/EModeLogic.sol:EModeLogic:0xcdae69765333cae780e4bf6dcb7db886fae0b5a1,aave-v3-origin/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0xF8b48c00Ff12dD97F961EFE5240eBe956a3D8687,aave-v3-origin/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0x78ca5c313c8a3265a8bf69a645564181970be9c1,aave-v3-origin/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0x4511b06e1524929a4a90c5dd2aca59c8df728e8a,aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x0095325bb5C5da5b19C92bb6919f80110dcbaEFF`

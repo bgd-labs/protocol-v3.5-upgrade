@@ -1,0 +1,413 @@
+===================================================================
+--- lib/aave-v3-origin/src/contracts/protocol/pool/PoolConfigurator.sol
++++ lib/aave-v3-origin-private/src/contracts/protocol/pool/PoolConfigurator.sol
+@@ -82,13 +82,16 @@
+         ConfiguratorInputTypes.InitReserveInput[] calldata input
+     ) external override onlyAssetListingOrPoolAdmins {
+         IPool cachedPool = _pool;
+ 
++        address interestRateStrategyAddress = cachedPool
++            .RESERVE_INTEREST_RATE_STRATEGY();
+         for (uint256 i = 0; i < input.length; i++) {
+             ConfiguratorLogic.executeInitReserve(cachedPool, input[i]);
++
+             emit ReserveInterestRateDataChanged(
+                 input[i].underlyingAsset,
+-                input[i].interestRateStrategyAddress,
++                interestRateStrategyAddress,
+                 input[i].interestRateData
+             );
+         }
+     }
+@@ -134,9 +137,9 @@
+     ) external override onlyRiskOrPoolAdmins {
+         //validation of the parameters: the LTV can
+         //only be lower or equal than the liquidation threshold
+         //(otherwise a loan against the asset would cause instantaneous liquidation)
+-        require(ltv <= liquidationThreshold, Errors.INVALID_RESERVE_PARAMS);
++        require(ltv <= liquidationThreshold, Errors.InvalidReserveParams());
+ 
+         DataTypes.ReserveConfigurationMap memory currentConfig = _pool
+             .getConfiguration(asset);
+ 
+@@ -144,20 +147,20 @@
+             //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
+             //collateral than needed to cover the debt
+             require(
+                 liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
+-                Errors.INVALID_RESERVE_PARAMS
++                Errors.InvalidReserveParams()
+             );
+ 
+             //if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
+             //a loan is taken there is enough collateral available to cover the liquidation bonus
+             require(
+                 liquidationThreshold.percentMul(liquidationBonus) <=
+                     PercentageMath.PERCENTAGE_FACTOR,
+-                Errors.INVALID_RESERVE_PARAMS
++                Errors.InvalidReserveParams()
+             );
+         } else {
+-            require(liquidationBonus == 0, Errors.INVALID_RESERVE_PARAMS);
++            require(liquidationBonus == 0, Errors.InvalidReserveParams());
+             //if the liquidation threshold is being set to 0,
+             // the reserve is being disabled as collateral. To do so,
+             //we need to ensure no liquidity is supplied
+             _checkNoSuppliers(asset);
+@@ -222,9 +225,9 @@
+             .getConfiguration(asset);
+ 
+         require(
+             freeze != currentConfig.getFrozen(),
+-            Errors.INVALID_FREEZE_STATE
++            Errors.InvalidFreezeState()
+         );
+ 
+         currentConfig.setFrozen(freeze);
+ 
+@@ -273,9 +276,9 @@
+     ) public override onlyEmergencyOrPoolAdmin {
+         if (!paused && gracePeriod != 0) {
+             require(
+                 gracePeriod <= MAX_GRACE_PERIOD,
+-                Errors.INVALID_GRACE_PERIOD
++                Errors.InvalidGracePeriod()
+             );
+ 
+             uint40 until = uint40(block.timestamp) + gracePeriod;
+             _pool.setLiquidationGracePeriod(asset, until);
+@@ -313,9 +316,9 @@
+         uint256 newReserveFactor
+     ) external override onlyRiskOrPoolAdmins {
+         require(
+             newReserveFactor <= PercentageMath.PERCENTAGE_FACTOR,
+-            Errors.INVALID_RESERVE_FACTOR
++            Errors.InvalidReserveFactor()
+         );
+ 
+         _pool.syncIndexesState(asset);
+ 
+@@ -405,9 +408,9 @@
+         uint256 newFee
+     ) external override onlyRiskOrPoolAdmins {
+         require(
+             newFee <= PercentageMath.PERCENTAGE_FACTOR,
+-            Errors.INVALID_LIQUIDATION_PROTOCOL_FEE
++            Errors.InvalidLiquidationProtocolFee()
+         );
+         DataTypes.ReserveConfigurationMap memory currentConfig = _pool
+             .getConfiguration(asset);
+         uint256 oldFee = currentConfig.getLiquidationProtocolFee();
+@@ -423,32 +426,29 @@
+         uint16 liquidationThreshold,
+         uint16 liquidationBonus,
+         string calldata label
+     ) external override onlyRiskOrPoolAdmins {
+-        require(ltv != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
+-        require(
+-            liquidationThreshold != 0,
+-            Errors.INVALID_EMODE_CATEGORY_PARAMS
+-        );
++        require(ltv != 0, Errors.InvalidEmodeCategoryParams());
++        require(liquidationThreshold != 0, Errors.InvalidEmodeCategoryParams());
+ 
+         // validation of the parameters: the LTV can
+         // only be lower or equal than the liquidation threshold
+         // (otherwise a loan against the asset would cause instantaneous liquidation)
+         require(
+             ltv <= liquidationThreshold,
+-            Errors.INVALID_EMODE_CATEGORY_PARAMS
++            Errors.InvalidEmodeCategoryParams()
+         );
+         require(
+             liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
+-            Errors.INVALID_EMODE_CATEGORY_PARAMS
++            Errors.InvalidEmodeCategoryParams()
+         );
+ 
+         // if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
+         // a loan is taken there is enough collateral available to cover the liquidation bonus
+         require(
+             uint256(liquidationThreshold).percentMul(liquidationBonus) <=
+                 PercentageMath.PERCENTAGE_FACTOR,
+-            Errors.INVALID_EMODE_CATEGORY_PARAMS
++            Errors.InvalidEmodeCategoryParams()
+         );
+ 
+         DataTypes.EModeCategoryBaseConfiguration memory categoryData;
+         categoryData.ltv = ltv;
+@@ -480,9 +480,9 @@
+             asset
+         );
+         require(
+             reserveData.id != 0 || _pool.getReservesList()[0] == asset,
+-            Errors.ASSET_NOT_LISTED
++            Errors.AssetNotListed()
+         );
+         collateralBitmap = EModeConfiguration.setReserveBitmapBit(
+             collateralBitmap,
+             reserveData.id,
+@@ -508,9 +508,9 @@
+             asset
+         );
+         require(
+             reserveData.id != 0 || _pool.getReservesList()[0] == asset,
+-            Errors.ASSET_NOT_LISTED
++            Errors.AssetNotListed()
+         );
+         borrowableBitmap = EModeConfiguration.setReserveBitmapBit(
+             borrowableBitmap,
+             reserveData.id,
+@@ -523,55 +523,25 @@
+         emit AssetBorrowableInEModeChanged(asset, categoryId, borrowable);
+     }
+ 
+     /// @inheritdoc IPoolConfigurator
+-    function setUnbackedMintCap(
+-        address asset,
+-        uint256 newUnbackedMintCap
+-    ) external override onlyRiskOrPoolAdmins {
+-        DataTypes.ReserveConfigurationMap memory currentConfig = _pool
+-            .getConfiguration(asset);
+-        uint256 oldUnbackedMintCap = currentConfig.getUnbackedMintCap();
+-        currentConfig.setUnbackedMintCap(newUnbackedMintCap);
+-        _pool.setConfiguration(asset, currentConfig);
+-        emit UnbackedMintCapChanged(
+-            asset,
+-            oldUnbackedMintCap,
+-            newUnbackedMintCap
+-        );
+-    }
+-
+-    /// @inheritdoc IPoolConfigurator
+     function setReserveInterestRateData(
+         address asset,
+         bytes calldata rateData
+     ) external onlyRiskOrPoolAdmins {
+-        DataTypes.ReserveDataLegacy memory reserve = _pool.getReserveData(
+-            asset
+-        );
+-        _updateInterestRateStrategy(
+-            asset,
+-            reserve,
+-            reserve.interestRateStrategyAddress,
+-            rateData
+-        );
+-    }
++        _pool.syncIndexesState(asset);
+ 
+-    /// @inheritdoc IPoolConfigurator
+-    function setReserveInterestRateStrategyAddress(
+-        address asset,
+-        address rateStrategyAddress,
+-        bytes calldata rateData
+-    ) external override onlyRiskOrPoolAdmins {
+-        DataTypes.ReserveDataLegacy memory reserve = _pool.getReserveData(
+-            asset
+-        );
+-        _updateInterestRateStrategy(
++        address interestRateStrategyAddress = _pool
++            .RESERVE_INTEREST_RATE_STRATEGY();
++        IDefaultInterestRateStrategyV2(interestRateStrategyAddress)
++            .setInterestRateParams(asset, rateData);
++        emit ReserveInterestRateDataChanged(
+             asset,
+-            reserve,
+-            rateStrategyAddress,
++            interestRateStrategyAddress,
+             rateData
+         );
++
++        _pool.syncRatesState(asset);
+     }
+ 
+     /// @inheritdoc IPoolConfigurator
+     function setPoolPause(
+@@ -594,63 +564,26 @@
+         setPoolPause(paused, 0);
+     }
+ 
+     /// @inheritdoc IPoolConfigurator
+-    function updateBridgeProtocolFee(
+-        uint256 newBridgeProtocolFee
++    function updateFlashloanPremium(
++        uint128 newFlashloanPremium
+     ) external override onlyPoolAdmin {
+         require(
+-            newBridgeProtocolFee <= PercentageMath.PERCENTAGE_FACTOR,
+-            Errors.BRIDGE_PROTOCOL_FEE_INVALID
++            newFlashloanPremium <= PercentageMath.PERCENTAGE_FACTOR,
++            Errors.FlashloanPremiumInvalid()
+         );
+-        uint256 oldBridgeProtocolFee = _pool.BRIDGE_PROTOCOL_FEE();
+-        _pool.updateBridgeProtocolFee(newBridgeProtocolFee);
+-        emit BridgeProtocolFeeUpdated(
+-            oldBridgeProtocolFee,
+-            newBridgeProtocolFee
+-        );
+-    }
+ 
+-    /// @inheritdoc IPoolConfigurator
+-    function updateFlashloanPremiumTotal(
+-        uint128 newFlashloanPremiumTotal
+-    ) external override onlyPoolAdmin {
+-        require(
+-            newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
+-            Errors.FLASHLOAN_PREMIUM_INVALID
+-        );
+-        uint128 oldFlashloanPremiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
+-        _pool.updateFlashloanPremiums(
+-            newFlashloanPremiumTotal,
+-            _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL()
+-        );
++        uint128 oldFlashloanPremium = _pool.FLASHLOAN_PREMIUM_TOTAL();
++        _pool.updateFlashloanPremium(newFlashloanPremium);
++
+         emit FlashloanPremiumTotalUpdated(
+-            oldFlashloanPremiumTotal,
+-            newFlashloanPremiumTotal
++            oldFlashloanPremium,
++            newFlashloanPremium
+         );
+     }
+ 
+     /// @inheritdoc IPoolConfigurator
+-    function updateFlashloanPremiumToProtocol(
+-        uint128 newFlashloanPremiumToProtocol
+-    ) external override onlyPoolAdmin {
+-        require(
+-            newFlashloanPremiumToProtocol <= PercentageMath.PERCENTAGE_FACTOR,
+-            Errors.FLASHLOAN_PREMIUM_INVALID
+-        );
+-        uint128 oldFlashloanPremiumToProtocol = _pool
+-            .FLASHLOAN_PREMIUM_TO_PROTOCOL();
+-        _pool.updateFlashloanPremiums(
+-            _pool.FLASHLOAN_PREMIUM_TOTAL(),
+-            newFlashloanPremiumToProtocol
+-        );
+-        emit FlashloanPremiumToProtocolUpdated(
+-            oldFlashloanPremiumToProtocol,
+-            newFlashloanPremiumToProtocol
+-        );
+-    }
+-
+-    /// @inheritdoc IPoolConfigurator
+     function getPendingLtv(
+         address asset
+     ) external view override returns (uint256) {
+         return _pendingLtv[asset];
+@@ -660,41 +593,8 @@
+     function getConfiguratorLogic() external pure returns (address) {
+         return address(ConfiguratorLogic);
+     }
+ 
+-    function _updateInterestRateStrategy(
+-        address asset,
+-        DataTypes.ReserveDataLegacy memory reserve,
+-        address newRateStrategyAddress,
+-        bytes calldata rateData
+-    ) internal {
+-        address oldRateStrategyAddress = reserve.interestRateStrategyAddress;
+-
+-        _pool.syncIndexesState(asset);
+-
+-        IDefaultInterestRateStrategyV2(newRateStrategyAddress)
+-            .setInterestRateParams(asset, rateData);
+-        emit ReserveInterestRateDataChanged(
+-            asset,
+-            newRateStrategyAddress,
+-            rateData
+-        );
+-
+-        if (oldRateStrategyAddress != newRateStrategyAddress) {
+-            _pool.setReserveInterestRateStrategyAddress(
+-                asset,
+-                newRateStrategyAddress
+-            );
+-            emit ReserveInterestRateStrategyChanged(
+-                asset,
+-                oldRateStrategyAddress,
+-                newRateStrategyAddress
+-            );
+-        }
+-
+-        _pool.syncRatesState(asset);
+-    }
+-
+     function _checkNoSuppliers(address asset) internal view {
+         DataTypes.ReserveDataLegacy memory reserveData = _pool.getReserveData(
+             asset
+         );
+@@ -703,26 +603,26 @@
+         ).getATokenTotalSupply(asset);
+ 
+         require(
+             totalSupplied == 0 && reserveData.accruedToTreasury == 0,
+-            Errors.RESERVE_LIQUIDITY_NOT_ZERO
++            Errors.ReserveLiquidityNotZero()
+         );
+     }
+ 
+     function _checkNoBorrowers(address asset) internal view {
+         uint256 totalDebt = IPoolDataProvider(
+             _addressesProvider.getPoolDataProvider()
+         ).getTotalDebt(asset);
+-        require(totalDebt == 0, Errors.RESERVE_DEBT_NOT_ZERO);
++        require(totalDebt == 0, Errors.ReserveDebtNotZero());
+     }
+ 
+     function _onlyPoolAdmin() internal view {
+         IACLManager aclManager = IACLManager(
+             _addressesProvider.getACLManager()
+         );
+         require(
+             aclManager.isPoolAdmin(msg.sender),
+-            Errors.CALLER_NOT_POOL_ADMIN
++            Errors.CallerNotPoolAdmin()
+         );
+     }
+ 
+     function _onlyPoolOrEmergencyAdmin() internal view {
+@@ -731,9 +631,9 @@
+         );
+         require(
+             aclManager.isPoolAdmin(msg.sender) ||
+                 aclManager.isEmergencyAdmin(msg.sender),
+-            Errors.CALLER_NOT_POOL_OR_EMERGENCY_ADMIN
++            Errors.CallerNotPoolOrEmergencyAdmin()
+         );
+     }
+ 
+     function _onlyAssetListingOrPoolAdmins() internal view {
+@@ -742,9 +642,9 @@
+         );
+         require(
+             aclManager.isAssetListingAdmin(msg.sender) ||
+                 aclManager.isPoolAdmin(msg.sender),
+-            Errors.CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
++            Errors.CallerNotAssetListingOrPoolAdmin()
+         );
+     }
+ 
+     function _onlyRiskOrPoolAdmins() internal view {
+@@ -753,9 +653,9 @@
+         );
+         require(
+             aclManager.isRiskAdmin(msg.sender) ||
+                 aclManager.isPoolAdmin(msg.sender),
+-            Errors.CALLER_NOT_RISK_OR_POOL_ADMIN
++            Errors.CallerNotRiskOrPoolAdmin()
+         );
+     }
+ 
+     function _onlyRiskOrPoolOrEmergencyAdmins() internal view {
+@@ -765,8 +665,8 @@
+         require(
+             aclManager.isRiskAdmin(msg.sender) ||
+                 aclManager.isPoolAdmin(msg.sender) ||
+                 aclManager.isEmergencyAdmin(msg.sender),
+-            Errors.CALLER_NOT_RISK_OR_POOL_OR_EMERGENCY_ADMIN
++            Errors.CallerNotRiskOrPoolOrEmergencyAdmin()
+         );
+     }
+ }

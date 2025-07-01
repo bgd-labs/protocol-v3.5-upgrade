@@ -1,0 +1,10 @@
+===================================================================
+--- @aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol
++++ lib/aave-v3-origin-private/src/contracts/interfaces/IScaledBalanceToken.sol
+@@ -1,5 +1,5 @@
+-// SPDX-License-Identifier: AGPL-3.0
++// SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.0;
+ 
+ /**
+  * @title IScaledBalanceToken

@@ -1,0 +1,10 @@
+===================================================================
+--- node_modules/@aave/core-v3/contracts/interfaces/IACLManager.sol
++++ lib/aave-v3-origin-private/src/contracts/interfaces/IACLManager.sol
+@@ -1,5 +1,5 @@
+-// SPDX-License-Identifier: AGPL-3.0
++// SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.0;
+ 
+ import {IPoolAddressesProvider} from "./IPoolAddressesProvider.sol";
+ 

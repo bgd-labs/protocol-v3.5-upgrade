@@ -14,7 +14,8 @@ import {
   BNBScript,
   LineaScript,
   SonicScript,
-  CeloScript
+  CeloScript,
+  SoneiumScript
 } from "solidity-utils/contracts/utils/ScriptUtils.sol";
 
 import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
@@ -45,12 +46,21 @@ import {AaveV3EthereumEtherFi, AaveV3EthereumEtherFiAssets} from "aave-address-b
 import {AaveV3Linea, AaveV3LineaAssets} from "aave-address-book/AaveV3Linea.sol";
 import {AaveV3Sonic, AaveV3SonicAssets} from "aave-address-book/AaveV3Sonic.sol";
 import {AaveV3Celo, AaveV3CeloAssets} from "aave-address-book/AaveV3Celo.sol";
+import {AaveV3Soneium, AaveV3SoneiumAssets} from "aave-address-book/AaveV3Soneium.sol";
 
 import {UpgradePayload} from "../src/UpgradePayload.sol";
 import {UpgradePayloadMainnetCore} from "../src/UpgradePayloadMainnetCore.sol";
 
 library DeploymentLibrary {
+  struct DeployParameters {
+    address poolAddressesProvider;
+    address pool;
+    address interestRateStrategy;
+    address rewardsController;
+    address treasury;
+  }
   // rollups
+
   function _deployOptimism() internal returns (address) {
     DeployParameters memory deployParams;
 
@@ -205,7 +215,7 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Linea.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Linea.COLLECTOR);
 
-    return _deployL1(deployParams);
+    return _deployL2(deployParams);
   }
 
   function _deploySonic() internal returns (address) {
@@ -229,15 +239,19 @@ library DeploymentLibrary {
     deployParams.rewardsController = AaveV3Celo.DEFAULT_INCENTIVES_CONTROLLER;
     deployParams.treasury = address(AaveV3Celo.COLLECTOR);
 
-    return _deployL2(deployParams);
+    return _deployL1(deployParams);
   }
 
-  struct DeployParameters {
-    address poolAddressesProvider;
-    address pool;
-    address interestRateStrategy;
-    address rewardsController;
-    address treasury;
+  function _deploySoneium() internal returns (address) {
+    DeployParameters memory deployParams;
+
+    deployParams.pool = address(AaveV3Soneium.POOL);
+    deployParams.poolAddressesProvider = address(AaveV3Soneium.POOL_ADDRESSES_PROVIDER);
+    deployParams.interestRateStrategy = address(AaveV3SoneiumAssets.USDT_INTEREST_RATE_STRATEGY);
+    deployParams.rewardsController = AaveV3Soneium.DEFAULT_INCENTIVES_CONTROLLER;
+    deployParams.treasury = address(AaveV3Soneium.COLLECTOR);
+
+    return _deployL2(deployParams);
   }
 
   function _deployL2(DeployParameters memory deployParams) internal returns (address) {
@@ -410,5 +424,11 @@ contract Deploysonic is SonicScript {
 contract Deploycelo is CeloScript {
   function run() external broadcast {
     DeploymentLibrary._deployCelo();
+  }
+}
+
+contract Deploysoneium is SoneiumScript {
+  function run() external broadcast {
+    DeploymentLibrary._deploySoneium();
   }
 }

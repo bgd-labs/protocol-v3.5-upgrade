@@ -1,0 +1,10 @@
+===================================================================
+--- lib/aave-v3-core/contracts/interfaces/IAaveIncentivesController.sol
++++ lib/aave-v3-origin-private/src/contracts/interfaces/IAaveIncentivesController.sol
+@@ -1,5 +1,5 @@
+-// SPDX-License-Identifier: AGPL-3.0
++// SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.0;
+ 
+ /**
+  * @title IAaveIncentivesController

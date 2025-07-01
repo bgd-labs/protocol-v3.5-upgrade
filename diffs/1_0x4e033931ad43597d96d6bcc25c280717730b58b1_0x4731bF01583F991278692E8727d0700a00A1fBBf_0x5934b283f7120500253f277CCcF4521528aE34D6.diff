@@ -1,0 +1,3987 @@
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/DataTypes.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/DataTypes.sol
+index 3e28687..3debcd4 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/DataTypes.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/DataTypes.sol
+@@ -29,11 +29,11 @@ library DataTypes {
+     address stableDebtTokenAddress;
+     //variableDebtToken address
+     address variableDebtTokenAddress;
+-    //address of the interest rate strategy
++    // DEPRECATED on v3.4.0, should use the `RESERVE_INTEREST_RATE_STRATEGY` variable from the Pool contract
+     address interestRateStrategyAddress;
+     //the current treasury balance, scaled
+     uint128 accruedToTreasury;
+-    //the outstanding unbacked aTokens minted through the bridging feature
++    // DEPRECATED on v3.4.0
+     uint128 unbacked;
+     //the outstanding debt borrowed against this asset in isolation mode
+     uint128 isolationModeTotalDebt;
+@@ -65,16 +65,17 @@ library DataTypes {
+     address __deprecatedStableDebtTokenAddress;
+     //variableDebtToken address
+     address variableDebtTokenAddress;
+-    //address of the interest rate strategy
+-    address interestRateStrategyAddress;
++    // DEPRECATED on v3.4.0, should use the `RESERVE_INTEREST_RATE_STRATEGY` variable from the Pool contract
++    address __deprecatedInterestRateStrategyAddress;
+     //the current treasury balance, scaled
+     uint128 accruedToTreasury;
+-    //the outstanding unbacked aTokens minted through the bridging feature
+-    uint128 unbacked;
++    // In aave 3.3.0 this storage slot contained the `unbacked`
++    uint128 virtualUnderlyingBalance;
+     //the outstanding debt borrowed against this asset in isolation mode
+     uint128 isolationModeTotalDebt;
+     //the amount of underlying accounted for by the protocol
+-    uint128 virtualUnderlyingBalance;
++    // DEPRECATED on v3.4.0. Moved into the same slot as accruedToTreasury for optimized storage access.
++    uint128 __deprecatedVirtualUnderlyingBalance;
+   }
+ 
+   struct ReserveConfigurationMap {
+@@ -95,9 +96,9 @@ library DataTypes {
+     //bit 116-151: supply cap in whole tokens, supplyCap == 0 => no cap
+     //bit 152-167: liquidation protocol fee
+     //bit 168-175: DEPRECATED: eMode category
+-    //bit 176-211: unbacked mint cap in whole tokens, unbackedMintCap == 0 => minting disabled
++    //bit 176-211: DEPRECATED: unbacked mint cap
+     //bit 212-251: debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
+-    //bit 252: virtual accounting is enabled for the reserve
++    //bit 252: DEPRECATED: virtual accounting is enabled for the reserve
+     //bit 253-255 unused
+     uint256 data;
+   }
+@@ -168,19 +169,22 @@ library DataTypes {
+   }
+ 
+   struct ExecuteLiquidationCallParams {
+-    uint256 reservesCount;
++    address liquidator;
+     uint256 debtToCover;
+     address collateralAsset;
+     address debtAsset;
+-    address user;
++    address borrower;
+     bool receiveAToken;
+     address priceOracle;
+-    uint8 userEModeCategory;
++    uint8 borrowerEModeCategory;
+     address priceOracleSentinel;
++    address interestRateStrategyAddress;
+   }
+ 
+   struct ExecuteSupplyParams {
++    address user;
+     address asset;
++    address interestRateStrategyAddress;
+     uint256 amount;
+     address onBehalfOf;
+     uint16 referralCode;
+@@ -190,11 +194,11 @@ library DataTypes {
+     address asset;
+     address user;
+     address onBehalfOf;
++    address interestRateStrategyAddress;
+     uint256 amount;
+     InterestRateMode interestRateMode;
+     uint16 referralCode;
+     bool releaseUnderlying;
+-    uint256 reservesCount;
+     address oracle;
+     uint8 userEModeCategory;
+     address priceOracleSentinel;
+@@ -202,6 +206,8 @@ library DataTypes {
+ 
+   struct ExecuteRepayParams {
+     address asset;
++    address user;
++    address interestRateStrategyAddress;
+     uint256 amount;
+     InterestRateMode interestRateMode;
+     address onBehalfOf;
+@@ -209,25 +215,22 @@ library DataTypes {
+   }
+ 
+   struct ExecuteWithdrawParams {
++    address user;
+     address asset;
++    address interestRateStrategyAddress;
+     uint256 amount;
+     address to;
+-    uint256 reservesCount;
+     address oracle;
+     uint8 userEModeCategory;
+   }
+ 
+   struct ExecuteEliminateDeficitParams {
++    address user;
+     address asset;
++    address interestRateStrategyAddress;
+     uint256 amount;
+   }
+ 
+-  struct ExecuteSetUserEModeParams {
+-    uint256 reservesCount;
+-    address oracle;
+-    uint8 categoryId;
+-  }
+-
+   struct FinalizeTransferParams {
+     address asset;
+     address from;
+@@ -235,22 +238,21 @@ library DataTypes {
+     uint256 amount;
+     uint256 balanceFromBefore;
+     uint256 balanceToBefore;
+-    uint256 reservesCount;
+     address oracle;
+     uint8 fromEModeCategory;
+   }
+ 
+   struct FlashloanParams {
++    address user;
+     address receiverAddress;
+     address[] assets;
+     uint256[] amounts;
+     uint256[] interestRateModes;
++    address interestRateStrategyAddress;
+     address onBehalfOf;
+     bytes params;
+     uint16 referralCode;
+-    uint256 flashLoanPremiumToProtocol;
+-    uint256 flashLoanPremiumTotal;
+-    uint256 reservesCount;
++    uint256 flashLoanPremium;
+     address addressesProvider;
+     address pool;
+     uint8 userEModeCategory;
+@@ -258,27 +260,28 @@ library DataTypes {
+   }
+ 
+   struct FlashloanSimpleParams {
++    address user;
+     address receiverAddress;
+     address asset;
++    address interestRateStrategyAddress;
+     uint256 amount;
+     bytes params;
+     uint16 referralCode;
+-    uint256 flashLoanPremiumToProtocol;
+-    uint256 flashLoanPremiumTotal;
++    uint256 flashLoanPremium;
+   }
+ 
+   struct FlashLoanRepaymentParams {
++    address user;
+     uint256 amount;
+     uint256 totalPremium;
+-    uint256 flashLoanPremiumToProtocol;
+     address asset;
++    address interestRateStrategyAddress;
+     address receiverAddress;
+     uint16 referralCode;
+   }
+ 
+   struct CalculateUserAccountDataParams {
+     UserConfigurationMap userConfig;
+-    uint256 reservesCount;
+     address user;
+     address oracle;
+     uint8 userEModeCategory;
+@@ -291,13 +294,9 @@ library DataTypes {
+     address userAddress;
+     uint256 amount;
+     InterestRateMode interestRateMode;
+-    uint256 reservesCount;
+     address oracle;
+     uint8 userEModeCategory;
+     address priceOracleSentinel;
+-    bool isolationModeActive;
+-    address isolationModeCollateralAddress;
+-    uint256 isolationModeDebtCeiling;
+   }
+ 
+   struct ValidateLiquidationCallParams {
+@@ -305,6 +304,8 @@ library DataTypes {
+     uint256 totalDebt;
+     uint256 healthFactor;
+     address priceOracleSentinel;
++    address borrower;
++    address liquidator;
+   }
+ 
+   struct CalculateInterestRatesParams {
+@@ -314,6 +315,7 @@ library DataTypes {
+     uint256 totalDebt;
+     uint256 reserveFactor;
+     address reserve;
++    // @notice DEPRECATED in 3.4, but kept for backwards compatibility
+     bool usingVirtualBalance;
+     uint256 virtualUnderlyingBalance;
+   }
+@@ -322,7 +324,6 @@ library DataTypes {
+     address asset;
+     address aTokenAddress;
+     address variableDebtAddress;
+-    address interestRateStrategyAddress;
+     uint16 reservesCount;
+     uint16 maxNumberReserves;
+   }
+diff --git a/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/DelegationMode.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/DelegationMode.sol
+new file mode 100644
+index 0000000..8d59013
+--- /dev/null
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/DelegationMode.sol
+@@ -0,0 +1,9 @@
++// SPDX-License-Identifier: MIT
++pragma solidity ^0.8.0;
++
++enum DelegationMode {
++  NO_DELEGATION,
++  VOTING_DELEGATED,
++  PROPOSITION_DELEGATED,
++  FULL_POWER_DELEGATED
++}
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/EModeConfiguration.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/EModeConfiguration.sol
+index be44430..b883b99 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/EModeConfiguration.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/EModeConfiguration.sol
+@@ -20,7 +20,7 @@ library EModeConfiguration {
+    */
+   function setReserveBitmapBit(uint128 bitmap, uint256 reserveIndex, bool enabled) internal pure returns (uint128) {
+     unchecked {
+-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
++      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.InvalidReserveIndex());
+       uint128 bit = uint128(1 << reserveIndex);
+       if (enabled) {
+         return bitmap | bit;
+@@ -38,7 +38,7 @@ library EModeConfiguration {
+    */
+   function isReserveEnabledOnBitmap(uint128 bitmap, uint256 reserveIndex) internal pure returns (bool) {
+     unchecked {
+-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
++      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.InvalidReserveIndex());
+       return (bitmap >> reserveIndex) & 1 != 0;
+     }
+   }
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/EModeLogic.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/EModeLogic.sol
+index bc5ecef..55a5dd1 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/EModeLogic.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/EModeLogic.sol
+@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
+ 
+ import {GPv2SafeERC20} from "../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol";
+ import {IERC20} from "../../../dependencies/openzeppelin/contracts/IERC20.sol";
++import {IPool} from "../../../interfaces/IPool.sol";
+ import {UserConfiguration} from "../configuration/UserConfiguration.sol";
+ import {WadRayMath} from "../math/WadRayMath.sol";
+ import {PercentageMath} from "../math/PercentageMath.sol";
+@@ -23,9 +24,6 @@ library EModeLogic {
+   using WadRayMath for uint256;
+   using PercentageMath for uint256;
+ 
+-  // See `IPool` for descriptions
+-  event UserEModeSet(address indexed user, uint8 categoryId);
+-
+   /**
+    * @notice Updates the user efficiency mode category
+    * @dev Will revert if user is borrowing non-compatible asset or change will drop HF < HEALTH_FACTOR_LIQUIDATION_THRESHOLD
+@@ -35,7 +33,9 @@ library EModeLogic {
+    * @param eModeCategories The configuration of all the efficiency mode categories
+    * @param usersEModeCategory The state of all users efficiency mode category
+    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+-   * @param params The additional parameters needed to execute the setUserEMode function
++   * @param user The selected user
++   * @param oracle The address of the oracle
++   * @param categoryId The selected eMode categoryId
+    */
+   function executeSetUserEMode(
+     mapping(address => DataTypes.ReserveData) storage reservesData,
+@@ -43,24 +43,19 @@ library EModeLogic {
+     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+     mapping(address => uint8) storage usersEModeCategory,
+     DataTypes.UserConfigurationMap storage userConfig,
+-    DataTypes.ExecuteSetUserEModeParams memory params
++    address user,
++    address oracle,
++    uint8 categoryId
+   ) external {
+-    if (usersEModeCategory[msg.sender] == params.categoryId) return;
++    if (usersEModeCategory[user] == categoryId) return;
+ 
+-    ValidationLogic.validateSetUserEMode(eModeCategories, userConfig, params.reservesCount, params.categoryId);
++    ValidationLogic.validateSetUserEMode(eModeCategories, userConfig, categoryId);
+ 
+-    usersEModeCategory[msg.sender] = params.categoryId;
++    usersEModeCategory[user] = categoryId;
+ 
+     ValidationLogic.validateHealthFactor(
+-      reservesData,
+-      reservesList,
+-      eModeCategories,
+-      userConfig,
+-      msg.sender,
+-      params.categoryId,
+-      params.reservesCount,
+-      params.oracle
++      reservesData, reservesList, eModeCategories, userConfig, user, categoryId, oracle
+     );
+-    emit UserEModeSet(msg.sender, params.categoryId);
++    emit IPool.UserEModeSet(user, categoryId);
+   }
+ }
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/Errors.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/Errors.sol
+index 619ebd0..6c493d8 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/Errors.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/Errors.sol
+@@ -7,101 +7,93 @@ pragma solidity ^0.8.0;
+  * @notice Defines the error messages emitted by the different contracts of the Aave protocol
+  */
+ library Errors {
+-  string public constant CALLER_NOT_POOL_ADMIN = "1"; // 'The caller of the function is not a pool admin'
+-  string public constant CALLER_NOT_EMERGENCY_ADMIN = "2"; // 'The caller of the function is not an emergency admin'
+-  string public constant CALLER_NOT_POOL_OR_EMERGENCY_ADMIN = "3"; // 'The caller of the function is not a pool or emergency admin'
+-  string public constant CALLER_NOT_RISK_OR_POOL_ADMIN = "4"; // 'The caller of the function is not a risk or pool admin'
+-  string public constant CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = "5"; // 'The caller of the function is not an asset listing or pool admin'
+-  string public constant CALLER_NOT_BRIDGE = "6"; // 'The caller of the function is not a bridge'
+-  string public constant ADDRESSES_PROVIDER_NOT_REGISTERED = "7"; // 'Pool addresses provider is not registered'
+-  string public constant INVALID_ADDRESSES_PROVIDER_ID = "8"; // 'Invalid id for the pool addresses provider'
+-  string public constant NOT_CONTRACT = "9"; // 'Address is not a contract'
+-  string public constant CALLER_NOT_POOL_CONFIGURATOR = "10"; // 'The caller of the function is not the pool configurator'
+-  string public constant CALLER_NOT_ATOKEN = "11"; // 'The caller of the function is not an AToken'
+-  string public constant INVALID_ADDRESSES_PROVIDER = "12"; // 'The address of the pool addresses provider is invalid'
+-  string public constant INVALID_FLASHLOAN_EXECUTOR_RETURN = "13"; // 'Invalid return value of the flashloan executor function'
+-  string public constant RESERVE_ALREADY_ADDED = "14"; // 'Reserve has already been added to reserve list'
+-  string public constant NO_MORE_RESERVES_ALLOWED = "15"; // 'Maximum amount of reserves in the pool reached'
+-  string public constant EMODE_CATEGORY_RESERVED = "16"; // 'Zero eMode category is reserved for volatile heterogeneous assets'
+-  string public constant INVALID_EMODE_CATEGORY_ASSIGNMENT = "17"; // 'Invalid eMode category assignment to asset'
+-  string public constant RESERVE_LIQUIDITY_NOT_ZERO = "18"; // 'The liquidity of the reserve needs to be 0'
+-  string public constant FLASHLOAN_PREMIUM_INVALID = "19"; // 'Invalid flashloan premium'
+-  string public constant INVALID_RESERVE_PARAMS = "20"; // 'Invalid risk parameters for the reserve'
+-  string public constant INVALID_EMODE_CATEGORY_PARAMS = "21"; // 'Invalid risk parameters for the eMode category'
+-  string public constant BRIDGE_PROTOCOL_FEE_INVALID = "22"; // 'Invalid bridge protocol fee'
+-  string public constant CALLER_MUST_BE_POOL = "23"; // 'The caller of this function must be a pool'
+-  string public constant INVALID_MINT_AMOUNT = "24"; // 'Invalid amount to mint'
+-  string public constant INVALID_BURN_AMOUNT = "25"; // 'Invalid amount to burn'
+-  string public constant INVALID_AMOUNT = "26"; // 'Amount must be greater than 0'
+-  string public constant RESERVE_INACTIVE = "27"; // 'Action requires an active reserve'
+-  string public constant RESERVE_FROZEN = "28"; // 'Action cannot be performed because the reserve is frozen'
+-  string public constant RESERVE_PAUSED = "29"; // 'Action cannot be performed because the reserve is paused'
+-  string public constant BORROWING_NOT_ENABLED = "30"; // 'Borrowing is not enabled'
+-  string public constant NOT_ENOUGH_AVAILABLE_USER_BALANCE = "32"; // 'User cannot withdraw more than the available balance'
+-  string public constant INVALID_INTEREST_RATE_MODE_SELECTED = "33"; // 'Invalid interest rate mode selected'
+-  string public constant COLLATERAL_BALANCE_IS_ZERO = "34"; // 'The collateral balance is 0'
+-  string public constant HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD = "35"; // 'Health factor is lesser than the liquidation threshold'
+-  string public constant COLLATERAL_CANNOT_COVER_NEW_BORROW = "36"; // 'There is not enough collateral to cover a new borrow'
+-  string public constant COLLATERAL_SAME_AS_BORROWING_CURRENCY = "37"; // 'Collateral is (mostly) the same currency that is being borrowed'
+-  string public constant NO_DEBT_OF_SELECTED_TYPE = "39"; // 'For repayment of a specific type of debt, the user needs to have debt that type'
+-  string public constant NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF = "40"; // 'To repay on behalf of a user an explicit amount to repay is needed'
+-  string public constant NO_OUTSTANDING_VARIABLE_DEBT = "42"; // 'User does not have outstanding variable rate debt on this reserve'
+-  string public constant UNDERLYING_BALANCE_ZERO = "43"; // 'The underlying balance needs to be greater than 0'
+-  string public constant INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET = "44"; // 'Interest rate rebalance conditions were not met'
+-  string public constant HEALTH_FACTOR_NOT_BELOW_THRESHOLD = "45"; // 'Health factor is not below the threshold'
+-  string public constant COLLATERAL_CANNOT_BE_LIQUIDATED = "46"; // 'The collateral chosen cannot be liquidated'
+-  string public constant SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = "47"; // 'User did not borrow the specified currency'
+-  string public constant INCONSISTENT_FLASHLOAN_PARAMS = "49"; // 'Inconsistent flashloan parameters'
+-  string public constant BORROW_CAP_EXCEEDED = "50"; // 'Borrow cap is exceeded'
+-  string public constant SUPPLY_CAP_EXCEEDED = "51"; // 'Supply cap is exceeded'
+-  string public constant UNBACKED_MINT_CAP_EXCEEDED = "52"; // 'Unbacked mint cap is exceeded'
+-  string public constant DEBT_CEILING_EXCEEDED = "53"; // 'Debt ceiling is exceeded'
+-  string public constant UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO = "54"; // 'Claimable rights over underlying not zero (aToken supply or accruedToTreasury)'
+-  string public constant VARIABLE_DEBT_SUPPLY_NOT_ZERO = "56"; // 'Variable debt supply is not zero'
+-  string public constant LTV_VALIDATION_FAILED = "57"; // 'Ltv validation failed'
+-  string public constant INCONSISTENT_EMODE_CATEGORY = "58"; // 'Inconsistent eMode category'
+-  string public constant PRICE_ORACLE_SENTINEL_CHECK_FAILED = "59"; // 'Price oracle sentinel validation failed'
+-  string public constant ASSET_NOT_BORROWABLE_IN_ISOLATION = "60"; // 'Asset is not borrowable in isolation mode'
+-  string public constant RESERVE_ALREADY_INITIALIZED = "61"; // 'Reserve has already been initialized'
+-  string public constant USER_IN_ISOLATION_MODE_OR_LTV_ZERO = "62"; // 'User is in isolation mode or ltv is zero'
+-  string public constant INVALID_LTV = "63"; // 'Invalid ltv parameter for the reserve'
+-  string public constant INVALID_LIQ_THRESHOLD = "64"; // 'Invalid liquidity threshold parameter for the reserve'
+-  string public constant INVALID_LIQ_BONUS = "65"; // 'Invalid liquidity bonus parameter for the reserve'
+-  string public constant INVALID_DECIMALS = "66"; // 'Invalid decimals parameter of the underlying asset of the reserve'
+-  string public constant INVALID_RESERVE_FACTOR = "67"; // 'Invalid reserve factor parameter for the reserve'
+-  string public constant INVALID_BORROW_CAP = "68"; // 'Invalid borrow cap for the reserve'
+-  string public constant INVALID_SUPPLY_CAP = "69"; // 'Invalid supply cap for the reserve'
+-  string public constant INVALID_LIQUIDATION_PROTOCOL_FEE = "70"; // 'Invalid liquidation protocol fee for the reserve'
+-  string public constant INVALID_EMODE_CATEGORY = "71"; // 'Invalid eMode category for the reserve'
+-  string public constant INVALID_UNBACKED_MINT_CAP = "72"; // 'Invalid unbacked mint cap for the reserve'
+-  string public constant INVALID_DEBT_CEILING = "73"; // 'Invalid debt ceiling for the reserve
+-  string public constant INVALID_RESERVE_INDEX = "74"; // 'Invalid reserve index'
+-  string public constant ACL_ADMIN_CANNOT_BE_ZERO = "75"; // 'ACL admin cannot be set to the zero address'
+-  string public constant INCONSISTENT_PARAMS_LENGTH = "76"; // 'Array parameters that should be equal length are not'
+-  string public constant ZERO_ADDRESS_NOT_VALID = "77"; // 'Zero address not valid'
+-  string public constant INVALID_EXPIRATION = "78"; // 'Invalid expiration'
+-  string public constant INVALID_SIGNATURE = "79"; // 'Invalid signature'
+-  string public constant OPERATION_NOT_SUPPORTED = "80"; // 'Operation not supported'
+-  string public constant DEBT_CEILING_NOT_ZERO = "81"; // 'Debt ceiling is not zero'
+-  string public constant ASSET_NOT_LISTED = "82"; // 'Asset is not listed'
+-  string public constant INVALID_OPTIMAL_USAGE_RATIO = "83"; // 'Invalid optimal usage ratio'
+-  string public constant UNDERLYING_CANNOT_BE_RESCUED = "85"; // 'The underlying asset cannot be rescued'
+-  string public constant ADDRESSES_PROVIDER_ALREADY_ADDED = "86"; // 'Reserve has already been added to reserve list'
+-  string public constant POOL_ADDRESSES_DO_NOT_MATCH = "87"; // 'The token implementation pool address and the pool address provided by the initializing pool do not match'
+-  string public constant SILOED_BORROWING_VIOLATION = "89"; // 'User is trying to borrow multiple assets including a siloed one'
+-  string public constant RESERVE_DEBT_NOT_ZERO = "90"; // the total debt of the reserve needs to be 0
+-  string public constant FLASHLOAN_DISABLED = "91"; // FlashLoaning for this asset is disabled
+-  string public constant INVALID_MAX_RATE = "92"; // The expect maximum borrow rate is invalid
+-  string public constant WITHDRAW_TO_ATOKEN = "93"; // Withdrawing to the aToken is not allowed
+-  string public constant SUPPLY_TO_ATOKEN = "94"; // Supplying to the aToken is not allowed
+-  string public constant SLOPE_2_MUST_BE_GTE_SLOPE_1 = "95"; // Variable interest rate slope 2 can not be lower than slope 1
+-  string public constant CALLER_NOT_RISK_OR_POOL_OR_EMERGENCY_ADMIN = "96"; // 'The caller of the function is not a risk, pool or emergency admin'
+-  string public constant LIQUIDATION_GRACE_SENTINEL_CHECK_FAILED = "97"; // 'Liquidation grace sentinel validation failed'
+-  string public constant INVALID_GRACE_PERIOD = "98"; // Grace period above a valid range
+-  string public constant INVALID_FREEZE_STATE = "99"; // Reserve is already in the passed freeze state
+-  string public constant NOT_BORROWABLE_IN_EMODE = "100"; // Asset not borrowable in eMode
+-  string public constant CALLER_NOT_UMBRELLA = "101"; // The caller of the function is not the umbrella contract
+-  string public constant RESERVE_NOT_IN_DEFICIT = "102"; // The reserve is not in deficit
+-  string public constant MUST_NOT_LEAVE_DUST = "103"; // Below a certain threshold liquidators need to take the full position
+-  string public constant USER_CANNOT_HAVE_DEBT = "104"; // Thrown when a user tries to interact with a method that requires a position without debt
++  error CallerNotPoolAdmin(); // 'The caller of the function is not a pool admin'
++  error CallerNotPoolOrEmergencyAdmin(); // 'The caller of the function is not a pool or emergency admin'
++  error CallerNotRiskOrPoolAdmin(); // 'The caller of the function is not a risk or pool admin'
++  error CallerNotAssetListingOrPoolAdmin(); // 'The caller of the function is not an asset listing or pool admin'
++  error AddressesProviderNotRegistered(); // 'Pool addresses provider is not registered'
++  error InvalidAddressesProviderId(); // 'Invalid id for the pool addresses provider'
++  error NotContract(); // 'Address is not a contract'
++  error CallerNotPoolConfigurator(); // 'The caller of the function is not the pool configurator'
++  error CallerNotAToken(); // 'The caller of the function is not an AToken'
++  error InvalidAddressesProvider(); // 'The address of the pool addresses provider is invalid'
++  error InvalidFlashloanExecutorReturn(); // 'Invalid return value of the flashloan executor function'
++  error ReserveAlreadyAdded(); // 'Reserve has already been added to reserve list'
++  error NoMoreReservesAllowed(); // 'Maximum amount of reserves in the pool reached'
++  error EModeCategoryReserved(); // 'Zero eMode category is reserved for volatile heterogeneous assets'
++  error ReserveLiquidityNotZero(); // 'The liquidity of the reserve needs to be 0'
++  error FlashloanPremiumInvalid(); // 'Invalid flashloan premium'
++  error InvalidReserveParams(); // 'Invalid risk parameters for the reserve'
++  error InvalidEmodeCategoryParams(); // 'Invalid risk parameters for the eMode category'
++  error CallerMustBePool(); // 'The caller of this function must be a pool'
++  error InvalidMintAmount(); // 'Invalid amount to mint'
++  error InvalidBurnAmount(); // 'Invalid amount to burn'
++  error InvalidAmount(); // 'Amount must be greater than 0'
++  error ReserveInactive(); // 'Action requires an active reserve'
++  error ReserveFrozen(); // 'Action cannot be performed because the reserve is frozen'
++  error ReservePaused(); // 'Action cannot be performed because the reserve is paused'
++  error BorrowingNotEnabled(); // 'Borrowing is not enabled'
++  error NotEnoughAvailableUserBalance(); // 'User cannot withdraw more than the available balance'
++  error InvalidInterestRateModeSelected(); // 'Invalid interest rate mode selected'
++  error CollateralBalanceIsZero(); // 'The collateral balance is 0'
++  error HealthFactorLowerThanLiquidationThreshold(); // 'Health factor is below the liquidation threshold'
++  error CollateralCannotCoverNewBorrow(); // 'There is not enough collateral to cover a new borrow'
++  error NoDebtOfSelectedType(); // 'For repayment of a specific type of debt, the user needs to have debt that type'
++  error NoExplicitAmountToRepayOnBehalf(); // 'To repay on behalf of a user an explicit amount to repay is needed'
++  error UnderlyingBalanceZero(); // 'The underlying balance needs to be greater than 0'
++  error HealthFactorNotBelowThreshold(); // 'Health factor is not below the threshold'
++  error CollateralCannotBeLiquidated(); // 'The collateral chosen cannot be liquidated'
++  error SpecifiedCurrencyNotBorrowedByUser(); // 'User did not borrow the specified currency'
++  error InconsistentFlashloanParams(); // 'Inconsistent flashloan parameters'
++  error BorrowCapExceeded(); // 'Borrow cap is exceeded'
++  error SupplyCapExceeded(); // 'Supply cap is exceeded'
++  error DebtCeilingExceeded(); // 'Debt ceiling is exceeded'
++  error UnderlyingClaimableRightsNotZero(); // 'Claimable rights over underlying not zero (aToken supply or accruedToTreasury)'
++  error VariableDebtSupplyNotZero(); // 'Variable debt supply is not zero'
++  error LtvValidationFailed(); // 'Ltv validation failed'
++  error InconsistentEModeCategory(); // 'Inconsistent eMode category'
++  error PriceOracleSentinelCheckFailed(); // 'Price oracle sentinel validation failed'
++  error AssetNotBorrowableInIsolation(); // 'Asset is not borrowable in isolation mode'
++  error ReserveAlreadyInitialized(); // 'Reserve has already been initialized'
++  error UserInIsolationModeOrLtvZero(); // 'User is in isolation mode or ltv is zero'
++  error InvalidLtv(); // 'Invalid ltv parameter for the reserve'
++  error InvalidLiquidationThreshold(); // 'Invalid liquidity threshold parameter for the reserve'
++  error InvalidLiquidationBonus(); // 'Invalid liquidity bonus parameter for the reserve'
++  error InvalidDecimals(); // 'Invalid decimals parameter of the underlying asset of the reserve'
++  error InvalidReserveFactor(); // 'Invalid reserve factor parameter for the reserve'
++  error InvalidBorrowCap(); // 'Invalid borrow cap for the reserve'
++  error InvalidSupplyCap(); // 'Invalid supply cap for the reserve'
++  error InvalidLiquidationProtocolFee(); // 'Invalid liquidation protocol fee for the reserve'
++  error InvalidDebtCeiling(); // 'Invalid debt ceiling for the reserve'
++  error InvalidReserveIndex(); // 'Invalid reserve index'
++  error AclAdminCannotBeZero(); // 'ACL admin cannot be set to the zero address'
++  error InconsistentParamsLength(); // 'Array parameters that should be equal length are not'
++  error ZeroAddressNotValid(); // 'Zero address not valid'
++  error InvalidExpiration(); // 'Invalid expiration'
++  error InvalidSignature(); // 'Invalid signature'
++  error OperationNotSupported(); // 'Operation not supported'
++  error DebtCeilingNotZero(); // 'Debt ceiling is not zero'
++  error AssetNotListed(); // 'Asset is not listed'
++  error InvalidOptimalUsageRatio(); // 'Invalid optimal usage ratio'
++  error UnderlyingCannotBeRescued(); // 'The underlying asset cannot be rescued'
++  error AddressesProviderAlreadyAdded(); // 'Reserve has already been added to reserve list'
++  error PoolAddressesDoNotMatch(); // 'The token implementation pool address and the pool address provided by the initializing pool do not match'
++  error SiloedBorrowingViolation(); // 'User is trying to borrow multiple assets including a siloed one'
++  error ReserveDebtNotZero(); // the total debt of the reserve needs to be 0
++  error FlashloanDisabled(); // FlashLoaning for this asset is disabled
++  error InvalidMaxRate(); // The expect maximum borrow rate is invalid
++  error WithdrawToAToken(); // Withdrawing to the aToken is not allowed
++  error SupplyToAToken(); // Supplying to the aToken is not allowed
++  error Slope2MustBeGteSlope1(); // Variable interest rate slope 2 can not be lower than slope 1
++  error CallerNotRiskOrPoolOrEmergencyAdmin(); // 'The caller of the function is not a risk, pool or emergency admin'
++  error LiquidationGraceSentinelCheckFailed(); // 'Liquidation grace sentinel validation failed'
++  error InvalidGracePeriod(); // Grace period above a valid range
++  error InvalidFreezeState(); // Reserve is already in the passed freeze state
++  error NotBorrowableInEMode(); // Asset not borrowable in eMode
++  error CallerNotUmbrella(); // The caller of the function is not the umbrella contract
++  error ReserveNotInDeficit(); // The reserve is not in deficit
++  error MustNotLeaveDust(); // Below a certain threshold liquidators need to take the full position
++  error UserCannotHaveDebt(); // Thrown when a user tries to interact with a method that requires a position without debt
++  error SelfLiquidation(); // Thrown when a user tries to liquidate themselves
++  error CallerNotPositionManager(); // Thrown when the caller has not been enabled as a position manager of the on-behalf-of user
+ }
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/GenericLogic.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/GenericLogic.sol
+index a452f66..809ce96 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/GenericLogic.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/GenericLogic.sol
+@@ -40,6 +40,7 @@ library GenericLogic {
+     uint256 avgLiquidationThreshold;
+     uint256 eModeLtv;
+     uint256 eModeLiqThreshold;
++    uint128 eModeCollateralBitmap;
+     address currentReserveAddress;
+     bool hasZeroLtvCollateral;
+     bool isInEModeCategory;
+@@ -75,64 +76,52 @@ library GenericLogic {
+     if (params.userEModeCategory != 0) {
+       vars.eModeLtv = eModeCategories[params.userEModeCategory].ltv;
+       vars.eModeLiqThreshold = eModeCategories[params.userEModeCategory].liquidationThreshold;
++      vars.eModeCollateralBitmap = eModeCategories[params.userEModeCategory].collateralBitmap;
+     }
+ 
+-    while (vars.i < params.reservesCount) {
+-      if (!params.userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
+-        unchecked {
+-          ++vars.i;
+-        }
+-        continue;
+-      }
++    uint256 userConfigCache = params.userConfig.data;
++    bool isBorrowed = false;
++    bool isEnabledAsCollateral = false;
+ 
+-      vars.currentReserveAddress = reservesList[vars.i];
++    while (userConfigCache != 0) {
++      (userConfigCache, isBorrowed, isEnabledAsCollateral) = UserConfiguration.getNextFlags(userConfigCache);
++      if (isEnabledAsCollateral || isBorrowed) {
++        vars.currentReserveAddress = reservesList[vars.i];
+ 
+-      if (vars.currentReserveAddress == address(0)) {
+-        unchecked {
+-          ++vars.i;
+-        }
+-        continue;
+-      }
++        if (vars.currentReserveAddress != address(0)) {
++          DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
+ 
+-      DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
++          (vars.ltv, vars.liquidationThreshold,, vars.decimals,) = currentReserve.configuration.getParams();
+ 
+-      (vars.ltv, vars.liquidationThreshold,, vars.decimals,) = currentReserve.configuration.getParams();
++          unchecked {
++            vars.assetUnit = 10 ** vars.decimals;
++          }
+ 
+-      unchecked {
+-        vars.assetUnit = 10 ** vars.decimals;
+-      }
+-
+-      vars.assetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
++          vars.assetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
+ 
+-      if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
+-        vars.userBalanceInBaseCurrency =
+-          _getUserBalanceInBaseCurrency(params.user, currentReserve, vars.assetPrice, vars.assetUnit);
++          if (vars.liquidationThreshold != 0 && isEnabledAsCollateral) {
++            vars.userBalanceInBaseCurrency =
++              _getUserBalanceInBaseCurrency(params.user, currentReserve, vars.assetPrice, vars.assetUnit);
+ 
+-        vars.totalCollateralInBaseCurrency += vars.userBalanceInBaseCurrency;
++            vars.totalCollateralInBaseCurrency += vars.userBalanceInBaseCurrency;
+ 
+-        vars.isInEModeCategory = params.userEModeCategory != 0
+-          && EModeConfiguration.isReserveEnabledOnBitmap(
+-            eModeCategories[params.userEModeCategory].collateralBitmap, vars.i
+-          );
++            vars.isInEModeCategory = params.userEModeCategory != 0
++              && EModeConfiguration.isReserveEnabledOnBitmap(vars.eModeCollateralBitmap, vars.i);
+ 
+-        if (vars.ltv != 0) {
+-          vars.avgLtv += vars.userBalanceInBaseCurrency * (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
+-        } else {
+-          vars.hasZeroLtvCollateral = true;
+-        }
++            if (vars.ltv != 0) {
++              vars.avgLtv += vars.userBalanceInBaseCurrency * (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
++            } else {
++              vars.hasZeroLtvCollateral = true;
++            }
+ 
+-        vars.avgLiquidationThreshold +=
+-          vars.userBalanceInBaseCurrency * (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
+-      }
++            vars.avgLiquidationThreshold += vars.userBalanceInBaseCurrency
++              * (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
++          }
+ 
+-      if (params.userConfig.isBorrowing(vars.i)) {
+-        if (currentReserve.configuration.getIsVirtualAccActive()) {
+-          vars.totalDebtInBaseCurrency +=
+-            _getUserDebtInBaseCurrency(params.user, currentReserve, vars.assetPrice, vars.assetUnit);
+-        } else {
+-          // custom case for GHO, which applies the GHO discount on balanceOf
+-          vars.totalDebtInBaseCurrency +=
+-            (IERC20(currentReserve.variableDebtTokenAddress).balanceOf(params.user) * vars.assetPrice) / vars.assetUnit;
++          if (isBorrowed) {
++            vars.totalDebtInBaseCurrency +=
++              _getUserDebtInBaseCurrency(params.user, currentReserve, vars.assetPrice, vars.assetUnit);
++          }
+         }
+       }
+ 
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IAToken.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IAToken.sol
+index dd05390..e42351f 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IAToken.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IAToken.sol
+@@ -53,8 +53,9 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
+    * @param from The address getting liquidated, current owner of the aTokens
+    * @param to The recipient
+    * @param value The amount of tokens getting transferred
++   * @param index The next liquidity index of the reserve
+    */
+-  function transferOnLiquidation(address from, address to, uint256 value) external;
++  function transferOnLiquidation(address from, address to, uint256 value, uint256 index) external;
+ 
+   /**
+    * @notice Transfers the underlying asset to `target`.
+@@ -64,17 +65,6 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
+    */
+   function transferUnderlyingTo(address target, uint256 amount) external;
+ 
+-  /**
+-   * @notice Handles the underlying received by the aToken after the transfer has been completed.
+-   * @dev The default implementation is empty as with standard ERC20 tokens, nothing needs to be done after the
+-   * transfer is concluded. However in the future there may be aTokens that allow for example to stake the underlying
+-   * to receive LM rewards. In that case, `handleRepayment()` would perform the staking of the underlying asset.
+-   * @param user The user executing the repayment
+-   * @param onBehalfOf The address of the user who will get his debt reduced/removed
+-   * @param amount The amount getting repaid
+-   */
+-  function handleRepayment(address user, address onBehalfOf, uint256 amount) external;
+-
+   /**
+    * @notice Allow passing a signed message to approve spending
+    * @dev implements the permit function as for
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IInitializableAToken.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IInitializableAToken.sol
+index 5967614..6773248 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IInitializableAToken.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IInitializableAToken.sol
+@@ -35,9 +35,7 @@ interface IInitializableAToken {
+   /**
+    * @notice Initializes the aToken
+    * @param pool The pool contract that is initializing this contract
+-   * @param treasury The address of the Aave treasury, receiving the fees on this aToken
+    * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
+-   * @param incentivesController The smart contract managing potential incentives distribution
+    * @param aTokenDecimals The decimals of the aToken, same as the underlying asset's
+    * @param aTokenName The name of the aToken
+    * @param aTokenSymbol The symbol of the aToken
+@@ -45,9 +43,7 @@ interface IInitializableAToken {
+    */
+   function initialize(
+     IPool pool,
+-    address treasury,
+     address underlyingAsset,
+-    IAaveIncentivesController incentivesController,
+     uint8 aTokenDecimals,
+     string calldata aTokenName,
+     string calldata aTokenSymbol,
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IInitializableDebtToken.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IInitializableDebtToken.sol
+index 1413dcb..283c3a9 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IInitializableDebtToken.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IInitializableDebtToken.sol
+@@ -34,7 +34,6 @@ interface IInitializableDebtToken {
+    * @notice Initializes the debt token.
+    * @param pool The pool contract that is initializing this contract
+    * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
+-   * @param incentivesController The smart contract managing potential incentives distribution
+    * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
+    * @param debtTokenName The name of the token
+    * @param debtTokenSymbol The symbol of the token
+@@ -43,7 +42,6 @@ interface IInitializableDebtToken {
+   function initialize(
+     IPool pool,
+     address underlyingAsset,
+-    IAaveIncentivesController incentivesController,
+     uint8 debtTokenDecimals,
+     string memory debtTokenName,
+     string memory debtTokenSymbol,
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IPool.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IPool.sol
+index 68c1799..38aad59 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IPool.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IPool.sol
+@@ -10,27 +10,6 @@ import {DataTypes} from "../protocol/libraries/types/DataTypes.sol";
+  * @notice Defines the basic interface for an Aave Pool.
+  */
+ interface IPool {
+-  /**
+-   * @dev Emitted on mintUnbacked()
+-   * @param reserve The address of the underlying asset of the reserve
+-   * @param user The address initiating the supply
+-   * @param onBehalfOf The beneficiary of the supplied assets, receiving the aTokens
+-   * @param amount The amount of supplied assets
+-   * @param referralCode The referral code used
+-   */
+-  event MintUnbacked(
+-    address indexed reserve, address user, address indexed onBehalfOf, uint256 amount, uint16 indexed referralCode
+-  );
+-
+-  /**
+-   * @dev Emitted on backUnbacked()
+-   * @param reserve The address of the underlying asset of the reserve
+-   * @param backer The address paying for the backing
+-   * @param amount The amount added as backing
+-   * @param fee The amount paid in fees
+-   */
+-  event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
+-
+   /**
+    * @dev Emitted on supply()
+    * @param reserve The address of the underlying asset of the reserve
+@@ -195,23 +174,18 @@ interface IPool {
+   event DeficitCreated(address indexed user, address indexed debtAsset, uint256 amountCreated);
+ 
+   /**
+-   * @notice Mints an `amount` of aTokens to the `onBehalfOf`
+-   * @param asset The address of the underlying asset to mint
+-   * @param amount The amount to mint
+-   * @param onBehalfOf The address that will receive the aTokens
+-   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+-   *   0 if the action is executed directly by the user, without any middle-man
++   * @dev Emitted when a position manager is approved by the user.
++   * @param user The user address
++   * @param positionManager The address of the position manager
+    */
+-  function mintUnbacked(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;
++  event PositionManagerApproved(address indexed user, address indexed positionManager);
+ 
+   /**
+-   * @notice Back the current unbacked underlying with `amount` and pay `fee`.
+-   * @param asset The address of the underlying asset to back
+-   * @param amount The amount to back
+-   * @param fee The amount paid in fees
+-   * @return The backed amount
++   * @dev Emitted when a position manager is revoked by the user.
++   * @param user The user address
++   * @param positionManager The address of the position manager
+    */
+-  function backUnbacked(address asset, uint256 amount, uint256 fee) external returns (uint256);
++  event PositionManagerRevoked(address indexed user, address indexed positionManager);
+ 
+   /**
+    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
+@@ -352,7 +326,7 @@ interface IPool {
+    *   a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
+    * @param collateralAsset The address of the underlying asset used as collateral, to receive as result of the liquidation
+    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
+-   * @param user The address of the borrower getting liquidated
++   * @param borrower The address of the borrower getting liquidated
+    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
+    * @param receiveAToken True if the liquidators wants to receive the collateral aTokens, `false` if he wants
+    * to receive the underlying collateral asset directly
+@@ -360,7 +334,7 @@ interface IPool {
+   function liquidationCall(
+     address collateralAsset,
+     address debtAsset,
+-    address user,
++    address borrower,
+     uint256 debtToCover,
+     bool receiveAToken
+   ) external;
+@@ -435,20 +409,13 @@ interface IPool {
+     );
+ 
+   /**
+-   * @notice Initializes a reserve, activating it, assigning an aToken and debt tokens and an
+-   * interest rate strategy
++   * @notice Initializes a reserve, activating it, assigning an aToken and debt tokens
+    * @dev Only callable by the PoolConfigurator contract
+    * @param asset The address of the underlying asset of the reserve
+    * @param aTokenAddress The address of the aToken that will be assigned to the reserve
+    * @param variableDebtAddress The address of the VariableDebtToken that will be assigned to the reserve
+-   * @param interestRateStrategyAddress The address of the interest rate strategy contract
+    */
+-  function initReserve(
+-    address asset,
+-    address aTokenAddress,
+-    address variableDebtAddress,
+-    address interestRateStrategyAddress
+-  ) external;
++  function initReserve(address asset, address aTokenAddress, address variableDebtAddress) external;
+ 
+   /**
+    * @notice Drop a reserve
+@@ -458,14 +425,6 @@ interface IPool {
+    */
+   function dropReserve(address asset) external;
+ 
+-  /**
+-   * @notice Updates the address of the interest rate strategy contract
+-   * @dev Only callable by the PoolConfigurator contract
+-   * @param asset The address of the underlying asset of the reserve
+-   * @param rateStrategyAddress The address of the interest rate strategy contract
+-   */
+-  function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress) external;
+-
+   /**
+    * @notice Accumulates interest to all indexes of the reserve
+    * @dev Only callable by the PoolConfigurator contract
+@@ -586,22 +545,18 @@ interface IPool {
+   function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
+ 
+   /**
+-   * @notice Updates the protocol fee on the bridging
+-   * @param bridgeProtocolFee The part of the premium sent to the protocol treasury
++   * @notice Returns the ReserveInterestRateStrategy connected to all the reserves
++   * @return The address of the ReserveInterestRateStrategy contract
+    */
+-  function updateBridgeProtocolFee(uint256 bridgeProtocolFee) external;
++  function RESERVE_INTEREST_RATE_STRATEGY() external view returns (address);
+ 
+   /**
+-   * @notice Updates flash loan premiums. Flash loan premium consists of two parts:
+-   * - A part is sent to aToken holders as extra, one time accumulated interest
+-   * - A part is collected by the protocol treasury
+-   * @dev The total premium is calculated on the total borrowed amount
+-   * @dev The premium to protocol is calculated on the total premium, being a percentage of `flashLoanPremiumTotal`
++   * @notice Updates flash loan premium. All this premium is collected by the protocol treasury.
++   * @dev The premium is calculated on the total borrowed amount
+    * @dev Only callable by the PoolConfigurator contract
+-   * @param flashLoanPremiumTotal The total premium, expressed in bps
+-   * @param flashLoanPremiumToProtocol The part of the premium sent to the protocol treasury, expressed in bps
++   * @param flashLoanPremium The flash loan premium, expressed in bps
+    */
+-  function updateFlashloanPremiums(uint128 flashLoanPremiumTotal, uint128 flashLoanPremiumToProtocol) external;
++  function updateFlashloanPremium(uint128 flashLoanPremium) external;
+ 
+   /**
+    * @notice Configures a new or alters an existing collateral configuration of an eMode.
+@@ -701,19 +656,16 @@ interface IPool {
+   function getLiquidationGracePeriod(address asset) external view returns (uint40);
+ 
+   /**
+-   * @notice Returns the total fee on flash loans
++   * @notice Returns the total fee on flash loans.
++   * @dev From v3.4 all flashloan fees will be send to the treasury.
+    * @return The total fee on flashloans
+    */
+   function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint128);
+ 
+-  /**
+-   * @notice Returns the part of the bridge fees sent to protocol
+-   * @return The bridge fee sent to the protocol treasury
+-   */
+-  function BRIDGE_PROTOCOL_FEE() external view returns (uint256);
+-
+   /**
+    * @notice Returns the part of the flashloan fees sent to protocol
++   * @dev From v3.4 all flashloan fees will be send to the treasury and this value
++   *      is always 100_00.
+    * @return The flashloan fee sent to the protocol treasury
+    */
+   function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint128);
+@@ -753,15 +705,51 @@ interface IPool {
+   function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;
+ 
+   /**
+-   * @notice It covers the deficit of a specified reserve by burning:
+-   * - the equivalent aToken `amount` for assets with virtual accounting enabled
+-   * - the equivalent `amount` of underlying for assets with virtual accounting disabled (e.g. GHO)
++   * @notice It covers the deficit of a specified reserve by burning the equivalent aToken `amount` for assets
+    * @dev The deficit of a reserve can occur due to situations where borrowed assets are not repaid, leading to bad debt.
+    * @param asset The address of the underlying asset to cover the deficit.
+-   * @param amount The amount to be covered, in aToken or underlying on non-virtual accounted assets
++   * @param amount The amount to be covered, in aToken
+    */
+   function eliminateReserveDeficit(address asset, uint256 amount) external;
+ 
++  /**
++   * @notice Approves or disapproves a position manager. This position manager will be able
++   * to call the `setUserUseReserveAsCollateralOnBehalfOf` and the
++   * `setUserEModeOnBehalfOf` function on behalf of the user.
++   * @param positionManager The address of the position manager
++   * @param approve True if the position manager should be approved, false otherwise
++   */
++  function approvePositionManager(address positionManager, bool approve) external;
++
++  /**
++   * @notice Renounces a position manager role for a given user.
++   * @param user The address of the user
++   */
++  function renouncePositionManagerRole(address user) external;
++
++  /**
++   * @notice Sets the use as collateral flag for the user on the specific reserve on behalf of the user.
++   * @param asset The address of the underlying asset of the reserve
++   * @param useAsCollateral True if the user wants to use the reserve as collateral, false otherwise
++   * @param onBehalfOf The address of the user
++   */
++  function setUserUseReserveAsCollateralOnBehalfOf(address asset, bool useAsCollateral, address onBehalfOf) external;
++
++  /**
++   * @notice Sets the eMode category for the user on the specific reserve on behalf of the user.
++   * @param categoryId The id of the category
++   * @param onBehalfOf The address of the user
++   */
++  function setUserEModeOnBehalfOf(uint8 categoryId, address onBehalfOf) external;
++
++  /*
++   * @notice Returns true if the `positionManager` address is approved to use the position manager role on behalf of the user.
++   * @param user The address of the user
++   * @param positionManager The address of the position manager
++   * @return True if the user is approved to use the position manager, false otherwise
++   */
++  function isApprovedPositionManager(address user, address positionManager) external view returns (bool);
++
+   /**
+    * @notice Returns the current deficit of a reserve.
+    * @param asset The address of the underlying asset of the reserve
+@@ -793,11 +781,6 @@ interface IPool {
+    */
+   function getBorrowLogic() external view returns (address);
+ 
+-  /**
+-   * @notice Gets the address of the external BridgeLogic
+-   */
+-  function getBridgeLogic() external view returns (address);
+-
+   /**
+    * @notice Gets the address of the external EModeLogic
+    */
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IVariableDebtToken.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IVariableDebtToken.sol
+index 6564e68..d567d1f 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IVariableDebtToken.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IVariableDebtToken.sol
+@@ -17,10 +17,9 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
+    * @param onBehalfOf The address receiving the debt tokens
+    * @param amount The amount of debt being minted
+    * @param index The variable debt index of the reserve
+-   * @return True if the previous balance of the user is 0, false otherwise
+    * @return The scaled total debt of the reserve
+    */
+-  function mint(address user, address onBehalfOf, uint256 amount, uint256 index) external returns (bool, uint256);
++  function mint(address user, address onBehalfOf, uint256 amount, uint256 index) external returns (uint256);
+ 
+   /**
+    * @notice Burns user variable debt
+@@ -29,9 +28,10 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
+    * @param from The address from which the debt will be burned
+    * @param amount The amount getting burned
+    * @param index The variable debt index of the reserve
++   * @return True if the new balance is zero
+    * @return The scaled total debt of the reserve
+    */
+-  function burn(address from, uint256 amount, uint256 index) external returns (uint256);
++  function burn(address from, uint256 amount, uint256 index) external returns (bool, uint256);
+ 
+   /**
+    * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for variableDebtWETH)
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IncentivizedERC20.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IncentivizedERC20.sol
+index 4d233c2..4e18e31 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IncentivizedERC20.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IncentivizedERC20.sol
+@@ -4,13 +4,14 @@ pragma solidity ^0.8.10;
+ import {Context} from "../../../dependencies/openzeppelin/contracts/Context.sol";
+ import {IERC20} from "../../../dependencies/openzeppelin/contracts/IERC20.sol";
+ import {IERC20Detailed} from "../../../dependencies/openzeppelin/contracts/IERC20Detailed.sol";
+-import {SafeCast} from "../../../dependencies/openzeppelin/contracts/SafeCast.sol";
++import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ import {WadRayMath} from "../../libraries/math/WadRayMath.sol";
+ import {Errors} from "../../libraries/helpers/Errors.sol";
+ import {IAaveIncentivesController} from "../../../interfaces/IAaveIncentivesController.sol";
+ import {IPoolAddressesProvider} from "../../../interfaces/IPoolAddressesProvider.sol";
+ import {IPool} from "../../../interfaces/IPool.sol";
+ import {IACLManager} from "../../../interfaces/IACLManager.sol";
++import {DelegationMode} from "./DelegationMode.sol";
+ 
+ /**
+  * @title IncentivizedERC20
+@@ -26,7 +27,7 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+    */
+   modifier onlyPoolAdmin() {
+     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+-    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
++    require(aclManager.isPoolAdmin(_msgSender()), Errors.CallerNotPoolAdmin());
+     _;
+   }
+ 
+@@ -34,7 +35,7 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+    * @dev Only pool can call functions marked by this modifier.
+    */
+   modifier onlyPool() {
+-    require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
++    require(_msgSender() == address(POOL), Errors.CallerMustBePool());
+     _;
+   }
+ 
+@@ -44,7 +45,8 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+    * user's last supply/withdrawal/borrow/repayment.
+    */
+   struct UserState {
+-    uint128 balance;
++    uint120 balance;
++    DelegationMode delegationMode;
+     uint128 additionalData;
+   }
+   // Map of users address and their state data (userAddress => userStateData)
+@@ -58,9 +60,15 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+   string private _name;
+   string private _symbol;
+   uint8 private _decimals;
+-  IAaveIncentivesController internal _incentivesController;
++  // @dev deprecated on v3.4.0, replaced with immutable REWARDS_CONTROLLER
++  IAaveIncentivesController internal __deprecated_incentivesController;
+   IPoolAddressesProvider internal immutable _addressesProvider;
+   IPool public immutable POOL;
++  /**
++   * @notice Returns the address of the Incentives Controller contract
++   * @return The address of the Incentives Controller
++   */
++  IAaveIncentivesController public immutable REWARDS_CONTROLLER;
+ 
+   /**
+    * @dev Constructor.
+@@ -68,13 +76,15 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+    * @param name_ The name of the token
+    * @param symbol_ The symbol of the token
+    * @param decimals_ The number of decimals of the token
++   * @param rewardsController The address of the rewards controller contract
+    */
+-  constructor(IPool pool, string memory name_, string memory symbol_, uint8 decimals_) {
++  constructor(IPool pool, string memory name_, string memory symbol_, uint8 decimals_, address rewardsController) {
+     _addressesProvider = pool.ADDRESSES_PROVIDER();
+     _name = name_;
+     _symbol = symbol_;
+     _decimals = decimals_;
+     POOL = pool;
++    REWARDS_CONTROLLER = IAaveIncentivesController(rewardsController);
+   }
+ 
+   /// @inheritdoc IERC20Detailed
+@@ -107,20 +117,12 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+    * @return The address of the Incentives Controller
+    */
+   function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
+-    return _incentivesController;
+-  }
+-
+-  /**
+-   * @notice Sets a new Incentives Controller
+-   * @param controller the new Incentives controller
+-   */
+-  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmin {
+-    _incentivesController = controller;
++    return REWARDS_CONTROLLER;
+   }
+ 
+   /// @inheritdoc IERC20
+   function transfer(address recipient, uint256 amount) external virtual override returns (bool) {
+-    uint128 castAmount = amount.toUint128();
++    uint120 castAmount = amount.toUint120();
+     _transfer(_msgSender(), recipient, castAmount);
+     return true;
+   }
+@@ -138,7 +140,7 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+ 
+   /// @inheritdoc IERC20
+   function transferFrom(address sender, address recipient, uint256 amount) external virtual override returns (bool) {
+-    uint128 castAmount = amount.toUint128();
++    uint120 castAmount = amount.toUint120();
+     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
+     _transfer(sender, recipient, castAmount);
+     return true;
+@@ -172,18 +174,17 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+    * @param recipient The destination address
+    * @param amount The amount getting transferred
+    */
+-  function _transfer(address sender, address recipient, uint128 amount) internal virtual {
+-    uint128 oldSenderBalance = _userState[sender].balance;
++  function _transfer(address sender, address recipient, uint120 amount) internal virtual {
++    uint120 oldSenderBalance = _userState[sender].balance;
+     _userState[sender].balance = oldSenderBalance - amount;
+-    uint128 oldRecipientBalance = _userState[recipient].balance;
++    uint120 oldRecipientBalance = _userState[recipient].balance;
+     _userState[recipient].balance = oldRecipientBalance + amount;
+ 
+-    IAaveIncentivesController incentivesControllerLocal = _incentivesController;
+-    if (address(incentivesControllerLocal) != address(0)) {
++    if (address(REWARDS_CONTROLLER) != address(0)) {
+       uint256 currentTotalSupply = _totalSupply;
+-      incentivesControllerLocal.handleAction(sender, currentTotalSupply, oldSenderBalance);
++      REWARDS_CONTROLLER.handleAction(sender, currentTotalSupply, oldSenderBalance);
+       if (sender != recipient) {
+-        incentivesControllerLocal.handleAction(recipient, currentTotalSupply, oldRecipientBalance);
++        REWARDS_CONTROLLER.handleAction(recipient, currentTotalSupply, oldRecipientBalance);
+       }
+     }
+   }
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IsolationModeLogic.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IsolationModeLogic.sol
+index e3567f4..38b467f 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/IsolationModeLogic.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IsolationModeLogic.sol
+@@ -1,10 +1,12 @@
+ // SPDX-License-Identifier: BUSL-1.1
+ pragma solidity ^0.8.10;
+ 
++import {Errors} from "../helpers/Errors.sol";
++import {IPool} from "../../../interfaces/IPool.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
+ import {UserConfiguration} from "../configuration/UserConfiguration.sol";
+-import {SafeCast} from "../../../dependencies/openzeppelin/contracts/SafeCast.sol";
++import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ 
+ /**
+  * @title IsolationModeLogic library
+@@ -16,8 +18,39 @@ library IsolationModeLogic {
+   using UserConfiguration for DataTypes.UserConfigurationMap;
+   using SafeCast for uint256;
+ 
+-  // See `IPool` for descriptions
+-  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
++  /**
++   * @notice increases the isolated debt whenever user borrows against isolated collateral asset
++   * @param reservesData The state of all the reserves
++   * @param reservesList The addresses of all the active reserves
++   * @param userConfig The user configuration mapping
++   * @param reserveCache The cached data of the reserve
++   * @param borrowAmount The amount being borrowed
++   */
++  function increaseIsolatedDebtIfIsolated(
++    mapping(address => DataTypes.ReserveData) storage reservesData,
++    mapping(uint256 => address) storage reservesList,
++    DataTypes.UserConfigurationMap storage userConfig,
++    DataTypes.ReserveCache memory reserveCache,
++    uint256 borrowAmount
++  ) internal {
++    (bool isolationModeActive, address isolationModeCollateralAddress, uint256 isolationModeDebtCeiling) =
++      userConfig.getIsolationModeState(reservesData, reservesList);
++
++    if (isolationModeActive) {
++      // check that the asset being borrowed is borrowable in isolation mode AND
++      // the total exposure is no bigger than the collateral debt ceiling
++      require(reserveCache.reserveConfiguration.getBorrowableInIsolation(), Errors.AssetNotBorrowableInIsolation());
++
++      uint128 nextIsolationModeTotalDebt = reservesData[isolationModeCollateralAddress].isolationModeTotalDebt
++        + convertToIsolatedDebtUnits(reserveCache, borrowAmount);
++
++      require(nextIsolationModeTotalDebt <= isolationModeDebtCeiling, Errors.DebtCeilingExceeded());
++
++      setIsolationModeTotalDebt(
++        reservesData[isolationModeCollateralAddress], isolationModeCollateralAddress, nextIsolationModeTotalDebt
++      );
++    }
++  }
+ 
+   /**
+    * @notice updated the isolated debt whenever a position collateralized by an isolated asset is repaid
+@@ -27,7 +60,7 @@ library IsolationModeLogic {
+    * @param reserveCache The cached data of the reserve
+    * @param repayAmount The amount being repaid
+    */
+-  function updateIsolatedDebtIfIsolated(
++  function reduceIsolatedDebtIfIsolated(
+     mapping(address => DataTypes.ReserveData) storage reservesData,
+     mapping(uint256 => address) storage reservesList,
+     DataTypes.UserConfigurationMap storage userConfig,
+@@ -57,19 +90,45 @@ library IsolationModeLogic {
+   ) internal {
+     uint128 isolationModeTotalDebt = reservesData[isolationModeCollateralAddress].isolationModeTotalDebt;
+ 
+-    uint128 isolatedDebtRepaid = (
+-      repayAmount / 10 ** (reserveCache.reserveConfiguration.getDecimals() - ReserveConfiguration.DEBT_CEILING_DECIMALS)
+-    ).toUint128();
++    uint128 isolatedDebtRepaid = convertToIsolatedDebtUnits(reserveCache, repayAmount);
+ 
+     // since the debt ceiling does not take into account the interest accrued, it might happen that amount
+     // repaid > debt in isolation mode
+-    if (isolationModeTotalDebt <= isolatedDebtRepaid) {
+-      reservesData[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
+-      emit IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, 0);
+-    } else {
+-      uint256 nextIsolationModeTotalDebt = reservesData[isolationModeCollateralAddress].isolationModeTotalDebt =
+-        isolationModeTotalDebt - isolatedDebtRepaid;
+-      emit IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, nextIsolationModeTotalDebt);
+-    }
++    uint128 newIsolationModeTotalDebt =
++      isolationModeTotalDebt > isolatedDebtRepaid ? isolationModeTotalDebt - isolatedDebtRepaid : 0;
++    setIsolationModeTotalDebt(
++      reservesData[isolationModeCollateralAddress], isolationModeCollateralAddress, newIsolationModeTotalDebt
++    );
++  }
++
++  /**
++   * @notice Sets the isolation mode total debt of the given asset to a certain value
++   * @param reserveData The state of the reserve
++   * @param isolationModeCollateralAddress The address of the isolation mode collateral
++   * @param newIsolationModeTotalDebt The new isolation mode total debt
++   */
++  function setIsolationModeTotalDebt(
++    DataTypes.ReserveData storage reserveData,
++    address isolationModeCollateralAddress,
++    uint128 newIsolationModeTotalDebt
++  ) internal {
++    reserveData.isolationModeTotalDebt = newIsolationModeTotalDebt;
++
++    emit IPool.IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, newIsolationModeTotalDebt);
++  }
++
++  /**
++   * @notice utility function to convert an amount into the isolated debt units, which usually has less decimals
++   * @param reserveCache The cached data of the reserve
++   * @param amount The amount being added or removed from isolated debt
++   */
++  function convertToIsolatedDebtUnits(DataTypes.ReserveCache memory reserveCache, uint256 amount)
++    private
++    pure
++    returns (uint128)
++  {
++    return (
++      amount / 10 ** (reserveCache.reserveConfiguration.getDecimals() - ReserveConfiguration.DEBT_CEILING_DECIMALS)
++    ).toUint128();
+   }
+ }
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/LiquidationLogic.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/LiquidationLogic.sol
+index cfc61bd..d51f940 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/LiquidationLogic.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/LiquidationLogic.sol
+@@ -14,15 +14,12 @@ import {UserConfiguration} from "../../libraries/configuration/UserConfiguration
+ import {ReserveConfiguration} from "../../libraries/configuration/ReserveConfiguration.sol";
+ import {EModeConfiguration} from "../../libraries/configuration/EModeConfiguration.sol";
+ import {IAToken} from "../../../interfaces/IAToken.sol";
++import {IPool} from "../../../interfaces/IPool.sol";
+ import {IVariableDebtToken} from "../../../interfaces/IVariableDebtToken.sol";
+ import {IPriceOracleGetter} from "../../../interfaces/IPriceOracleGetter.sol";
+-import {SafeCast} from "../../../dependencies/openzeppelin/contracts/SafeCast.sol";
++import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ import {Errors} from "../helpers/Errors.sol";
+ 
+-interface IGhoVariableDebtToken {
+-  function getBalanceFromInterest(address user) external view returns (uint256);
+-}
+-
+ /**
+  * @title LiquidationLogic library
+  * @author Aave
+@@ -38,21 +35,6 @@ library LiquidationLogic {
+   using GPv2SafeERC20 for IERC20;
+   using SafeCast for uint256;
+ 
+-  // See `IPool` for descriptions
+-  event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
+-  event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
+-  event DeficitCreated(address indexed user, address indexed debtAsset, uint256 amountCreated);
+-  event DeficitCovered(address indexed reserve, address caller, uint256 amountCovered);
+-  event LiquidationCall(
+-    address indexed collateralAsset,
+-    address indexed debtAsset,
+-    address indexed user,
+-    uint256 debtToCover,
+-    uint256 liquidatedCollateralAmount,
+-    address liquidator,
+-    bool receiveAToken
+-  );
+-
+   /**
+    * @dev Default percentage of borrower's debt to be repaid in a liquidation.
+    * @dev Percentage applied when the users health factor is above `CLOSE_FACTOR_HF_THRESHOLD`
+@@ -82,9 +64,7 @@ library LiquidationLogic {
+   uint256 public constant MIN_LEFTOVER_BASE = MIN_BASE_MAX_CLOSE_FACTOR_THRESHOLD / 2;
+ 
+   /**
+-   * @notice Reduces a portion or all of the deficit of a specified reserve by burning:
+-   * - the equivalent aToken `amount` for assets with virtual accounting enabled
+-   * - the equivalent `amount` of underlying for assets with virtual accounting disabled (e.g. GHO)
++   * @notice Reduces a portion or all of the deficit of a specified reserve by burning the equivalent aToken `amount`
+    * The caller of this method MUST always be the Umbrella contract and the Umbrella contract is assumed to never have debt.
+    * @dev Emits the `DeficitCovered() event`.
+    * @dev If the coverage admin covers its entire balance, `ReserveUsedAsCollateralDisabled()` is emitted.
+@@ -97,18 +77,18 @@ library LiquidationLogic {
+     DataTypes.UserConfigurationMap storage userConfig,
+     DataTypes.ExecuteEliminateDeficitParams memory params
+   ) external {
+-    require(params.amount != 0, Errors.INVALID_AMOUNT);
++    require(params.amount != 0, Errors.InvalidAmount());
+ 
+     DataTypes.ReserveData storage reserve = reservesData[params.asset];
+     uint256 currentDeficit = reserve.deficit;
+ 
+-    require(currentDeficit != 0, Errors.RESERVE_NOT_IN_DEFICIT);
+-    require(!userConfig.isBorrowingAny(), Errors.USER_CANNOT_HAVE_DEBT);
++    require(currentDeficit != 0, Errors.ReserveNotInDeficit());
++    require(!userConfig.isBorrowingAny(), Errors.UserCannotHaveDebt());
+ 
+     DataTypes.ReserveCache memory reserveCache = reserve.cache();
+     reserve.updateState(reserveCache);
+     bool isActive = reserveCache.reserveConfiguration.getActive();
+-    require(isActive, Errors.RESERVE_INACTIVE);
++    require(isActive, Errors.ReserveInactive());
+ 
+     uint256 balanceWriteOff = params.amount;
+ 
+@@ -116,48 +96,29 @@ library LiquidationLogic {
+       balanceWriteOff = currentDeficit;
+     }
+ 
+-    uint256 userBalance = reserveCache.reserveConfiguration.getIsVirtualAccActive()
+-      ? IAToken(reserveCache.aTokenAddress).scaledBalanceOf(msg.sender).rayMul(reserveCache.nextLiquidityIndex)
+-      : IERC20(params.asset).balanceOf(msg.sender);
+-    require(balanceWriteOff <= userBalance, Errors.NOT_ENOUGH_AVAILABLE_USER_BALANCE);
+-
+-    if (reserveCache.reserveConfiguration.getIsVirtualAccActive()) {
+-      // assets without virtual accounting can never be a collateral
+-      bool isCollateral = userConfig.isUsingAsCollateral(reserve.id);
+-      if (isCollateral && balanceWriteOff == userBalance) {
+-        userConfig.setUsingAsCollateral(reserve.id, false);
+-        emit ReserveUsedAsCollateralDisabled(params.asset, msg.sender);
+-      }
++    uint256 userBalance =
++      IAToken(reserveCache.aTokenAddress).scaledBalanceOf(params.user).rayMul(reserveCache.nextLiquidityIndex);
++    require(balanceWriteOff <= userBalance, Errors.NotEnoughAvailableUserBalance());
+ 
+-      IAToken(reserveCache.aTokenAddress).burn(
+-        msg.sender, reserveCache.aTokenAddress, balanceWriteOff, reserveCache.nextLiquidityIndex
+-      );
+-    } else {
+-      // This is a special case to allow mintable assets (ex. GHO), which by definition cannot be supplied
+-      // and thus do not use virtual underlying balances.
+-      // In that case, the procedure is 1) sending the underlying asset to the aToken and
+-      // 2) trigger the handleRepayment() for the aToken to dispose of those assets
+-      IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, balanceWriteOff);
+-      // it is assumed that handleRepayment does not touch the variable debt balance
+-      IAToken(reserveCache.aTokenAddress).handleRepayment(
+-        msg.sender,
+-        // In the context of GHO it's only relevant that the address has no debt.
+-        // Passing the pool is fitting as it's handling the repayment on behalf of the protocol.
+-        address(this),
+-        balanceWriteOff
+-      );
++    bool isCollateral = userConfig.isUsingAsCollateral(reserve.id);
++    if (isCollateral && balanceWriteOff == userBalance) {
++      userConfig.setUsingAsCollateral(reserve.id, params.asset, params.user, false);
+     }
+ 
++    IAToken(reserveCache.aTokenAddress).burn(
++      params.user, reserveCache.aTokenAddress, balanceWriteOff, reserveCache.nextLiquidityIndex
++    );
++
+     reserve.deficit -= balanceWriteOff.toUint128();
+ 
+-    reserve.updateInterestRatesAndVirtualBalance(reserveCache, params.asset, 0, 0);
++    reserve.updateInterestRatesAndVirtualBalance(reserveCache, params.asset, 0, 0, params.interestRateStrategyAddress);
+ 
+-    emit DeficitCovered(params.asset, msg.sender, balanceWriteOff);
++    emit IPool.DeficitCovered(params.asset, params.user, balanceWriteOff);
+   }
+ 
+   struct LiquidationCallLocalVars {
+-    uint256 userCollateralBalance;
+-    uint256 userReserveDebt;
++    uint256 borrowerCollateralBalance;
++    uint256 borrowerReserveDebt;
+     uint256 actualDebtToLiquidate;
+     uint256 actualCollateralToLiquidate;
+     uint256 liquidationBonus;
+@@ -166,8 +127,8 @@ library LiquidationLogic {
+     uint256 totalCollateralInBaseCurrency;
+     uint256 totalDebtInBaseCurrency;
+     uint256 collateralToLiquidateInBaseCurrency;
+-    uint256 userReserveDebtInBaseCurrency;
+-    uint256 userReserveCollateralInBaseCurrency;
++    uint256 borrowerReserveDebtInBaseCurrency;
++    uint256 borrowerReserveCollateralInBaseCurrency;
+     uint256 collateralAssetPrice;
+     uint256 debtAssetPrice;
+     uint256 collateralAssetUnit;
+@@ -198,7 +159,7 @@ library LiquidationLogic {
+ 
+     DataTypes.ReserveData storage collateralReserve = reservesData[params.collateralAsset];
+     DataTypes.ReserveData storage debtReserve = reservesData[params.debtAsset];
+-    DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
++    DataTypes.UserConfigurationMap storage borrowerConfig = usersConfig[params.borrower];
+     vars.debtReserveCache = debtReserve.cache();
+     debtReserve.updateState(vars.debtReserveCache);
+ 
+@@ -208,37 +169,40 @@ library LiquidationLogic {
+       reservesList,
+       eModeCategories,
+       DataTypes.CalculateUserAccountDataParams({
+-        userConfig: userConfig,
+-        reservesCount: params.reservesCount,
+-        user: params.user,
++        userConfig: borrowerConfig,
++        user: params.borrower,
+         oracle: params.priceOracle,
+-        userEModeCategory: params.userEModeCategory
++        userEModeCategory: params.borrowerEModeCategory
+       })
+     );
+ 
+     vars.collateralAToken = IAToken(collateralReserve.aTokenAddress);
+-    vars.userCollateralBalance = vars.collateralAToken.balanceOf(params.user);
+-    vars.userReserveDebt = IERC20(vars.debtReserveCache.variableDebtTokenAddress).balanceOf(params.user);
++    vars.borrowerCollateralBalance = vars.collateralAToken.balanceOf(params.borrower);
++    vars.borrowerReserveDebt = IVariableDebtToken(vars.debtReserveCache.variableDebtTokenAddress).scaledBalanceOf(
++      params.borrower
++    ).rayMul(vars.debtReserveCache.nextVariableBorrowIndex);
+ 
+     ValidationLogic.validateLiquidationCall(
+-      userConfig,
++      borrowerConfig,
+       collateralReserve,
+       debtReserve,
+       DataTypes.ValidateLiquidationCallParams({
+         debtReserveCache: vars.debtReserveCache,
+-        totalDebt: vars.userReserveDebt,
++        totalDebt: vars.borrowerReserveDebt,
+         healthFactor: vars.healthFactor,
+-        priceOracleSentinel: params.priceOracleSentinel
++        priceOracleSentinel: params.priceOracleSentinel,
++        borrower: params.borrower,
++        liquidator: params.liquidator
+       })
+     );
+ 
+     if (
+-      params.userEModeCategory != 0
++      params.borrowerEModeCategory != 0
+         && EModeConfiguration.isReserveEnabledOnBitmap(
+-          eModeCategories[params.userEModeCategory].collateralBitmap, collateralReserve.id
++          eModeCategories[params.borrowerEModeCategory].collateralBitmap, collateralReserve.id
+         )
+     ) {
+-      vars.liquidationBonus = eModeCategories[params.userEModeCategory].liquidationBonus;
++      vars.liquidationBonus = eModeCategories[params.borrowerEModeCategory].liquidationBonus;
+     } else {
+       vars.liquidationBonus = collateralReserve.configuration.getLiquidationBonus();
+     }
+@@ -247,18 +211,18 @@ library LiquidationLogic {
+     vars.collateralAssetUnit = 10 ** collateralReserve.configuration.getDecimals();
+     vars.debtAssetUnit = 10 ** vars.debtReserveCache.reserveConfiguration.getDecimals();
+ 
+-    vars.userReserveDebtInBaseCurrency = (vars.userReserveDebt * vars.debtAssetPrice) / vars.debtAssetUnit;
++    vars.borrowerReserveDebtInBaseCurrency = (vars.borrowerReserveDebt * vars.debtAssetPrice) / vars.debtAssetUnit;
+ 
+-    vars.userReserveCollateralInBaseCurrency =
+-      (vars.userCollateralBalance * vars.collateralAssetPrice) / vars.collateralAssetUnit;
++    vars.borrowerReserveCollateralInBaseCurrency =
++      (vars.borrowerCollateralBalance * vars.collateralAssetPrice) / vars.collateralAssetUnit;
+ 
+     // by default whole debt in the reserve could be liquidated
+-    uint256 maxLiquidatableDebt = vars.userReserveDebt;
++    uint256 maxLiquidatableDebt = vars.borrowerReserveDebt;
+     // but if debt and collateral is above or equal MIN_BASE_MAX_CLOSE_FACTOR_THRESHOLD
+     // and health factor is above CLOSE_FACTOR_HF_THRESHOLD this amount may be adjusted
+     if (
+-      vars.userReserveCollateralInBaseCurrency >= MIN_BASE_MAX_CLOSE_FACTOR_THRESHOLD
+-        && vars.userReserveDebtInBaseCurrency >= MIN_BASE_MAX_CLOSE_FACTOR_THRESHOLD
++      vars.borrowerReserveCollateralInBaseCurrency >= MIN_BASE_MAX_CLOSE_FACTOR_THRESHOLD
++        && vars.borrowerReserveDebtInBaseCurrency >= MIN_BASE_MAX_CLOSE_FACTOR_THRESHOLD
+         && vars.healthFactor > CLOSE_FACTOR_HF_THRESHOLD
+     ) {
+       uint256 totalDefaultLiquidatableDebtInBaseCurrency =
+@@ -266,7 +230,7 @@ library LiquidationLogic {
+ 
+       // if the debt is more then DEFAULT_LIQUIDATION_CLOSE_FACTOR % of the whole,
+       // then we CAN liquidate only up to DEFAULT_LIQUIDATION_CLOSE_FACTOR %
+-      if (vars.userReserveDebtInBaseCurrency > totalDefaultLiquidatableDebtInBaseCurrency) {
++      if (vars.borrowerReserveDebtInBaseCurrency > totalDefaultLiquidatableDebtInBaseCurrency) {
+         maxLiquidatableDebt = (totalDefaultLiquidatableDebtInBaseCurrency * vars.debtAssetUnit) / vars.debtAssetPrice;
+       }
+     }
+@@ -285,7 +249,7 @@ library LiquidationLogic {
+       vars.debtAssetPrice,
+       vars.debtAssetUnit,
+       vars.actualDebtToLiquidate,
+-      vars.userCollateralBalance,
++      vars.borrowerCollateralBalance,
+       vars.liquidationBonus
+     );
+ 
+@@ -294,37 +258,38 @@ library LiquidationLogic {
+     // 2. liquidate all collateral
+     // 3. leave more than MIN_LEFTOVER_BASE of collateral & debt
+     if (
+-      vars.actualDebtToLiquidate < vars.userReserveDebt
+-        && vars.actualCollateralToLiquidate + vars.liquidationProtocolFeeAmount < vars.userCollateralBalance
++      vars.actualDebtToLiquidate < vars.borrowerReserveDebt
++        && vars.actualCollateralToLiquidate + vars.liquidationProtocolFeeAmount < vars.borrowerCollateralBalance
+     ) {
+-      bool isDebtMoreThanLeftoverThreshold = ((vars.userReserveDebt - vars.actualDebtToLiquidate) * vars.debtAssetPrice)
+-        / vars.debtAssetUnit >= MIN_LEFTOVER_BASE;
++      bool isDebtMoreThanLeftoverThreshold = (
++        (vars.borrowerReserveDebt - vars.actualDebtToLiquidate) * vars.debtAssetPrice
++      ) / vars.debtAssetUnit >= MIN_LEFTOVER_BASE;
+ 
+       bool isCollateralMoreThanLeftoverThreshold = (
+-        (vars.userCollateralBalance - vars.actualCollateralToLiquidate - vars.liquidationProtocolFeeAmount)
++        (vars.borrowerCollateralBalance - vars.actualCollateralToLiquidate - vars.liquidationProtocolFeeAmount)
+           * vars.collateralAssetPrice
+       ) / vars.collateralAssetUnit >= MIN_LEFTOVER_BASE;
+ 
+-      require(isDebtMoreThanLeftoverThreshold && isCollateralMoreThanLeftoverThreshold, Errors.MUST_NOT_LEAVE_DUST);
++      require(isDebtMoreThanLeftoverThreshold && isCollateralMoreThanLeftoverThreshold, Errors.MustNotLeaveDust());
+     }
+ 
+     // If the collateral being liquidated is equal to the user balance,
+     // we set the currency as not being used as collateral anymore
+-    if (vars.actualCollateralToLiquidate + vars.liquidationProtocolFeeAmount == vars.userCollateralBalance) {
+-      userConfig.setUsingAsCollateral(collateralReserve.id, false);
+-      emit ReserveUsedAsCollateralDisabled(params.collateralAsset, params.user);
++    if (vars.actualCollateralToLiquidate + vars.liquidationProtocolFeeAmount == vars.borrowerCollateralBalance) {
++      borrowerConfig.setUsingAsCollateral(collateralReserve.id, params.collateralAsset, params.borrower, false);
+     }
+ 
+     bool hasNoCollateralLeft = vars.totalCollateralInBaseCurrency == vars.collateralToLiquidateInBaseCurrency;
+     _burnDebtTokens(
+       vars.debtReserveCache,
+       debtReserve,
+-      userConfig,
+-      params.user,
++      borrowerConfig,
++      params.borrower,
+       params.debtAsset,
+-      vars.userReserveDebt,
++      vars.borrowerReserveDebt,
+       vars.actualDebtToLiquidate,
+-      hasNoCollateralLeft
++      hasNoCollateralLeft,
++      params.interestRateStrategyAddress
+     );
+ 
+     // An asset can only be ceiled if it has no supply or if it was not a collateral previously.
+@@ -349,37 +314,38 @@ library LiquidationLogic {
+     if (vars.liquidationProtocolFeeAmount != 0) {
+       uint256 liquidityIndex = collateralReserve.getNormalizedIncome();
+       uint256 scaledDownLiquidationProtocolFee = vars.liquidationProtocolFeeAmount.rayDiv(liquidityIndex);
+-      uint256 scaledDownUserBalance = vars.collateralAToken.scaledBalanceOf(params.user);
++      uint256 scaledDownBorrowerBalance = vars.collateralAToken.scaledBalanceOf(params.borrower);
+       // To avoid trying to send more aTokens than available on balance, due to 1 wei imprecision
+-      if (scaledDownLiquidationProtocolFee > scaledDownUserBalance) {
+-        vars.liquidationProtocolFeeAmount = scaledDownUserBalance.rayMul(liquidityIndex);
++      if (scaledDownLiquidationProtocolFee > scaledDownBorrowerBalance) {
++        vars.liquidationProtocolFeeAmount = scaledDownBorrowerBalance.rayMul(liquidityIndex);
+       }
+       vars.collateralAToken.transferOnLiquidation(
+-        params.user, vars.collateralAToken.RESERVE_TREASURY_ADDRESS(), vars.liquidationProtocolFeeAmount
++        params.borrower,
++        vars.collateralAToken.RESERVE_TREASURY_ADDRESS(),
++        vars.liquidationProtocolFeeAmount,
++        liquidityIndex
+       );
+     }
+ 
+     // burn bad debt if necessary
+     // Each additional debt asset already adds around ~75k gas to the liquidation.
+     // To keep the liquidation gas under control, 0 usd collateral positions are not touched, as there is no immediate benefit in burning or transferring to treasury.
+-    if (hasNoCollateralLeft && userConfig.isBorrowingAny()) {
+-      _burnBadDebt(reservesData, reservesList, userConfig, params.reservesCount, params.user);
++    if (hasNoCollateralLeft && borrowerConfig.isBorrowingAny()) {
++      _burnBadDebt(reservesData, reservesList, borrowerConfig, params.borrower, params.interestRateStrategyAddress);
+     }
+ 
+     // Transfers the debt asset being repaid to the aToken, where the liquidity is kept
+     IERC20(params.debtAsset).safeTransferFrom(
+-      msg.sender, vars.debtReserveCache.aTokenAddress, vars.actualDebtToLiquidate
++      params.liquidator, vars.debtReserveCache.aTokenAddress, vars.actualDebtToLiquidate
+     );
+ 
+-    IAToken(vars.debtReserveCache.aTokenAddress).handleRepayment(msg.sender, params.user, vars.actualDebtToLiquidate);
+-
+-    emit LiquidationCall(
++    emit IPool.LiquidationCall(
+       params.collateralAsset,
+       params.debtAsset,
+-      params.user,
++      params.borrower,
+       vars.actualDebtToLiquidate,
+       vars.actualCollateralToLiquidate,
+-      msg.sender,
++      params.liquidator,
+       params.receiveAToken
+     );
+   }
+@@ -399,12 +365,16 @@ library LiquidationLogic {
+     DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
+     collateralReserve.updateState(collateralReserveCache);
+     collateralReserve.updateInterestRatesAndVirtualBalance(
+-      collateralReserveCache, params.collateralAsset, 0, vars.actualCollateralToLiquidate
++      collateralReserveCache,
++      params.collateralAsset,
++      0,
++      vars.actualCollateralToLiquidate,
++      params.interestRateStrategyAddress
+     );
+ 
+     // Burn the equivalent amount of aToken, sending the underlying to the liquidator
+     vars.collateralAToken.burn(
+-      params.user, msg.sender, vars.actualCollateralToLiquidate, collateralReserveCache.nextLiquidityIndex
++      params.borrower, params.liquidator, vars.actualCollateralToLiquidate, collateralReserveCache.nextLiquidityIndex
+     );
+   }
+ 
+@@ -427,26 +397,24 @@ library LiquidationLogic {
+     DataTypes.ExecuteLiquidationCallParams memory params,
+     LiquidationCallLocalVars memory vars
+   ) internal {
+-    uint256 liquidatorPreviousATokenBalance = IERC20(vars.collateralAToken).balanceOf(msg.sender);
+-    vars.collateralAToken.transferOnLiquidation(params.user, msg.sender, vars.actualCollateralToLiquidate);
++    uint256 liquidatorPreviousATokenBalance = IAToken(vars.collateralAToken).scaledBalanceOf(params.liquidator);
++    vars.collateralAToken.transferOnLiquidation(
++      params.borrower, params.liquidator, vars.actualCollateralToLiquidate, collateralReserve.getNormalizedIncome()
++    );
+ 
+-    if (
+-      // For the special case of msg.sender == params.user (self-liquidation) the liquidatorPreviousATokenBalance
+-      // will not yet be 0, but the liquidation will result in collateral being fully liquidated and then resupplied.
+-      liquidatorPreviousATokenBalance == 0
+-        || (
+-          msg.sender == params.user
+-            && vars.actualCollateralToLiquidate + vars.liquidationProtocolFeeAmount == vars.userCollateralBalance
+-        )
+-    ) {
+-      DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
++    if (liquidatorPreviousATokenBalance == 0) {
++      DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[params.liquidator];
+       if (
+         ValidationLogic.validateAutomaticUseAsCollateral(
+-          reservesData, reservesList, liquidatorConfig, collateralReserve.configuration, collateralReserve.aTokenAddress
++          params.liquidator,
++          reservesData,
++          reservesList,
++          liquidatorConfig,
++          collateralReserve.configuration,
++          collateralReserve.aTokenAddress
+         )
+       ) {
+-        liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
+-        emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
++        liquidatorConfig.setUsingAsCollateral(collateralReserve.id, params.collateralAsset, params.liquidator, true);
+       }
+     }
+   }
+@@ -457,8 +425,8 @@ library LiquidationLogic {
+    * @dev The function alters the `debtReserveCache` state in `vars` to update the debt related data.
+    * @param debtReserveCache The cached debt reserve parameters
+    * @param debtReserve The storage pointer of the debt reserve parameters
+-   * @param userConfig The pointer of the user configuration
+-   * @param user The user address
++   * @param borrowerConfig The pointer of the user configuration
++   * @param borrower The user address
+    * @param debtAsset The debt asset address
+    * @param actualDebtToLiquidate The actual debt to liquidate
+    * @param hasNoCollateralLeft The flag representing, will user will have no collateral left after liquidation
+@@ -466,64 +434,41 @@ library LiquidationLogic {
+   function _burnDebtTokens(
+     DataTypes.ReserveCache memory debtReserveCache,
+     DataTypes.ReserveData storage debtReserve,
+-    DataTypes.UserConfigurationMap storage userConfig,
+-    address user,
++    DataTypes.UserConfigurationMap storage borrowerConfig,
++    address borrower,
+     address debtAsset,
+-    uint256 userReserveDebt,
++    uint256 borrowerReserveDebt,
+     uint256 actualDebtToLiquidate,
+-    bool hasNoCollateralLeft
++    bool hasNoCollateralLeft,
++    address interestRateStrategyAddress
+   ) internal {
++    bool noMoreDebt = true;
+     // Prior v3.1, there were cases where, after liquidation, the `isBorrowing` flag was left on
+     // even after the user debt was fully repaid, so to avoid this function reverting in the `_burnScaled`
+     // (see ScaledBalanceTokenBase contract), we check for any debt remaining.
+-    if (userReserveDebt != 0) {
+-      debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(debtReserveCache.variableDebtTokenAddress).burn(
+-        user, hasNoCollateralLeft ? userReserveDebt : actualDebtToLiquidate, debtReserveCache.nextVariableBorrowIndex
++    if (borrowerReserveDebt != 0) {
++      (noMoreDebt, debtReserveCache.nextScaledVariableDebt) = IVariableDebtToken(
++        debtReserveCache.variableDebtTokenAddress
++      ).burn(
++        borrower,
++        hasNoCollateralLeft ? borrowerReserveDebt : actualDebtToLiquidate,
++        debtReserveCache.nextVariableBorrowIndex
+       );
+     }
+ 
+-    uint256 outstandingDebt = userReserveDebt - actualDebtToLiquidate;
++    uint256 outstandingDebt = borrowerReserveDebt - actualDebtToLiquidate;
+     if (hasNoCollateralLeft && outstandingDebt != 0) {
+-      /**
+-       * Special handling of GHO. Implicitly assuming that virtual acc !active == GHO, which is true.
+-       * Scenario 1: The amount of GHO debt being liquidated is greater or equal to the GHO accrued interest.
+-       *             In this case, the outer handleRepayment will clear the storage and all additional operations can be skipped.
+-       * Scenario 2: The amount of debt being liquidated is lower than the GHO accrued interest.
+-       *             In this case handleRepayment will be called with the difference required to clear the storage.
+-       *             If we assume a liquidation of n debt, and m accrued interest, the difference is k = m-n.
+-       *             Therefore we call handleRepayment(k).
+-       *             Additionally, as the dao (GHO issuer) accepts the loss on interest on the bad debt,
+-       *             we need to discount k from the deficit (via reducing outstandingDebt).
+-       * Note: If a non GHO asset is liquidated and GHO bad debt is created in the process, Scenario 2 applies with n = 0.
+-       */
+-      if (!debtReserveCache.reserveConfiguration.getIsVirtualAccActive()) {
+-        uint256 accruedInterest =
+-          IGhoVariableDebtToken(debtReserveCache.variableDebtTokenAddress).getBalanceFromInterest(user);
+-        // handleRepayment() will first discount the protocol fee from an internal `accumulatedDebtInterest` variable
+-        // and then burn the excess GHO
+-        if (accruedInterest != 0 && accruedInterest > actualDebtToLiquidate) {
+-          // in order to clean the `accumulatedDebtInterest` storage the function will need to be called with the accruedInterest
+-          // discounted by the actualDebtToLiquidate, as in the main flow `handleRepayment` will be called with actualDebtToLiquidate already
+-          uint256 amountToBurn = accruedInterest - actualDebtToLiquidate;
+-          // In the case of GHO, all obligations are to the protocol
+-          // therefore the protocol assumes the losses on interest and only tracks the pure deficit by discounting the not-collected & burned debt
+-          outstandingDebt -= amountToBurn;
+-          // IMPORTANT: address(0) is used here to indicate that the accrued fee is discounted and not actually repayed.
+-          // The value passed has no relevance as it is unused on the aGHO.handleRepayment, therefore the value is purely esthetical.
+-          IAToken(debtReserveCache.aTokenAddress).handleRepayment(address(0), user, amountToBurn);
+-        }
+-      }
+       debtReserve.deficit += outstandingDebt.toUint128();
+-      emit DeficitCreated(user, debtAsset, outstandingDebt);
+-
+-      outstandingDebt = 0;
++      emit IPool.DeficitCreated(borrower, debtAsset, outstandingDebt);
+     }
+ 
+-    if (outstandingDebt == 0) {
+-      userConfig.setBorrowing(debtReserve.id, false);
++    if (noMoreDebt) {
++      borrowerConfig.setBorrowing(debtReserve.id, false);
+     }
+ 
+-    debtReserve.updateInterestRatesAndVirtualBalance(debtReserveCache, debtAsset, actualDebtToLiquidate, 0);
++    debtReserve.updateInterestRatesAndVirtualBalance(
++      debtReserveCache, debtAsset, actualDebtToLiquidate, 0, interestRateStrategyAddress
++    );
+   }
+ 
+   struct AvailableCollateralToLiquidateLocalVars {
+@@ -549,7 +494,7 @@ library LiquidationLogic {
+    * @param debtAssetPrice The price of the underlying borrowed asset to be repaid with the liquidation
+    * @param debtAssetUnit The asset units of the debt
+    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
+-   * @param userCollateralBalance The collateral balance for the specific `collateralAsset` of the user being liquidated
++   * @param borrowerCollateralBalance The collateral balance for the specific `collateralAsset` of the user being liquidated
+    * @param liquidationBonus The collateral bonus percentage to receive as result of the liquidation
+    * @return The maximum amount that is possible to liquidate given all the liquidation constraints (user balance, close factor)
+    * @return The amount to repay with the liquidation
+@@ -563,7 +508,7 @@ library LiquidationLogic {
+     uint256 debtAssetPrice,
+     uint256 debtAssetUnit,
+     uint256 debtToCover,
+-    uint256 userCollateralBalance,
++    uint256 borrowerCollateralBalance,
+     uint256 liquidationBonus
+   ) internal pure returns (uint256, uint256, uint256, uint256) {
+     AvailableCollateralToLiquidateLocalVars memory vars;
+@@ -576,8 +521,8 @@ library LiquidationLogic {
+ 
+     vars.maxCollateralToLiquidate = vars.baseCollateral.percentMul(liquidationBonus);
+ 
+-    if (vars.maxCollateralToLiquidate > userCollateralBalance) {
+-      vars.collateralAmount = userCollateralBalance;
++    if (vars.maxCollateralToLiquidate > borrowerCollateralBalance) {
++      vars.collateralAmount = borrowerCollateralBalance;
+       vars.debtAmountNeeded = (
+         (vars.collateralAssetPrice * vars.collateralAmount * debtAssetUnit) / (debtAssetPrice * collateralAssetUnit)
+       ).percentDiv(liquidationBonus);
+@@ -608,43 +553,46 @@ library LiquidationLogic {
+    * updates their state, and performs the necessary burn.
+    * @param reservesData The state of all the reserves
+    * @param reservesList The addresses of all the active reserves
+-   * @param userConfig The user configuration
+-   * @param reservesCount The total number of valid reserves
+-   * @param user The user from which the debt will be burned.
++   * @param borrowerConfig The user configuration
++   * @param borrower The user from which the debt will be burned.
+    */
+   function _burnBadDebt(
+     mapping(address => DataTypes.ReserveData) storage reservesData,
+     mapping(uint256 => address) storage reservesList,
+-    DataTypes.UserConfigurationMap storage userConfig,
+-    uint256 reservesCount,
+-    address user
++    DataTypes.UserConfigurationMap storage borrowerConfig,
++    address borrower,
++    address interestRateStrategyAddress
+   ) internal {
+-    for (uint256 i; i < reservesCount; i++) {
+-      if (!userConfig.isBorrowing(i)) {
+-        continue;
++    uint256 cachedBorrowerConfig = borrowerConfig.data;
++    uint256 i = 0;
++    bool isBorrowed = false;
++    while (cachedBorrowerConfig != 0) {
++      (cachedBorrowerConfig, isBorrowed,) = UserConfiguration.getNextFlags(cachedBorrowerConfig);
++      if (isBorrowed) {
++        address reserveAddress = reservesList[i];
++        if (reserveAddress != address(0)) {
++          DataTypes.ReserveData storage currentReserve = reservesData[reserveAddress];
++          DataTypes.ReserveCache memory reserveCache = currentReserve.cache();
++          if (reserveCache.reserveConfiguration.getActive()) {
++            currentReserve.updateState(reserveCache);
++
++            _burnDebtTokens(
++              reserveCache,
++              currentReserve,
++              borrowerConfig,
++              borrower,
++              reserveAddress,
++              IERC20(reserveCache.variableDebtTokenAddress).balanceOf(borrower),
++              0,
++              true,
++              interestRateStrategyAddress
++            );
++          }
++        }
+       }
+-
+-      address reserveAddress = reservesList[i];
+-      if (reserveAddress == address(0)) {
+-        continue;
++      unchecked {
++        ++i;
+       }
+-
+-      DataTypes.ReserveData storage currentReserve = reservesData[reserveAddress];
+-      DataTypes.ReserveCache memory reserveCache = currentReserve.cache();
+-      if (!reserveCache.reserveConfiguration.getActive()) continue;
+-
+-      currentReserve.updateState(reserveCache);
+-
+-      _burnDebtTokens(
+-        reserveCache,
+-        currentReserve,
+-        userConfig,
+-        user,
+-        reserveAddress,
+-        IERC20(reserveCache.variableDebtTokenAddress).balanceOf(user),
+-        0,
+-        true
+-      );
+     }
+   }
+ }
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/MathUtils.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/MathUtils.sol
+index 2a1a721..701ce53 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/MathUtils.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/MathUtils.sol
+@@ -56,29 +56,29 @@ library MathUtils {
+       return WadRayMath.RAY;
+     }
+ 
+-    uint256 expMinusOne;
+-    uint256 expMinusTwo;
+-    uint256 basePowerTwo;
+-    uint256 basePowerThree;
+-    unchecked {
+-      expMinusOne = exp - 1;
+-
+-      expMinusTwo = exp > 2 ? exp - 2 : 0;
++    // calculations compound interest using the ideal formula - e^(rate per year * number of years)
++    // 100_000% per year = 1_000 * 100, passed 10_000 years:
++    // e^(1_000 * 10_000) = 6.5922325346184394895608861310659088446667722661221381641234330770... × 10^4342944
+ 
+-      basePowerTwo = rate.rayMul(rate) / (SECONDS_PER_YEAR * SECONDS_PER_YEAR);
+-      basePowerThree = basePowerTwo.rayMul(rate) / SECONDS_PER_YEAR;
+-    }
++    // The current formula in the contract returns:
++    // 1.66666716666676666667 × 10^20
++    // This happens because the contract uses a polynomial approximation of the ideal formula
++    // and on big numbers the ideal formula with exponential function has much more speed.
++    // Used approximation in contracts is not precise enough on such big numbers.
++    //
++    // But we can be sure that the current formula in contracts can't overflow on such big numbers
++    // and we can use unchecked arithmetics to save gas.
++    //
++    // Also, if we take into an account the fact that all timestamps are stored in uint32/40 types
++    // we can only have 100 years left until we will have overflows in timestamps.
++    // Because of that realistically we can't overflow in this formula.
+ 
+-    uint256 secondTerm = exp * expMinusOne * basePowerTwo;
+     unchecked {
+-      secondTerm /= 2;
+-    }
+-    uint256 thirdTerm = exp * expMinusOne * expMinusTwo * basePowerThree;
+-    unchecked {
+-      thirdTerm /= 6;
+-    }
++      // this can't overflow because rate is always fits in 128 bits and exp always fits in 40 bits
++      uint256 x = (rate * exp) / SECONDS_PER_YEAR;
+ 
+-    return WadRayMath.RAY + (rate * exp) / SECONDS_PER_YEAR + secondTerm + thirdTerm;
++      return WadRayMath.RAY + x + x.rayMul(x / 2 + x.rayMul(x / 6));
++    }
+   }
+ 
+   /**
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/ReserveConfiguration.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ReserveConfiguration.sol
+index 0bec019..062e4b6 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/ReserveConfiguration.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ReserveConfiguration.sol
+@@ -29,9 +29,10 @@ library ReserveConfiguration {
+   uint256 internal constant SUPPLY_CAP_MASK = 0x00000000000000000000000000FFFFFFFFF00000000000000000000000000000; // prettier-ignore
+   uint256 internal constant LIQUIDATION_PROTOCOL_FEE_MASK =
+     0x0000000000000000000000FFFF00000000000000000000000000000000000000; // prettier-ignore
+-  //@notice there is an unoccupied hole of 8 bits from 168 to 176 left from pre 3.2 eModeCategory
+-  uint256 internal constant UNBACKED_MINT_CAP_MASK = 0x00000000000FFFFFFFFF00000000000000000000000000000000000000000000; // prettier-ignore
++  //@notice there is an unoccupied hole of 8 bits from 168 to 175 left from pre 3.2 eModeCategory
++  //@notice there is an unoccupied hole of 34 bits from 176 to 211 left from pre 3.4 unbackedMintCap
+   uint256 internal constant DEBT_CEILING_MASK = 0x0FFFFFFFFFF00000000000000000000000000000000000000000000000000000; // prettier-ignore
++  //@notice DEPRECATED: in v3.4 all reserves have virtual accounting enabled
+   uint256 internal constant VIRTUAL_ACC_ACTIVE_MASK = 0x1000000000000000000000000000000000000000000000000000000000000000; // prettier-ignore
+ 
+   /// @dev For the LTV, the start bit is 0 (up to 15), hence no bitshifting is needed
+@@ -49,9 +50,10 @@ library ReserveConfiguration {
+   uint256 internal constant BORROW_CAP_START_BIT_POSITION = 80;
+   uint256 internal constant SUPPLY_CAP_START_BIT_POSITION = 116;
+   uint256 internal constant LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION = 152;
+-  //@notice there is an unoccupied hole of 8 bits from 168 to 176 left from pre 3.2 eModeCategory
+-  uint256 internal constant UNBACKED_MINT_CAP_START_BIT_POSITION = 176;
++  //@notice there is an unoccupied hole of 8 bits from 168 to 175 left from pre 3.2 eModeCategory
++  //@notice there is an unoccupied hole of 34 bits from 176 to 211 left from pre 3.4 unbackedMintCap
+   uint256 internal constant DEBT_CEILING_START_BIT_POSITION = 212;
++  //@notice DEPRECATED: in v3.4 all reserves have virtual accounting enabled
+   uint256 internal constant VIRTUAL_ACC_START_BIT_POSITION = 252;
+ 
+   uint256 internal constant MAX_VALID_LTV = 65535;
+@@ -62,7 +64,6 @@ library ReserveConfiguration {
+   uint256 internal constant MAX_VALID_BORROW_CAP = 68719476735;
+   uint256 internal constant MAX_VALID_SUPPLY_CAP = 68719476735;
+   uint256 internal constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 65535;
+-  uint256 internal constant MAX_VALID_UNBACKED_MINT_CAP = 68719476735;
+   uint256 internal constant MAX_VALID_DEBT_CEILING = 1099511627775;
+ 
+   uint256 public constant DEBT_CEILING_DECIMALS = 2;
+@@ -74,7 +75,7 @@ library ReserveConfiguration {
+    * @param ltv The new ltv
+    */
+   function setLtv(DataTypes.ReserveConfigurationMap memory self, uint256 ltv) internal pure {
+-    require(ltv <= MAX_VALID_LTV, Errors.INVALID_LTV);
++    require(ltv <= MAX_VALID_LTV, Errors.InvalidLtv());
+ 
+     self.data = (self.data & ~LTV_MASK) | ltv;
+   }
+@@ -94,7 +95,7 @@ library ReserveConfiguration {
+    * @param threshold The new liquidation threshold
+    */
+   function setLiquidationThreshold(DataTypes.ReserveConfigurationMap memory self, uint256 threshold) internal pure {
+-    require(threshold <= MAX_VALID_LIQUIDATION_THRESHOLD, Errors.INVALID_LIQ_THRESHOLD);
++    require(threshold <= MAX_VALID_LIQUIDATION_THRESHOLD, Errors.InvalidLiquidationThreshold());
+ 
+     self.data = (self.data & ~LIQUIDATION_THRESHOLD_MASK) | (threshold << LIQUIDATION_THRESHOLD_START_BIT_POSITION);
+   }
+@@ -114,7 +115,7 @@ library ReserveConfiguration {
+    * @param bonus The new liquidation bonus
+    */
+   function setLiquidationBonus(DataTypes.ReserveConfigurationMap memory self, uint256 bonus) internal pure {
+-    require(bonus <= MAX_VALID_LIQUIDATION_BONUS, Errors.INVALID_LIQ_BONUS);
++    require(bonus <= MAX_VALID_LIQUIDATION_BONUS, Errors.InvalidLiquidationBonus());
+ 
+     self.data = (self.data & ~LIQUIDATION_BONUS_MASK) | (bonus << LIQUIDATION_BONUS_START_BIT_POSITION);
+   }
+@@ -134,7 +135,7 @@ library ReserveConfiguration {
+    * @param decimals The decimals
+    */
+   function setDecimals(DataTypes.ReserveConfigurationMap memory self, uint256 decimals) internal pure {
+-    require(decimals <= MAX_VALID_DECIMALS, Errors.INVALID_DECIMALS);
++    require(decimals <= MAX_VALID_DECIMALS, Errors.InvalidDecimals());
+ 
+     self.data = (self.data & ~DECIMALS_MASK) | (decimals << RESERVE_DECIMALS_START_BIT_POSITION);
+   }
+@@ -273,7 +274,7 @@ library ReserveConfiguration {
+    * @param reserveFactor The reserve factor
+    */
+   function setReserveFactor(DataTypes.ReserveConfigurationMap memory self, uint256 reserveFactor) internal pure {
+-    require(reserveFactor <= MAX_VALID_RESERVE_FACTOR, Errors.INVALID_RESERVE_FACTOR);
++    require(reserveFactor <= MAX_VALID_RESERVE_FACTOR, Errors.InvalidReserveFactor());
+ 
+     self.data = (self.data & ~RESERVE_FACTOR_MASK) | (reserveFactor << RESERVE_FACTOR_START_BIT_POSITION);
+   }
+@@ -293,7 +294,7 @@ library ReserveConfiguration {
+    * @param borrowCap The borrow cap
+    */
+   function setBorrowCap(DataTypes.ReserveConfigurationMap memory self, uint256 borrowCap) internal pure {
+-    require(borrowCap <= MAX_VALID_BORROW_CAP, Errors.INVALID_BORROW_CAP);
++    require(borrowCap <= MAX_VALID_BORROW_CAP, Errors.InvalidBorrowCap());
+ 
+     self.data = (self.data & ~BORROW_CAP_MASK) | (borrowCap << BORROW_CAP_START_BIT_POSITION);
+   }
+@@ -313,7 +314,7 @@ library ReserveConfiguration {
+    * @param supplyCap The supply cap
+    */
+   function setSupplyCap(DataTypes.ReserveConfigurationMap memory self, uint256 supplyCap) internal pure {
+-    require(supplyCap <= MAX_VALID_SUPPLY_CAP, Errors.INVALID_SUPPLY_CAP);
++    require(supplyCap <= MAX_VALID_SUPPLY_CAP, Errors.InvalidSupplyCap());
+ 
+     self.data = (self.data & ~SUPPLY_CAP_MASK) | (supplyCap << SUPPLY_CAP_START_BIT_POSITION);
+   }
+@@ -333,7 +334,7 @@ library ReserveConfiguration {
+    * @param ceiling The maximum debt ceiling for the asset
+    */
+   function setDebtCeiling(DataTypes.ReserveConfigurationMap memory self, uint256 ceiling) internal pure {
+-    require(ceiling <= MAX_VALID_DEBT_CEILING, Errors.INVALID_DEBT_CEILING);
++    require(ceiling <= MAX_VALID_DEBT_CEILING, Errors.InvalidDebtCeiling());
+ 
+     self.data = (self.data & ~DEBT_CEILING_MASK) | (ceiling << DEBT_CEILING_START_BIT_POSITION);
+   }
+@@ -356,7 +357,7 @@ library ReserveConfiguration {
+     internal
+     pure
+   {
+-    require(liquidationProtocolFee <= MAX_VALID_LIQUIDATION_PROTOCOL_FEE, Errors.INVALID_LIQUIDATION_PROTOCOL_FEE);
++    require(liquidationProtocolFee <= MAX_VALID_LIQUIDATION_PROTOCOL_FEE, Errors.InvalidLiquidationProtocolFee());
+ 
+     self.data = (self.data & ~LIQUIDATION_PROTOCOL_FEE_MASK)
+       | (liquidationProtocolFee << LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION);
+@@ -371,26 +372,6 @@ library ReserveConfiguration {
+     return (self.data & LIQUIDATION_PROTOCOL_FEE_MASK) >> LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION;
+   }
+ 
+-  /**
+-   * @notice Sets the unbacked mint cap of the reserve
+-   * @param self The reserve configuration
+-   * @param unbackedMintCap The unbacked mint cap
+-   */
+-  function setUnbackedMintCap(DataTypes.ReserveConfigurationMap memory self, uint256 unbackedMintCap) internal pure {
+-    require(unbackedMintCap <= MAX_VALID_UNBACKED_MINT_CAP, Errors.INVALID_UNBACKED_MINT_CAP);
+-
+-    self.data = (self.data & ~UNBACKED_MINT_CAP_MASK) | (unbackedMintCap << UNBACKED_MINT_CAP_START_BIT_POSITION);
+-  }
+-
+-  /**
+-   * @dev Gets the unbacked mint cap of the reserve
+-   * @param self The reserve configuration
+-   * @return The unbacked mint cap
+-   */
+-  function getUnbackedMintCap(DataTypes.ReserveConfigurationMap memory self) internal pure returns (uint256) {
+-    return (self.data & UNBACKED_MINT_CAP_MASK) >> UNBACKED_MINT_CAP_START_BIT_POSITION;
+-  }
+-
+   /**
+    * @notice Sets the flashloanable flag for the reserve
+    * @param self The reserve configuration
+@@ -411,26 +392,13 @@ library ReserveConfiguration {
+   }
+ 
+   /**
+-   * @notice Sets the virtual account active/not state of the reserve
++   * @notice Forcefully set the virtual account active state of the reserve to `true`
++   * @dev DEPRECATED: in v3.4 all reserves have virtual accounting enabled.
++   * The flag is carried along for backward compatibility with integrations directly querying the configuration.
+    * @param self The reserve configuration
+-   * @param active The active state
+-   */
+-  function setVirtualAccActive(DataTypes.ReserveConfigurationMap memory self, bool active) internal pure {
+-    self.data = (self.data & ~VIRTUAL_ACC_ACTIVE_MASK) | (uint256(active ? 1 : 0) << VIRTUAL_ACC_START_BIT_POSITION);
+-  }
+-
+-  /**
+-   * @notice Gets the virtual account active/not state of the reserve
+-   * @dev The state should be true for all normal assets and should be false
+-   * Virtual accounting being disabled means that the asset:
+-   * - is GHO
+-   * - can never be supplied
+-   * - the interest rate strategy is not influenced by the virtual balance
+-   * @param self The reserve configuration
+-   * @return The active state
+    */
+-  function getIsVirtualAccActive(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
+-    return (self.data & VIRTUAL_ACC_ACTIVE_MASK) != 0;
++  function setVirtualAccActive(DataTypes.ReserveConfigurationMap memory self) internal pure {
++    self.data = (self.data & ~VIRTUAL_ACC_ACTIVE_MASK) | (uint256(1) << VIRTUAL_ACC_START_BIT_POSITION);
+   }
+ 
+   /**
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/ReserveLogic.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ReserveLogic.sol
+index b40cd25..0714e2f 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/ReserveLogic.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ReserveLogic.sol
+@@ -5,13 +5,14 @@ import {IERC20} from "../../../dependencies/openzeppelin/contracts/IERC20.sol";
+ import {GPv2SafeERC20} from "../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol";
+ import {IVariableDebtToken} from "../../../interfaces/IVariableDebtToken.sol";
+ import {IReserveInterestRateStrategy} from "../../../interfaces/IReserveInterestRateStrategy.sol";
++import {IPool} from "../../../interfaces/IPool.sol";
+ import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
+ import {MathUtils} from "../math/MathUtils.sol";
+ import {WadRayMath} from "../math/WadRayMath.sol";
+ import {PercentageMath} from "../math/PercentageMath.sol";
+ import {Errors} from "../helpers/Errors.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+-import {SafeCast} from "../../../dependencies/openzeppelin/contracts/SafeCast.sol";
++import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ 
+ /**
+  * @title ReserveLogic library
+@@ -26,16 +27,6 @@ library ReserveLogic {
+   using ReserveLogic for DataTypes.ReserveData;
+   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+ 
+-  // See `IPool` for descriptions
+-  event ReserveDataUpdated(
+-    address indexed reserve,
+-    uint256 liquidityRate,
+-    uint256 stableBorrowRate,
+-    uint256 variableBorrowRate,
+-    uint256 liquidityIndex,
+-    uint256 variableBorrowIndex
+-  );
+-
+   /**
+    * @notice Returns the ongoing normalized income for the reserve.
+    * @dev A value of 1e27 means there is no income. As time passes, the income is accrued
+@@ -77,7 +68,7 @@ library ReserveLogic {
+   }
+ 
+   /**
+-   * @notice Updates the liquidity cumulative index and the variable borrow index.
++   * @notice Updates the liquidity cumulative index, the variable borrow index and the timestamp of the update.
+    * @param reserve The reserve object
+    * @param reserveCache The caching layer for the reserve data
+    */
+@@ -96,46 +87,21 @@ library ReserveLogic {
+     reserveCache.reserveLastUpdateTimestamp = uint40(block.timestamp);
+   }
+ 
+-  /**
+-   * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example
+-   * to accumulate the flashloan fee to the reserve, and spread it between all the suppliers.
+-   * @param reserve The reserve object
+-   * @param totalLiquidity The total liquidity available in the reserve
+-   * @param amount The amount to accumulate
+-   * @return The next liquidity index of the reserve
+-   */
+-  function cumulateToLiquidityIndex(DataTypes.ReserveData storage reserve, uint256 totalLiquidity, uint256 amount)
+-    internal
+-    returns (uint256)
+-  {
+-    //next liquidity index is calculated this way: `((amount / totalLiquidity) + 1) * liquidityIndex`
+-    //division `amount / totalLiquidity` done in ray for precision
+-    uint256 result =
+-      (amount.wadToRay().rayDiv(totalLiquidity.wadToRay()) + WadRayMath.RAY).rayMul(reserve.liquidityIndex);
+-    reserve.liquidityIndex = result.toUint128();
+-    return result;
+-  }
+-
+   /**
+    * @notice Initializes a reserve.
+    * @param reserve The reserve object
+    * @param aTokenAddress The address of the overlying atoken contract
+    * @param variableDebtTokenAddress The address of the overlying variable debt token contract
+-   * @param interestRateStrategyAddress The address of the interest rate strategy contract
+    */
+-  function init(
+-    DataTypes.ReserveData storage reserve,
+-    address aTokenAddress,
+-    address variableDebtTokenAddress,
+-    address interestRateStrategyAddress
+-  ) internal {
+-    require(reserve.aTokenAddress == address(0), Errors.RESERVE_ALREADY_INITIALIZED);
++  function init(DataTypes.ReserveData storage reserve, address aTokenAddress, address variableDebtTokenAddress)
++    internal
++  {
++    require(reserve.aTokenAddress == address(0), Errors.ReserveAlreadyInitialized());
+ 
+     reserve.liquidityIndex = uint128(WadRayMath.RAY);
+     reserve.variableBorrowIndex = uint128(WadRayMath.RAY);
+     reserve.aTokenAddress = aTokenAddress;
+     reserve.variableDebtTokenAddress = variableDebtTokenAddress;
+-    reserve.interestRateStrategyAddress = interestRateStrategyAddress;
+   }
+ 
+   /**
+@@ -151,21 +117,21 @@ library ReserveLogic {
+     DataTypes.ReserveCache memory reserveCache,
+     address reserveAddress,
+     uint256 liquidityAdded,
+-    uint256 liquidityTaken
++    uint256 liquidityTaken,
++    address interestRateStrategyAddress
+   ) internal {
+     uint256 totalVariableDebt = reserveCache.nextScaledVariableDebt.rayMul(reserveCache.nextVariableBorrowIndex);
+ 
+-    (uint256 nextLiquidityRate, uint256 nextVariableRate) = IReserveInterestRateStrategy(
+-      reserve.interestRateStrategyAddress
+-    ).calculateInterestRates(
++    (uint256 nextLiquidityRate, uint256 nextVariableRate) = IReserveInterestRateStrategy(interestRateStrategyAddress)
++      .calculateInterestRates(
+       DataTypes.CalculateInterestRatesParams({
+-        unbacked: reserve.unbacked + reserve.deficit,
++        unbacked: reserve.deficit,
+         liquidityAdded: liquidityAdded,
+         liquidityTaken: liquidityTaken,
+         totalDebt: totalVariableDebt,
+         reserveFactor: reserveCache.reserveFactor,
+         reserve: reserveAddress,
+-        usingVirtualBalance: reserveCache.reserveConfiguration.getIsVirtualAccActive(),
++        usingVirtualBalance: true,
+         virtualUnderlyingBalance: reserve.virtualUnderlyingBalance
+       })
+     );
+@@ -173,17 +139,14 @@ library ReserveLogic {
+     reserve.currentLiquidityRate = nextLiquidityRate.toUint128();
+     reserve.currentVariableBorrowRate = nextVariableRate.toUint128();
+ 
+-    // Only affect virtual balance if the reserve uses it
+-    if (reserveCache.reserveConfiguration.getIsVirtualAccActive()) {
+-      if (liquidityAdded > 0) {
+-        reserve.virtualUnderlyingBalance += liquidityAdded.toUint128();
+-      }
+-      if (liquidityTaken > 0) {
+-        reserve.virtualUnderlyingBalance -= liquidityTaken.toUint128();
+-      }
++    if (liquidityAdded > 0) {
++      reserve.virtualUnderlyingBalance += liquidityAdded.toUint128();
++    }
++    if (liquidityTaken > 0) {
++      reserve.virtualUnderlyingBalance -= liquidityTaken.toUint128();
+     }
+ 
+-    emit ReserveDataUpdated(
++    emit IPool.ReserveDataUpdated(
+       reserveAddress,
+       nextLiquidityRate,
+       0,
+@@ -223,7 +186,7 @@ library ReserveLogic {
+   }
+ 
+   /**
+-   * @notice Updates the reserve indexes and the timestamp of the update.
++   * @notice Updates the reserve indexes.
+    * @param reserve The reserve reserve to be updated
+    * @param reserveCache The cache layer holding the cached protocol data
+    */
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/SafeCast.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/SafeCast.sol
+index c8913ed..6e26cd8 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/SafeCast.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/SafeCast.sol
+@@ -1,9 +1,11 @@
+ // SPDX-License-Identifier: MIT
+-// OpenZeppelin Contracts v4.4.1 (utils/math/SafeCast.sol)
+-pragma solidity ^0.8.10;
++// OpenZeppelin Contracts (last updated v5.1.0) (utils/math/SafeCast.sol)
++// This file was procedurally generated from scripts/generate/templates/SafeCast.js.
++
++pragma solidity ^0.8.20;
+ 
+ /**
+- * @dev Wrappers over Solidity's uintXX/intXX casting operators with added overflow
++ * @dev Wrappers over Solidity's uintXX/intXX/bool casting operators with added overflow
+  * checks.
+  *
+  * Downcasting from uint256/int256 in Solidity does not revert on overflow. This can
+@@ -13,11 +15,79 @@ pragma solidity ^0.8.10;
+  *
+  * Using this library instead of the unchecked operations eliminates an entire
+  * class of bugs, so it's recommended to use it always.
+- *
+- * Can be combined with {SafeMath} and {SignedSafeMath} to extend it to smaller types, by performing
+- * all math on `uint256` and `int256` and then downcasting.
+  */
+ library SafeCast {
++  /**
++   * @dev Value doesn't fit in an uint of `bits` size.
++   */
++  error SafeCastOverflowedUintDowncast(uint8 bits, uint256 value);
++
++  /**
++   * @dev An int value doesn't fit in an uint of `bits` size.
++   */
++  error SafeCastOverflowedIntToUint(int256 value);
++
++  /**
++   * @dev Value doesn't fit in an int of `bits` size.
++   */
++  error SafeCastOverflowedIntDowncast(uint8 bits, int256 value);
++
++  /**
++   * @dev An uint value doesn't fit in an int of `bits` size.
++   */
++  error SafeCastOverflowedUintToInt(uint256 value);
++
++  /**
++   * @dev Returns the downcasted uint248 from uint256, reverting on
++   * overflow (when the input is greater than largest uint248).
++   *
++   * Counterpart to Solidity's `uint248` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 248 bits
++   */
++  function toUint248(uint256 value) internal pure returns (uint248) {
++    if (value > type(uint248).max) {
++      revert SafeCastOverflowedUintDowncast(248, value);
++    }
++    return uint248(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint240 from uint256, reverting on
++   * overflow (when the input is greater than largest uint240).
++   *
++   * Counterpart to Solidity's `uint240` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 240 bits
++   */
++  function toUint240(uint256 value) internal pure returns (uint240) {
++    if (value > type(uint240).max) {
++      revert SafeCastOverflowedUintDowncast(240, value);
++    }
++    return uint240(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint232 from uint256, reverting on
++   * overflow (when the input is greater than largest uint232).
++   *
++   * Counterpart to Solidity's `uint232` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 232 bits
++   */
++  function toUint232(uint256 value) internal pure returns (uint232) {
++    if (value > type(uint232).max) {
++      revert SafeCastOverflowedUintDowncast(232, value);
++    }
++    return uint232(value);
++  }
++
+   /**
+    * @dev Returns the downcasted uint224 from uint256, reverting on
+    * overflow (when the input is greater than largest uint224).
+@@ -29,10 +99,199 @@ library SafeCast {
+    * - input must fit into 224 bits
+    */
+   function toUint224(uint256 value) internal pure returns (uint224) {
+-    require(value <= type(uint224).max, "SafeCast: value doesn't fit in 224 bits");
++    if (value > type(uint224).max) {
++      revert SafeCastOverflowedUintDowncast(224, value);
++    }
+     return uint224(value);
+   }
+ 
++  /**
++   * @dev Returns the downcasted uint216 from uint256, reverting on
++   * overflow (when the input is greater than largest uint216).
++   *
++   * Counterpart to Solidity's `uint216` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 216 bits
++   */
++  function toUint216(uint256 value) internal pure returns (uint216) {
++    if (value > type(uint216).max) {
++      revert SafeCastOverflowedUintDowncast(216, value);
++    }
++    return uint216(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint208 from uint256, reverting on
++   * overflow (when the input is greater than largest uint208).
++   *
++   * Counterpart to Solidity's `uint208` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 208 bits
++   */
++  function toUint208(uint256 value) internal pure returns (uint208) {
++    if (value > type(uint208).max) {
++      revert SafeCastOverflowedUintDowncast(208, value);
++    }
++    return uint208(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint200 from uint256, reverting on
++   * overflow (when the input is greater than largest uint200).
++   *
++   * Counterpart to Solidity's `uint200` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 200 bits
++   */
++  function toUint200(uint256 value) internal pure returns (uint200) {
++    if (value > type(uint200).max) {
++      revert SafeCastOverflowedUintDowncast(200, value);
++    }
++    return uint200(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint192 from uint256, reverting on
++   * overflow (when the input is greater than largest uint192).
++   *
++   * Counterpart to Solidity's `uint192` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 192 bits
++   */
++  function toUint192(uint256 value) internal pure returns (uint192) {
++    if (value > type(uint192).max) {
++      revert SafeCastOverflowedUintDowncast(192, value);
++    }
++    return uint192(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint184 from uint256, reverting on
++   * overflow (when the input is greater than largest uint184).
++   *
++   * Counterpart to Solidity's `uint184` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 184 bits
++   */
++  function toUint184(uint256 value) internal pure returns (uint184) {
++    if (value > type(uint184).max) {
++      revert SafeCastOverflowedUintDowncast(184, value);
++    }
++    return uint184(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint176 from uint256, reverting on
++   * overflow (when the input is greater than largest uint176).
++   *
++   * Counterpart to Solidity's `uint176` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 176 bits
++   */
++  function toUint176(uint256 value) internal pure returns (uint176) {
++    if (value > type(uint176).max) {
++      revert SafeCastOverflowedUintDowncast(176, value);
++    }
++    return uint176(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint168 from uint256, reverting on
++   * overflow (when the input is greater than largest uint168).
++   *
++   * Counterpart to Solidity's `uint168` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 168 bits
++   */
++  function toUint168(uint256 value) internal pure returns (uint168) {
++    if (value > type(uint168).max) {
++      revert SafeCastOverflowedUintDowncast(168, value);
++    }
++    return uint168(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint160 from uint256, reverting on
++   * overflow (when the input is greater than largest uint160).
++   *
++   * Counterpart to Solidity's `uint160` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 160 bits
++   */
++  function toUint160(uint256 value) internal pure returns (uint160) {
++    if (value > type(uint160).max) {
++      revert SafeCastOverflowedUintDowncast(160, value);
++    }
++    return uint160(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint152 from uint256, reverting on
++   * overflow (when the input is greater than largest uint152).
++   *
++   * Counterpart to Solidity's `uint152` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 152 bits
++   */
++  function toUint152(uint256 value) internal pure returns (uint152) {
++    if (value > type(uint152).max) {
++      revert SafeCastOverflowedUintDowncast(152, value);
++    }
++    return uint152(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint144 from uint256, reverting on
++   * overflow (when the input is greater than largest uint144).
++   *
++   * Counterpart to Solidity's `uint144` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 144 bits
++   */
++  function toUint144(uint256 value) internal pure returns (uint144) {
++    if (value > type(uint144).max) {
++      revert SafeCastOverflowedUintDowncast(144, value);
++    }
++    return uint144(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint136 from uint256, reverting on
++   * overflow (when the input is greater than largest uint136).
++   *
++   * Counterpart to Solidity's `uint136` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 136 bits
++   */
++  function toUint136(uint256 value) internal pure returns (uint136) {
++    if (value > type(uint136).max) {
++      revert SafeCastOverflowedUintDowncast(136, value);
++    }
++    return uint136(value);
++  }
++
+   /**
+    * @dev Returns the downcasted uint128 from uint256, reverting on
+    * overflow (when the input is greater than largest uint128).
+@@ -44,10 +303,63 @@ library SafeCast {
+    * - input must fit into 128 bits
+    */
+   function toUint128(uint256 value) internal pure returns (uint128) {
+-    require(value <= type(uint128).max, "SafeCast: value doesn't fit in 128 bits");
++    if (value > type(uint128).max) {
++      revert SafeCastOverflowedUintDowncast(128, value);
++    }
+     return uint128(value);
+   }
+ 
++  /**
++   * @dev Returns the downcasted uint120 from uint256, reverting on
++   * overflow (when the input is greater than largest uint120).
++   *
++   * Counterpart to Solidity's `uint120` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 120 bits
++   */
++  function toUint120(uint256 value) internal pure returns (uint120) {
++    if (value > type(uint120).max) {
++      revert SafeCastOverflowedUintDowncast(120, value);
++    }
++    return uint120(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint112 from uint256, reverting on
++   * overflow (when the input is greater than largest uint112).
++   *
++   * Counterpart to Solidity's `uint112` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 112 bits
++   */
++  function toUint112(uint256 value) internal pure returns (uint112) {
++    if (value > type(uint112).max) {
++      revert SafeCastOverflowedUintDowncast(112, value);
++    }
++    return uint112(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint104 from uint256, reverting on
++   * overflow (when the input is greater than largest uint104).
++   *
++   * Counterpart to Solidity's `uint104` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 104 bits
++   */
++  function toUint104(uint256 value) internal pure returns (uint104) {
++    if (value > type(uint104).max) {
++      revert SafeCastOverflowedUintDowncast(104, value);
++    }
++    return uint104(value);
++  }
++
+   /**
+    * @dev Returns the downcasted uint96 from uint256, reverting on
+    * overflow (when the input is greater than largest uint96).
+@@ -59,10 +371,63 @@ library SafeCast {
+    * - input must fit into 96 bits
+    */
+   function toUint96(uint256 value) internal pure returns (uint96) {
+-    require(value <= type(uint96).max, "SafeCast: value doesn't fit in 96 bits");
++    if (value > type(uint96).max) {
++      revert SafeCastOverflowedUintDowncast(96, value);
++    }
+     return uint96(value);
+   }
+ 
++  /**
++   * @dev Returns the downcasted uint88 from uint256, reverting on
++   * overflow (when the input is greater than largest uint88).
++   *
++   * Counterpart to Solidity's `uint88` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 88 bits
++   */
++  function toUint88(uint256 value) internal pure returns (uint88) {
++    if (value > type(uint88).max) {
++      revert SafeCastOverflowedUintDowncast(88, value);
++    }
++    return uint88(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint80 from uint256, reverting on
++   * overflow (when the input is greater than largest uint80).
++   *
++   * Counterpart to Solidity's `uint80` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 80 bits
++   */
++  function toUint80(uint256 value) internal pure returns (uint80) {
++    if (value > type(uint80).max) {
++      revert SafeCastOverflowedUintDowncast(80, value);
++    }
++    return uint80(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint72 from uint256, reverting on
++   * overflow (when the input is greater than largest uint72).
++   *
++   * Counterpart to Solidity's `uint72` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 72 bits
++   */
++  function toUint72(uint256 value) internal pure returns (uint72) {
++    if (value > type(uint72).max) {
++      revert SafeCastOverflowedUintDowncast(72, value);
++    }
++    return uint72(value);
++  }
++
+   /**
+    * @dev Returns the downcasted uint64 from uint256, reverting on
+    * overflow (when the input is greater than largest uint64).
+@@ -74,10 +439,63 @@ library SafeCast {
+    * - input must fit into 64 bits
+    */
+   function toUint64(uint256 value) internal pure returns (uint64) {
+-    require(value <= type(uint64).max, "SafeCast: value doesn't fit in 64 bits");
++    if (value > type(uint64).max) {
++      revert SafeCastOverflowedUintDowncast(64, value);
++    }
+     return uint64(value);
+   }
+ 
++  /**
++   * @dev Returns the downcasted uint56 from uint256, reverting on
++   * overflow (when the input is greater than largest uint56).
++   *
++   * Counterpart to Solidity's `uint56` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 56 bits
++   */
++  function toUint56(uint256 value) internal pure returns (uint56) {
++    if (value > type(uint56).max) {
++      revert SafeCastOverflowedUintDowncast(56, value);
++    }
++    return uint56(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint48 from uint256, reverting on
++   * overflow (when the input is greater than largest uint48).
++   *
++   * Counterpart to Solidity's `uint48` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 48 bits
++   */
++  function toUint48(uint256 value) internal pure returns (uint48) {
++    if (value > type(uint48).max) {
++      revert SafeCastOverflowedUintDowncast(48, value);
++    }
++    return uint48(value);
++  }
++
++  /**
++   * @dev Returns the downcasted uint40 from uint256, reverting on
++   * overflow (when the input is greater than largest uint40).
++   *
++   * Counterpart to Solidity's `uint40` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 40 bits
++   */
++  function toUint40(uint256 value) internal pure returns (uint40) {
++    if (value > type(uint40).max) {
++      revert SafeCastOverflowedUintDowncast(40, value);
++    }
++    return uint40(value);
++  }
++
+   /**
+    * @dev Returns the downcasted uint32 from uint256, reverting on
+    * overflow (when the input is greater than largest uint32).
+@@ -89,10 +507,29 @@ library SafeCast {
+    * - input must fit into 32 bits
+    */
+   function toUint32(uint256 value) internal pure returns (uint32) {
+-    require(value <= type(uint32).max, "SafeCast: value doesn't fit in 32 bits");
++    if (value > type(uint32).max) {
++      revert SafeCastOverflowedUintDowncast(32, value);
++    }
+     return uint32(value);
+   }
+ 
++  /**
++   * @dev Returns the downcasted uint24 from uint256, reverting on
++   * overflow (when the input is greater than largest uint24).
++   *
++   * Counterpart to Solidity's `uint24` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 24 bits
++   */
++  function toUint24(uint256 value) internal pure returns (uint24) {
++    if (value > type(uint24).max) {
++      revert SafeCastOverflowedUintDowncast(24, value);
++    }
++    return uint24(value);
++  }
++
+   /**
+    * @dev Returns the downcasted uint16 from uint256, reverting on
+    * overflow (when the input is greater than largest uint16).
+@@ -104,7 +541,9 @@ library SafeCast {
+    * - input must fit into 16 bits
+    */
+   function toUint16(uint256 value) internal pure returns (uint16) {
+-    require(value <= type(uint16).max, "SafeCast: value doesn't fit in 16 bits");
++    if (value > type(uint16).max) {
++      revert SafeCastOverflowedUintDowncast(16, value);
++    }
+     return uint16(value);
+   }
+ 
+@@ -116,10 +555,12 @@ library SafeCast {
+    *
+    * Requirements:
+    *
+-   * - input must fit into 8 bits.
++   * - input must fit into 8 bits
+    */
+   function toUint8(uint256 value) internal pure returns (uint8) {
+-    require(value <= type(uint8).max, "SafeCast: value doesn't fit in 8 bits");
++    if (value > type(uint8).max) {
++      revert SafeCastOverflowedUintDowncast(8, value);
++    }
+     return uint8(value);
+   }
+ 
+@@ -131,10 +572,282 @@ library SafeCast {
+    * - input must be greater than or equal to 0.
+    */
+   function toUint256(int256 value) internal pure returns (uint256) {
+-    require(value >= 0, "SafeCast: value must be positive");
++    if (value < 0) {
++      revert SafeCastOverflowedIntToUint(value);
++    }
+     return uint256(value);
+   }
+ 
++  /**
++   * @dev Returns the downcasted int248 from int256, reverting on
++   * overflow (when the input is less than smallest int248 or
++   * greater than largest int248).
++   *
++   * Counterpart to Solidity's `int248` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 248 bits
++   */
++  function toInt248(int256 value) internal pure returns (int248 downcasted) {
++    downcasted = int248(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(248, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int240 from int256, reverting on
++   * overflow (when the input is less than smallest int240 or
++   * greater than largest int240).
++   *
++   * Counterpart to Solidity's `int240` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 240 bits
++   */
++  function toInt240(int256 value) internal pure returns (int240 downcasted) {
++    downcasted = int240(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(240, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int232 from int256, reverting on
++   * overflow (when the input is less than smallest int232 or
++   * greater than largest int232).
++   *
++   * Counterpart to Solidity's `int232` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 232 bits
++   */
++  function toInt232(int256 value) internal pure returns (int232 downcasted) {
++    downcasted = int232(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(232, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int224 from int256, reverting on
++   * overflow (when the input is less than smallest int224 or
++   * greater than largest int224).
++   *
++   * Counterpart to Solidity's `int224` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 224 bits
++   */
++  function toInt224(int256 value) internal pure returns (int224 downcasted) {
++    downcasted = int224(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(224, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int216 from int256, reverting on
++   * overflow (when the input is less than smallest int216 or
++   * greater than largest int216).
++   *
++   * Counterpart to Solidity's `int216` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 216 bits
++   */
++  function toInt216(int256 value) internal pure returns (int216 downcasted) {
++    downcasted = int216(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(216, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int208 from int256, reverting on
++   * overflow (when the input is less than smallest int208 or
++   * greater than largest int208).
++   *
++   * Counterpart to Solidity's `int208` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 208 bits
++   */
++  function toInt208(int256 value) internal pure returns (int208 downcasted) {
++    downcasted = int208(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(208, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int200 from int256, reverting on
++   * overflow (when the input is less than smallest int200 or
++   * greater than largest int200).
++   *
++   * Counterpart to Solidity's `int200` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 200 bits
++   */
++  function toInt200(int256 value) internal pure returns (int200 downcasted) {
++    downcasted = int200(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(200, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int192 from int256, reverting on
++   * overflow (when the input is less than smallest int192 or
++   * greater than largest int192).
++   *
++   * Counterpart to Solidity's `int192` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 192 bits
++   */
++  function toInt192(int256 value) internal pure returns (int192 downcasted) {
++    downcasted = int192(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(192, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int184 from int256, reverting on
++   * overflow (when the input is less than smallest int184 or
++   * greater than largest int184).
++   *
++   * Counterpart to Solidity's `int184` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 184 bits
++   */
++  function toInt184(int256 value) internal pure returns (int184 downcasted) {
++    downcasted = int184(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(184, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int176 from int256, reverting on
++   * overflow (when the input is less than smallest int176 or
++   * greater than largest int176).
++   *
++   * Counterpart to Solidity's `int176` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 176 bits
++   */
++  function toInt176(int256 value) internal pure returns (int176 downcasted) {
++    downcasted = int176(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(176, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int168 from int256, reverting on
++   * overflow (when the input is less than smallest int168 or
++   * greater than largest int168).
++   *
++   * Counterpart to Solidity's `int168` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 168 bits
++   */
++  function toInt168(int256 value) internal pure returns (int168 downcasted) {
++    downcasted = int168(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(168, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int160 from int256, reverting on
++   * overflow (when the input is less than smallest int160 or
++   * greater than largest int160).
++   *
++   * Counterpart to Solidity's `int160` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 160 bits
++   */
++  function toInt160(int256 value) internal pure returns (int160 downcasted) {
++    downcasted = int160(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(160, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int152 from int256, reverting on
++   * overflow (when the input is less than smallest int152 or
++   * greater than largest int152).
++   *
++   * Counterpart to Solidity's `int152` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 152 bits
++   */
++  function toInt152(int256 value) internal pure returns (int152 downcasted) {
++    downcasted = int152(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(152, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int144 from int256, reverting on
++   * overflow (when the input is less than smallest int144 or
++   * greater than largest int144).
++   *
++   * Counterpart to Solidity's `int144` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 144 bits
++   */
++  function toInt144(int256 value) internal pure returns (int144 downcasted) {
++    downcasted = int144(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(144, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int136 from int256, reverting on
++   * overflow (when the input is less than smallest int136 or
++   * greater than largest int136).
++   *
++   * Counterpart to Solidity's `int136` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 136 bits
++   */
++  function toInt136(int256 value) internal pure returns (int136 downcasted) {
++    downcasted = int136(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(136, value);
++    }
++  }
++
+   /**
+    * @dev Returns the downcasted int128 from int256, reverting on
+    * overflow (when the input is less than smallest int128 or
+@@ -145,12 +858,138 @@ library SafeCast {
+    * Requirements:
+    *
+    * - input must fit into 128 bits
++   */
++  function toInt128(int256 value) internal pure returns (int128 downcasted) {
++    downcasted = int128(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(128, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int120 from int256, reverting on
++   * overflow (when the input is less than smallest int120 or
++   * greater than largest int120).
++   *
++   * Counterpart to Solidity's `int120` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 120 bits
++   */
++  function toInt120(int256 value) internal pure returns (int120 downcasted) {
++    downcasted = int120(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(120, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int112 from int256, reverting on
++   * overflow (when the input is less than smallest int112 or
++   * greater than largest int112).
++   *
++   * Counterpart to Solidity's `int112` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 112 bits
++   */
++  function toInt112(int256 value) internal pure returns (int112 downcasted) {
++    downcasted = int112(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(112, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int104 from int256, reverting on
++   * overflow (when the input is less than smallest int104 or
++   * greater than largest int104).
++   *
++   * Counterpart to Solidity's `int104` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 104 bits
++   */
++  function toInt104(int256 value) internal pure returns (int104 downcasted) {
++    downcasted = int104(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(104, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int96 from int256, reverting on
++   * overflow (when the input is less than smallest int96 or
++   * greater than largest int96).
++   *
++   * Counterpart to Solidity's `int96` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 96 bits
++   */
++  function toInt96(int256 value) internal pure returns (int96 downcasted) {
++    downcasted = int96(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(96, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int88 from int256, reverting on
++   * overflow (when the input is less than smallest int88 or
++   * greater than largest int88).
++   *
++   * Counterpart to Solidity's `int88` operator.
++   *
++   * Requirements:
+    *
+-   * _Available since v3.1._
++   * - input must fit into 88 bits
+    */
+-  function toInt128(int256 value) internal pure returns (int128) {
+-    require(value >= type(int128).min && value <= type(int128).max, "SafeCast: value doesn't fit in 128 bits");
+-    return int128(value);
++  function toInt88(int256 value) internal pure returns (int88 downcasted) {
++    downcasted = int88(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(88, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int80 from int256, reverting on
++   * overflow (when the input is less than smallest int80 or
++   * greater than largest int80).
++   *
++   * Counterpart to Solidity's `int80` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 80 bits
++   */
++  function toInt80(int256 value) internal pure returns (int80 downcasted) {
++    downcasted = int80(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(80, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int72 from int256, reverting on
++   * overflow (when the input is less than smallest int72 or
++   * greater than largest int72).
++   *
++   * Counterpart to Solidity's `int72` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 72 bits
++   */
++  function toInt72(int256 value) internal pure returns (int72 downcasted) {
++    downcasted = int72(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(72, value);
++    }
+   }
+ 
+   /**
+@@ -163,12 +1002,66 @@ library SafeCast {
+    * Requirements:
+    *
+    * - input must fit into 64 bits
++   */
++  function toInt64(int256 value) internal pure returns (int64 downcasted) {
++    downcasted = int64(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(64, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int56 from int256, reverting on
++   * overflow (when the input is less than smallest int56 or
++   * greater than largest int56).
++   *
++   * Counterpart to Solidity's `int56` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 56 bits
++   */
++  function toInt56(int256 value) internal pure returns (int56 downcasted) {
++    downcasted = int56(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(56, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int48 from int256, reverting on
++   * overflow (when the input is less than smallest int48 or
++   * greater than largest int48).
++   *
++   * Counterpart to Solidity's `int48` operator.
++   *
++   * Requirements:
++   *
++   * - input must fit into 48 bits
++   */
++  function toInt48(int256 value) internal pure returns (int48 downcasted) {
++    downcasted = int48(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(48, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int40 from int256, reverting on
++   * overflow (when the input is less than smallest int40 or
++   * greater than largest int40).
++   *
++   * Counterpart to Solidity's `int40` operator.
++   *
++   * Requirements:
+    *
+-   * _Available since v3.1._
++   * - input must fit into 40 bits
+    */
+-  function toInt64(int256 value) internal pure returns (int64) {
+-    require(value >= type(int64).min && value <= type(int64).max, "SafeCast: value doesn't fit in 64 bits");
+-    return int64(value);
++  function toInt40(int256 value) internal pure returns (int40 downcasted) {
++    downcasted = int40(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(40, value);
++    }
+   }
+ 
+   /**
+@@ -181,12 +1074,30 @@ library SafeCast {
+    * Requirements:
+    *
+    * - input must fit into 32 bits
++   */
++  function toInt32(int256 value) internal pure returns (int32 downcasted) {
++    downcasted = int32(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(32, value);
++    }
++  }
++
++  /**
++   * @dev Returns the downcasted int24 from int256, reverting on
++   * overflow (when the input is less than smallest int24 or
++   * greater than largest int24).
++   *
++   * Counterpart to Solidity's `int24` operator.
++   *
++   * Requirements:
+    *
+-   * _Available since v3.1._
++   * - input must fit into 24 bits
+    */
+-  function toInt32(int256 value) internal pure returns (int32) {
+-    require(value >= type(int32).min && value <= type(int32).max, "SafeCast: value doesn't fit in 32 bits");
+-    return int32(value);
++  function toInt24(int256 value) internal pure returns (int24 downcasted) {
++    downcasted = int24(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(24, value);
++    }
+   }
+ 
+   /**
+@@ -199,12 +1110,12 @@ library SafeCast {
+    * Requirements:
+    *
+    * - input must fit into 16 bits
+-   *
+-   * _Available since v3.1._
+    */
+-  function toInt16(int256 value) internal pure returns (int16) {
+-    require(value >= type(int16).min && value <= type(int16).max, "SafeCast: value doesn't fit in 16 bits");
+-    return int16(value);
++  function toInt16(int256 value) internal pure returns (int16 downcasted) {
++    downcasted = int16(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(16, value);
++    }
+   }
+ 
+   /**
+@@ -216,13 +1127,13 @@ library SafeCast {
+    *
+    * Requirements:
+    *
+-   * - input must fit into 8 bits.
+-   *
+-   * _Available since v3.1._
++   * - input must fit into 8 bits
+    */
+-  function toInt8(int256 value) internal pure returns (int8) {
+-    require(value >= type(int8).min && value <= type(int8).max, "SafeCast: value doesn't fit in 8 bits");
+-    return int8(value);
++  function toInt8(int256 value) internal pure returns (int8 downcasted) {
++    downcasted = int8(value);
++    if (downcasted != value) {
++      revert SafeCastOverflowedIntDowncast(8, value);
++    }
+   }
+ 
+   /**
+@@ -234,7 +1145,18 @@ library SafeCast {
+    */
+   function toInt256(uint256 value) internal pure returns (int256) {
+     // Note: Unsafe cast below is okay because `type(int256).max` is guaranteed to be positive
+-    require(value <= uint256(type(int256).max), "SafeCast: value doesn't fit in an int256");
++    if (value > uint256(type(int256).max)) {
++      revert SafeCastOverflowedUintToInt(value);
++    }
+     return int256(value);
+   }
++
++  /**
++   * @dev Cast a boolean (false or true) to a uint256 (0 or 1) with no jump.
++   */
++  function toUint(bool b) internal pure returns (uint256 u) {
++    assembly ("memory-safe") {
++      u := iszero(iszero(b))
++    }
++  }
+ }
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/UserConfiguration.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/UserConfiguration.sol
+index 3430b00..a4db6fd 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/UserConfiguration.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/UserConfiguration.sol
+@@ -1,6 +1,7 @@
+ // SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.0;
+ 
++import {IPool} from "../../../interfaces/IPool.sol";
+ import {Errors} from "../helpers/Errors.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ReserveConfiguration} from "./ReserveConfiguration.sol";
+@@ -24,7 +25,7 @@ library UserConfiguration {
+    */
+   function setBorrowing(DataTypes.UserConfigurationMap storage self, uint256 reserveIndex, bool borrowing) internal {
+     unchecked {
+-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
++      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.InvalidReserveIndex());
+       uint256 bit = 1 << (reserveIndex << 1);
+       if (borrowing) {
+         self.data |= bit;
+@@ -38,20 +39,26 @@ library UserConfiguration {
+    * @notice Sets if the user is using as collateral the reserve identified by reserveIndex
+    * @param self The configuration object
+    * @param reserveIndex The index of the reserve in the bitmap
++   * @param asset The address of the reserve
++   * @param user The address of the user
+    * @param usingAsCollateral True if the user is using the reserve as collateral, false otherwise
+    */
+   function setUsingAsCollateral(
+     DataTypes.UserConfigurationMap storage self,
+     uint256 reserveIndex,
++    address asset,
++    address user,
+     bool usingAsCollateral
+   ) internal {
+     unchecked {
+-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
++      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.InvalidReserveIndex());
+       uint256 bit = 1 << ((reserveIndex << 1) + 1);
+       if (usingAsCollateral) {
+         self.data |= bit;
++        emit IPool.ReserveUsedAsCollateralEnabled(asset, user);
+       } else {
+         self.data &= ~bit;
++        emit IPool.ReserveUsedAsCollateralDisabled(asset, user);
+       }
+     }
+   }
+@@ -68,7 +75,7 @@ library UserConfiguration {
+     returns (bool)
+   {
+     unchecked {
+-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
++      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.InvalidReserveIndex());
+       return (self.data >> (reserveIndex << 1)) & 3 != 0;
+     }
+   }
+@@ -81,7 +88,7 @@ library UserConfiguration {
+    */
+   function isBorrowing(DataTypes.UserConfigurationMap memory self, uint256 reserveIndex) internal pure returns (bool) {
+     unchecked {
+-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
++      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.InvalidReserveIndex());
+       return (self.data >> (reserveIndex << 1)) & 1 != 0;
+     }
+   }
+@@ -98,7 +105,7 @@ library UserConfiguration {
+     returns (bool)
+   {
+     unchecked {
+-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
++      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.InvalidReserveIndex());
+       return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
+     }
+   }
+@@ -202,6 +209,21 @@ library UserConfiguration {
+     return (false, address(0));
+   }
+ 
++  /**
++   * @notice Returns the borrowed and collateral flags for the first asset on the bitmap and the bitmap shifted by two.
++   * @dev This function mutates the input and the 2 bit slots in the bitmap will no longer correspond to the reserve index.
++   * This is useful in situations where we want to iterate the bitmap as it allows for early exit once the bitmap turns zero.
++   * @param data The configuration uint256
++   * @return The bitmap shifted by 2 bits, so that the first asset points to the *next* asset.
++   * @return True if the first asset in the bitmap is borrowed.
++   * @return True if the first asset in the bitmap is a collateral.
++   */
++  function getNextFlags(uint256 data) internal pure returns (uint256, bool, bool) {
++    bool isBorrowed = data & 1 == 1;
++    bool isEnabledAsCollateral = data & 2 == 2;
++    return (data >> 2, isBorrowed, isEnabledAsCollateral);
++  }
++
+   /**
+    * @notice Returns the address of the first asset flagged in the bitmap given the corresponding bitmask
+    * @param self The configuration object
+diff --git a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/ValidationLogic.sol b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ValidationLogic.sol
+index 88e693c..a894189 100644
+--- a/tmp/1_0x4731bF01583F991278692E8727d0700a00A1fBBf_flat/ValidationLogic.sol
++++ b/tmp/1_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ValidationLogic.sol
+@@ -18,7 +18,7 @@ import {PercentageMath} from "../math/PercentageMath.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ReserveLogic} from "./ReserveLogic.sol";
+ import {GenericLogic} from "./GenericLogic.sol";
+-import {SafeCast} from "../../../dependencies/openzeppelin/contracts/SafeCast.sol";
++import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ import {IncentivizedERC20} from "../../tokenization/base/IncentivizedERC20.sol";
+ 
+ /**
+@@ -66,13 +66,13 @@ library ValidationLogic {
+     uint256 amount,
+     address onBehalfOf
+   ) internal view {
+-    require(amount != 0, Errors.INVALID_AMOUNT);
++    require(amount != 0, Errors.InvalidAmount());
+ 
+     (bool isActive, bool isFrozen,, bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+-    require(isActive, Errors.RESERVE_INACTIVE);
+-    require(!isPaused, Errors.RESERVE_PAUSED);
+-    require(!isFrozen, Errors.RESERVE_FROZEN);
+-    require(onBehalfOf != reserveCache.aTokenAddress, Errors.SUPPLY_TO_ATOKEN);
++    require(isActive, Errors.ReserveInactive());
++    require(!isPaused, Errors.ReservePaused());
++    require(!isFrozen, Errors.ReserveFrozen());
++    require(onBehalfOf != reserveCache.aTokenAddress, Errors.SupplyToAToken());
+ 
+     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
+     require(
+@@ -82,7 +82,7 @@ library ValidationLogic {
+             reserveCache.nextLiquidityIndex
+           ) + amount
+         ) <= supplyCap * (10 ** reserveCache.reserveConfiguration.getDecimals()),
+-      Errors.SUPPLY_CAP_EXCEEDED
++      Errors.SupplyCapExceeded()
+     );
+   }
+ 
+@@ -96,12 +96,12 @@ library ValidationLogic {
+     internal
+     pure
+   {
+-    require(amount != 0, Errors.INVALID_AMOUNT);
+-    require(amount <= userBalance, Errors.NOT_ENOUGH_AVAILABLE_USER_BALANCE);
++    require(amount != 0, Errors.InvalidAmount());
++    require(amount <= userBalance, Errors.NotEnoughAvailableUserBalance());
+ 
+     (bool isActive,,, bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+-    require(isActive, Errors.RESERVE_INACTIVE);
+-    require(!isPaused, Errors.RESERVE_PAUSED);
++    require(isActive, Errors.ReserveInactive());
++    require(!isPaused, Errors.ReservePaused());
+   }
+ 
+   struct ValidateBorrowLocalVars {
+@@ -138,30 +138,26 @@ library ValidationLogic {
+     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+     DataTypes.ValidateBorrowParams memory params
+   ) internal view {
+-    require(params.amount != 0, Errors.INVALID_AMOUNT);
++    require(params.amount != 0, Errors.InvalidAmount());
+ 
+     ValidateBorrowLocalVars memory vars;
+ 
+     (vars.isActive, vars.isFrozen, vars.borrowingEnabled, vars.isPaused) =
+       params.reserveCache.reserveConfiguration.getFlags();
+ 
+-    require(vars.isActive, Errors.RESERVE_INACTIVE);
+-    require(!vars.isPaused, Errors.RESERVE_PAUSED);
+-    require(!vars.isFrozen, Errors.RESERVE_FROZEN);
+-    require(vars.borrowingEnabled, Errors.BORROWING_NOT_ENABLED);
+-    require(
+-      !params.reserveCache.reserveConfiguration.getIsVirtualAccActive()
+-        || IERC20(params.reserveCache.aTokenAddress).totalSupply() >= params.amount,
+-      Errors.INVALID_AMOUNT
+-    );
++    require(vars.isActive, Errors.ReserveInactive());
++    require(!vars.isPaused, Errors.ReservePaused());
++    require(!vars.isFrozen, Errors.ReserveFrozen());
++    require(vars.borrowingEnabled, Errors.BorrowingNotEnabled());
++    require(IERC20(params.reserveCache.aTokenAddress).totalSupply() >= params.amount, Errors.InvalidAmount());
+ 
+     require(
+       params.priceOracleSentinel == address(0) || IPriceOracleSentinel(params.priceOracleSentinel).isBorrowAllowed(),
+-      Errors.PRICE_ORACLE_SENTINEL_CHECK_FAILED
++      Errors.PriceOracleSentinelCheckFailed()
+     );
+ 
+     //validate interest rate mode
+-    require(params.interestRateMode == DataTypes.InterestRateMode.VARIABLE, Errors.INVALID_INTEREST_RATE_MODE_SELECTED);
++    require(params.interestRateMode == DataTypes.InterestRateMode.VARIABLE, Errors.InvalidInterestRateModeSelected());
+ 
+     vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
+     vars.borrowCap = params.reserveCache.reserveConfiguration.getBorrowCap();
+@@ -176,31 +172,16 @@ library ValidationLogic {
+       vars.totalDebt = vars.totalSupplyVariableDebt + params.amount;
+ 
+       unchecked {
+-        require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.BORROW_CAP_EXCEEDED);
++        require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.BorrowCapExceeded());
+       }
+     }
+ 
+-    if (params.isolationModeActive) {
+-      // check that the asset being borrowed is borrowable in isolation mode AND
+-      // the total exposure is no bigger than the collateral debt ceiling
+-      require(
+-        params.reserveCache.reserveConfiguration.getBorrowableInIsolation(), Errors.ASSET_NOT_BORROWABLE_IN_ISOLATION
+-      );
+-
+-      require(
+-        reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt
+-          + (params.amount / 10 ** (vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS)).toUint128()
+-          <= params.isolationModeDebtCeiling,
+-        Errors.DEBT_CEILING_EXCEEDED
+-      );
+-    }
+-
+     if (params.userEModeCategory != 0) {
+       require(
+         EModeConfiguration.isReserveEnabledOnBitmap(
+           eModeCategories[params.userEModeCategory].borrowableBitmap, reservesData[params.asset].id
+         ),
+-        Errors.NOT_BORROWABLE_IN_EMODE
++        Errors.NotBorrowableInEMode()
+       );
+     }
+ 
+@@ -211,19 +192,16 @@ library ValidationLogic {
+       eModeCategories,
+       DataTypes.CalculateUserAccountDataParams({
+         userConfig: params.userConfig,
+-        reservesCount: params.reservesCount,
+         user: params.userAddress,
+         oracle: params.oracle,
+         userEModeCategory: params.userEModeCategory
+       })
+     );
+ 
+-    require(vars.userCollateralInBaseCurrency != 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
+-    require(vars.currentLtv != 0, Errors.LTV_VALIDATION_FAILED);
++    require(vars.userCollateralInBaseCurrency != 0, Errors.CollateralBalanceIsZero());
++    require(vars.currentLtv != 0, Errors.LtvValidationFailed());
+ 
+-    require(
+-      vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
+-    );
++    require(vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HealthFactorLowerThanLiquidationThreshold());
+ 
+     vars.amountInBaseCurrency = IPriceOracleGetter(params.oracle).getAssetPrice(params.asset) * params.amount;
+     unchecked {
+@@ -235,8 +213,7 @@ library ValidationLogic {
+       (vars.userDebtInBaseCurrency + vars.amountInBaseCurrency).percentDiv(vars.currentLtv); //LTV is calculated in percentage
+ 
+     require(
+-      vars.collateralNeededInBaseCurrency <= vars.userCollateralInBaseCurrency,
+-      Errors.COLLATERAL_CANNOT_COVER_NEW_BORROW
++      vars.collateralNeededInBaseCurrency <= vars.userCollateralInBaseCurrency, Errors.CollateralCannotCoverNewBorrow()
+     );
+ 
+     if (params.userConfig.isBorrowingAny()) {
+@@ -244,52 +221,48 @@ library ValidationLogic {
+         params.userConfig.getSiloedBorrowingState(reservesData, reservesList);
+ 
+       if (vars.siloedBorrowingEnabled) {
+-        require(vars.siloedBorrowingAddress == params.asset, Errors.SILOED_BORROWING_VIOLATION);
++        require(vars.siloedBorrowingAddress == params.asset, Errors.SiloedBorrowingViolation());
+       } else {
+-        require(!params.reserveCache.reserveConfiguration.getSiloedBorrowing(), Errors.SILOED_BORROWING_VIOLATION);
++        require(!params.reserveCache.reserveConfiguration.getSiloedBorrowing(), Errors.SiloedBorrowingViolation());
+       }
+     }
+   }
+ 
+   /**
+    * @notice Validates a repay action.
++   * @param user The user initiating the repayment
+    * @param reserveCache The cached data of the reserve
+-   * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
+-   * @param onBehalfOf The address of the user msg.sender is repaying for
++   * @param amountSent The amount sent for the repayment. Can be an actual value or type(uint256).max
++   * @param onBehalfOf The address of the user sender is repaying for
+    * @param debt The borrow balance of the user
+    */
+   function validateRepay(
++    address user,
+     DataTypes.ReserveCache memory reserveCache,
+     uint256 amountSent,
+     DataTypes.InterestRateMode interestRateMode,
+     address onBehalfOf,
+     uint256 debt
+-  ) internal view {
+-    require(amountSent != 0, Errors.INVALID_AMOUNT);
+-    require(interestRateMode == DataTypes.InterestRateMode.VARIABLE, Errors.INVALID_INTEREST_RATE_MODE_SELECTED);
+-    require(amountSent != type(uint256).max || msg.sender == onBehalfOf, Errors.NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF);
++  ) internal pure {
++    require(amountSent != 0, Errors.InvalidAmount());
++    require(interestRateMode == DataTypes.InterestRateMode.VARIABLE, Errors.InvalidInterestRateModeSelected());
++    require(amountSent != type(uint256).max || user == onBehalfOf, Errors.NoExplicitAmountToRepayOnBehalf());
+ 
+     (bool isActive,,, bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+-    require(isActive, Errors.RESERVE_INACTIVE);
+-    require(!isPaused, Errors.RESERVE_PAUSED);
++    require(isActive, Errors.ReserveInactive());
++    require(!isPaused, Errors.ReservePaused());
+ 
+-    require(debt != 0, Errors.NO_DEBT_OF_SELECTED_TYPE);
++    require(debt != 0, Errors.NoDebtOfSelectedType());
+   }
+ 
+   /**
+    * @notice Validates the action of setting an asset as collateral.
+-   * @param reserveCache The cached data of the reserve
+-   * @param userBalance The balance of the user
++   * @param reserveConfig The config of the reserve
+    */
+-  function validateSetUseReserveAsCollateral(DataTypes.ReserveCache memory reserveCache, uint256 userBalance)
+-    internal
+-    pure
+-  {
+-    require(userBalance != 0, Errors.UNDERLYING_BALANCE_ZERO);
+-
+-    (bool isActive,,, bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+-    require(isActive, Errors.RESERVE_INACTIVE);
+-    require(!isPaused, Errors.RESERVE_PAUSED);
++  function validateSetUseReserveAsCollateral(DataTypes.ReserveConfigurationMap memory reserveConfig) internal pure {
++    (bool isActive,,, bool isPaused) = reserveConfig.getFlags();
++    require(isActive, Errors.ReserveInactive());
++    require(!isPaused, Errors.ReservePaused());
+   }
+ 
+   /**
+@@ -303,10 +276,10 @@ library ValidationLogic {
+     address[] memory assets,
+     uint256[] memory amounts
+   ) internal view {
+-    require(assets.length == amounts.length, Errors.INCONSISTENT_FLASHLOAN_PARAMS);
++    require(assets.length == amounts.length, Errors.InconsistentFlashloanParams());
+     for (uint256 i = 0; i < assets.length; i++) {
+       for (uint256 j = i + 1; j < assets.length; j++) {
+-        require(assets[i] != assets[j], Errors.INCONSISTENT_FLASHLOAN_PARAMS);
++        require(assets[i] != assets[j], Errors.InconsistentFlashloanParams());
+       }
+       validateFlashloanSimple(reservesData[assets[i]], amounts[i]);
+     }
+@@ -318,13 +291,10 @@ library ValidationLogic {
+    */
+   function validateFlashloanSimple(DataTypes.ReserveData storage reserve, uint256 amount) internal view {
+     DataTypes.ReserveConfigurationMap memory configuration = reserve.configuration;
+-    require(!configuration.getPaused(), Errors.RESERVE_PAUSED);
+-    require(configuration.getActive(), Errors.RESERVE_INACTIVE);
+-    require(configuration.getFlashLoanEnabled(), Errors.FLASHLOAN_DISABLED);
+-    require(
+-      !configuration.getIsVirtualAccActive() || IERC20(reserve.aTokenAddress).totalSupply() >= amount,
+-      Errors.INVALID_AMOUNT
+-    );
++    require(!configuration.getPaused(), Errors.ReservePaused());
++    require(configuration.getActive(), Errors.ReserveInactive());
++    require(configuration.getFlashLoanEnabled(), Errors.FlashloanDisabled());
++    require(IERC20(reserve.aTokenAddress).totalSupply() >= amount, Errors.InvalidAmount());
+   }
+ 
+   struct ValidateLiquidationCallLocalVars {
+@@ -337,47 +307,49 @@ library ValidationLogic {
+ 
+   /**
+    * @notice Validates the liquidation action.
+-   * @param userConfig The user configuration mapping
++   * @param borrowerConfig The user configuration mapping
+    * @param collateralReserve The reserve data of the collateral
+    * @param debtReserve The reserve data of the debt
+    * @param params Additional parameters needed for the validation
+    */
+   function validateLiquidationCall(
+-    DataTypes.UserConfigurationMap storage userConfig,
++    DataTypes.UserConfigurationMap storage borrowerConfig,
+     DataTypes.ReserveData storage collateralReserve,
+     DataTypes.ReserveData storage debtReserve,
+     DataTypes.ValidateLiquidationCallParams memory params
+   ) internal view {
+     ValidateLiquidationCallLocalVars memory vars;
+ 
++    require(params.borrower != params.liquidator, Errors.SelfLiquidation());
++
+     (vars.collateralReserveActive,,, vars.collateralReservePaused) = collateralReserve.configuration.getFlags();
+ 
+     (vars.principalReserveActive,,, vars.principalReservePaused) =
+       params.debtReserveCache.reserveConfiguration.getFlags();
+ 
+-    require(vars.collateralReserveActive && vars.principalReserveActive, Errors.RESERVE_INACTIVE);
+-    require(!vars.collateralReservePaused && !vars.principalReservePaused, Errors.RESERVE_PAUSED);
++    require(vars.collateralReserveActive && vars.principalReserveActive, Errors.ReserveInactive());
++    require(!vars.collateralReservePaused && !vars.principalReservePaused, Errors.ReservePaused());
+ 
+     require(
+       params.priceOracleSentinel == address(0) || params.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD
+         || IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(),
+-      Errors.PRICE_ORACLE_SENTINEL_CHECK_FAILED
++      Errors.PriceOracleSentinelCheckFailed()
+     );
+ 
+     require(
+       collateralReserve.liquidationGracePeriodUntil < uint40(block.timestamp)
+         && debtReserve.liquidationGracePeriodUntil < uint40(block.timestamp),
+-      Errors.LIQUIDATION_GRACE_SENTINEL_CHECK_FAILED
++      Errors.LiquidationGraceSentinelCheckFailed()
+     );
+ 
+-    require(params.healthFactor < HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HEALTH_FACTOR_NOT_BELOW_THRESHOLD);
++    require(params.healthFactor < HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HealthFactorNotBelowThreshold());
+ 
+     vars.isCollateralEnabled = collateralReserve.configuration.getLiquidationThreshold() != 0
+-      && userConfig.isUsingAsCollateral(collateralReserve.id);
++      && borrowerConfig.isUsingAsCollateral(collateralReserve.id);
+ 
+     //if collateral isn't enabled as collateral by user, it cannot be liquidated
+-    require(vars.isCollateralEnabled, Errors.COLLATERAL_CANNOT_BE_LIQUIDATED);
+-    require(params.totalDebt != 0, Errors.SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
++    require(vars.isCollateralEnabled, Errors.CollateralCannotBeLiquidated());
++    require(params.totalDebt != 0, Errors.SpecifiedCurrencyNotBorrowedByUser());
+   }
+ 
+   /**
+@@ -388,7 +360,6 @@ library ValidationLogic {
+    * @param userConfig The state of the user for the specific reserve
+    * @param user The user to validate health factor of
+    * @param userEModeCategory The users active efficiency mode category
+-   * @param reservesCount The number of available reserves
+    * @param oracle The price oracle
+    */
+   function validateHealthFactor(
+@@ -398,7 +369,6 @@ library ValidationLogic {
+     DataTypes.UserConfigurationMap memory userConfig,
+     address user,
+     uint8 userEModeCategory,
+-    uint256 reservesCount,
+     address oracle
+   ) internal view returns (uint256, bool) {
+     (,,,, uint256 healthFactor, bool hasZeroLtvCollateral) = GenericLogic.calculateUserAccountData(
+@@ -407,14 +377,13 @@ library ValidationLogic {
+       eModeCategories,
+       DataTypes.CalculateUserAccountDataParams({
+         userConfig: userConfig,
+-        reservesCount: reservesCount,
+         user: user,
+         oracle: oracle,
+         userEModeCategory: userEModeCategory
+       })
+     );
+ 
+-    require(healthFactor >= HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
++    require(healthFactor >= HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HealthFactorLowerThanLiquidationThreshold());
+ 
+     return (healthFactor, hasZeroLtvCollateral);
+   }
+@@ -427,7 +396,6 @@ library ValidationLogic {
+    * @param userConfig The state of the user for the specific reserve
+    * @param asset The asset for which the ltv will be validated
+    * @param from The user from which the aTokens are being transferred
+-   * @param reservesCount The number of available reserves
+    * @param oracle The price oracle
+    * @param userEModeCategory The users active efficiency mode category
+    */
+@@ -438,17 +406,13 @@ library ValidationLogic {
+     DataTypes.UserConfigurationMap memory userConfig,
+     address asset,
+     address from,
+-    uint256 reservesCount,
+     address oracle,
+     uint8 userEModeCategory
+   ) internal view {
+-    DataTypes.ReserveData memory reserve = reservesData[asset];
++    (, bool hasZeroLtvCollateral) =
++      validateHealthFactor(reservesData, reservesList, eModeCategories, userConfig, from, userEModeCategory, oracle);
+ 
+-    (, bool hasZeroLtvCollateral) = validateHealthFactor(
+-      reservesData, reservesList, eModeCategories, userConfig, from, userEModeCategory, reservesCount, oracle
+-    );
+-
+-    require(!hasZeroLtvCollateral || reserve.configuration.getLtv() == 0, Errors.LTV_VALIDATION_FAILED);
++    require(!hasZeroLtvCollateral || reservesData[asset].configuration.getLtv() == 0, Errors.LtvValidationFailed());
+   }
+ 
+   /**
+@@ -456,7 +420,7 @@ library ValidationLogic {
+    * @param reserve The reserve object
+    */
+   function validateTransfer(DataTypes.ReserveData storage reserve) internal view {
+-    require(!reserve.configuration.getPaused(), Errors.RESERVE_PAUSED);
++    require(!reserve.configuration.getPaused(), Errors.ReservePaused());
+   }
+ 
+   /**
+@@ -470,12 +434,12 @@ library ValidationLogic {
+     DataTypes.ReserveData storage reserve,
+     address asset
+   ) internal view {
+-    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+-    require(reserve.id != 0 || reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
+-    require(IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0, Errors.VARIABLE_DEBT_SUPPLY_NOT_ZERO);
++    require(asset != address(0), Errors.ZeroAddressNotValid());
++    require(reserve.id != 0 || reservesList[0] == asset, Errors.AssetNotListed());
++    require(IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0, Errors.VariableDebtSupplyNotZero());
+     require(
+       IERC20(reserve.aTokenAddress).totalSupply() == 0 && reserve.accruedToTreasury == 0,
+-      Errors.UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO
++      Errors.UnderlyingClaimableRightsNotZero()
+     );
+   }
+ 
+@@ -483,18 +447,16 @@ library ValidationLogic {
+    * @notice Validates the action of setting efficiency mode.
+    * @param eModeCategories a mapping storing configurations for all efficiency mode categories
+    * @param userConfig the user configuration
+-   * @param reservesCount The total number of valid reserves
+    * @param categoryId The id of the category
+    */
+   function validateSetUserEMode(
+     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+     DataTypes.UserConfigurationMap memory userConfig,
+-    uint256 reservesCount,
+     uint8 categoryId
+   ) internal view {
+     DataTypes.EModeCategory storage eModeCategory = eModeCategories[categoryId];
+     // category is invalid if the liq threshold is not set
+-    require(categoryId == 0 || eModeCategory.liquidationThreshold != 0, Errors.INCONSISTENT_EMODE_CATEGORY);
++    require(categoryId == 0 || eModeCategory.liquidationThreshold != 0, Errors.InconsistentEModeCategory());
+ 
+     // eMode can always be enabled if the user hasn't supplied anything
+     if (userConfig.isEmpty()) {
+@@ -504,14 +466,20 @@ library ValidationLogic {
+     // if user is trying to set another category than default we require that
+     // either the user is not borrowing, or it's borrowing assets of categoryId
+     if (categoryId != 0) {
++      uint256 i = 0;
++      bool isBorrowed = false;
++      uint128 cachedBorrowableBitmap = eModeCategory.borrowableBitmap;
++      uint256 cachedUserConfig = userConfig.data;
+       unchecked {
+-        for (uint256 i = 0; i < reservesCount; i++) {
+-          if (userConfig.isBorrowing(i)) {
++        while (cachedUserConfig != 0) {
++          (cachedUserConfig, isBorrowed,) = UserConfiguration.getNextFlags(cachedUserConfig);
++
++          if (isBorrowed) {
+             require(
+-              EModeConfiguration.isReserveEnabledOnBitmap(eModeCategory.borrowableBitmap, i),
+-              Errors.NOT_BORROWABLE_IN_EMODE
++              EModeConfiguration.isReserveEnabledOnBitmap(cachedBorrowableBitmap, i), Errors.NotBorrowableInEMode()
+             );
+           }
++          ++i;
+         }
+       }
+     }
+@@ -545,7 +513,7 @@ library ValidationLogic {
+ 
+   /**
+    * @notice Validates if an asset should be automatically activated as collateral in the following actions: supply,
+-   * transfer, mint unbacked, and liquidate
++   * transfer, and liquidate
+    * @dev This is used to ensure that isolated assets are not enabled as collateral automatically
+    * @param reservesData The state of all the reserves
+    * @param reservesList The addresses of all the active reserves
+@@ -554,6 +522,7 @@ library ValidationLogic {
+    * @return True if the asset can be activated as collateral, false otherwise
+    */
+   function validateAutomaticUseAsCollateral(
++    address sender,
+     mapping(address => DataTypes.ReserveData) storage reservesData,
+     mapping(uint256 => address) storage reservesList,
+     DataTypes.UserConfigurationMap storage userConfig,
+@@ -563,7 +532,7 @@ library ValidationLogic {
+     if (reserveConfig.getDebtCeiling() != 0) {
+       // ensures only the ISOLATED_COLLATERAL_SUPPLIER_ROLE can enable collateral as side-effect of an action
+       IPoolAddressesProvider addressesProvider = IncentivizedERC20(aTokenAddress).POOL().ADDRESSES_PROVIDER();
+-      if (!IAccessControl(addressesProvider.getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, msg.sender)) {
++      if (!IAccessControl(addressesProvider.getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, sender)) {
+         return false;
+       }
+     }

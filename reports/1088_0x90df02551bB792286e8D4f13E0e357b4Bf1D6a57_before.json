@@ -7,14 +7,14 @@
     "poolAddressesProvider": "0xB9FABd7500B2C6781c35Dd48d54f81fc2299D7AF",
     "poolConfigurator": "0x69FEE8F261E004453BE0800BC9039717528645A6",
     "priceOracleSentinel": "0x2B5EA1604BAbb7B730120950Cb13951f3525828A",
-    "protocolDataProvider": "0xbb4a3B6781be3650B252552dFF6332EfB1162152"
+    "protocolDataProvider": "0x602BeF1d4c381e5a29f0C562A310416A73D8Be19"
   },
   "reserves": {
     "0x420000000000000000000000000000000000000A": {
       "aToken": "0x8acAe35059C9aE27709028fF6689386a44c09f3a",
       "aTokenName": "Aave Metis WETH",
       "aTokenSymbol": "aMetWETH",
-      "aTokenUnderlyingBalance": "1361777627905715064873",
+      "aTokenUnderlyingBalance": "1386971803319928912676",
       "borrowCap": 720,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -34,7 +34,7 @@
       "oracle": "0x3BBe70e2F96c87aEce7F67A2b0178052f62E37fE",
       "oracleDecimals": 8,
       "oracleDescription": "ETH / USD",
-      "oracleLatestAnswer": "181212460000",
+      "oracleLatestAnswer": "245641094678",
       "reserveFactor": 1500,
       "supplyCap": 2300,
       "symbol": "WETH",
@@ -43,13 +43,13 @@
       "variableDebtToken": "0x8Bb19e3DD277a73D4A95EE434F14cE4B92898421",
       "variableDebtTokenName": "Aave Metis Variable Debt WETH",
       "variableDebtTokenSymbol": "variableDebtMetWETH",
-      "virtualBalance": "1361777563759498144156"
+      "virtualBalance": "1386971739173711991959"
     },
     "0x4c078361FC9BbB78DF910800A991C7c3DD2F6ce0": {
       "aToken": "0x85ABAdDcae06efee2CB5F75f33b6471759eFDE24",
       "aTokenName": "Aave Metis mDAI",
       "aTokenSymbol": "aMetmDAI",
-      "aTokenUnderlyingBalance": "45446633718029505703495",
+      "aTokenUnderlyingBalance": "57623836226679082689250",
       "borrowCap": 900000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -66,10 +66,10 @@
       "liquidationProtocolFee": 1000,
       "liquidationThreshold": 7700,
       "ltv": 6300,
-      "oracle": "0xB3721282cd62Ba8F7bB02Cb843F3a34f9e109ef8",
+      "oracle": "0xf577E512687C83706ccfeD31C1939C75E8ea966F",
       "oracleDecimals": 8,
       "oracleDescription": "Capped mDAI/USD",
-      "oracleLatestAnswer": "100003000",
+      "oracleLatestAnswer": "99985995",
       "reserveFactor": 2500,
       "supplyCap": 1000000,
       "symbol": "m.DAI",
@@ -78,13 +78,13 @@
       "variableDebtToken": "0x13Bd89aF338f3c7eAE9a75852fC2F1ca28B4DDbF",
       "variableDebtTokenName": "Aave Metis Variable Debt mDAI",
       "variableDebtTokenSymbol": "variableDebtMetmDAI",
-      "virtualBalance": "45445501107051630446581"
+      "virtualBalance": "57622703615701207432336"
     },
     "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000": {
       "aToken": "0x7314Ef2CA509490f65F52CC8FC9E0675C66390b8",
       "aTokenName": "Aave Metis METIS",
       "aTokenSymbol": "aMetMETIS",
-      "aTokenUnderlyingBalance": "215442875169507928163723",
+      "aTokenUnderlyingBalance": "211451565079199393378067",
       "borrowCap": 32000,
       "borrowingEnabled": true,
       "debtCeiling": 100000000,
@@ -104,7 +104,7 @@
       "oracle": "0xD4a5Bb03B5D66d9bf81507379302Ac2C2DFDFa6D",
       "oracleDecimals": 8,
       "oracleDescription": "METIS / USD",
-      "oracleLatestAnswer": "1608899816",
+      "oracleLatestAnswer": "1577425000",
       "reserveFactor": 1500,
       "supplyCap": 600000,
       "symbol": "Metis",
@@ -113,13 +113,13 @@
       "variableDebtToken": "0x0110174183e13D5Ea59D7512226c5D5A47bA2c40",
       "variableDebtTokenName": "Aave Metis Variable Debt METIS",
       "variableDebtTokenSymbol": "variableDebtMetMETIS",
-      "virtualBalance": "215442875140498827887469"
+      "virtualBalance": "211451565050190293101813"
     },
     "0xEA32A96608495e54156Ae48931A7c20f0dcc1a21": {
       "aToken": "0x885C8AEC5867571582545F894A5906971dB9bf27",
       "aTokenName": "Aave Metis mUSDC",
       "aTokenSymbol": "aMetmUSDC",
-      "aTokenUnderlyingBalance": "1107784315990",
+      "aTokenUnderlyingBalance": "933394313440",
       "borrowCap": 9000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -136,10 +136,10 @@
       "liquidationProtocolFee": 1000,
       "liquidationThreshold": 8300,
       "ltv": 7500,
-      "oracle": "0xF2acD6aE4fcf662161eA354dA844f224bf91FF8c",
+      "oracle": "0x0b9cA640284cf2636577703f785D5aEEc466BC56",
       "oracleDecimals": 8,
       "oracleDescription": "Capped mUSDC/USD",
-      "oracleLatestAnswer": "99990175",
+      "oracleLatestAnswer": "99988105",
       "reserveFactor": 1000,
       "supplyCap": 10000000,
       "symbol": "m.USDC",
@@ -148,13 +148,13 @@
       "variableDebtToken": "0x571171a7EF1e3c8c83d47EF1a50E225E9c351380",
       "variableDebtTokenName": "Aave Metis Variable Debt mUSDC",
       "variableDebtTokenSymbol": "variableDebtMetmUSDC",
-      "virtualBalance": "1107782702903"
+      "virtualBalance": "933392700353"
     },
     "0xbB06DCA3AE6887fAbF931640f67cab3e3a16F4dC": {
       "aToken": "0xd9fa75D14c26720d5ce7eE2530793a823e8f07b9",
       "aTokenName": "Aave Metis mUSDT",
       "aTokenSymbol": "aMetmUSDT",
-      "aTokenUnderlyingBalance": "592425680543",
+      "aTokenUnderlyingBalance": "405699657805",
       "borrowCap": 4000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -171,10 +171,10 @@
       "liquidationProtocolFee": 1000,
       "liquidationThreshold": 7800,
       "ltv": 7500,
-      "oracle": "0xD1D7DCBDE72916646A7F8AcE6Ad8C5179D8ddFbB",
+      "oracle": "0x433636CB0136Cfd75145ccca608Bb548E6C037dE",
       "oracleDecimals": 8,
       "oracleDescription": "Capped mUSDT/USD",
-      "oracleLatestAnswer": "100020955",
+      "oracleLatestAnswer": "100016200",
       "reserveFactor": 1000,
       "supplyCap": 4500000,
       "symbol": "m.USDT",
@@ -183,7 +183,7 @@
       "variableDebtToken": "0x6B45DcE8aF4fE5Ab3bFCF030d8fB57718eAB54e5",
       "variableDebtTokenName": "Aave Metis Variable Debt mUSDT",
       "variableDebtTokenSymbol": "variableDebtMetmUSDT",
-      "virtualBalance": "592415470304"
+      "virtualBalance": "405689447566"
     }
   },
   "strategies": {

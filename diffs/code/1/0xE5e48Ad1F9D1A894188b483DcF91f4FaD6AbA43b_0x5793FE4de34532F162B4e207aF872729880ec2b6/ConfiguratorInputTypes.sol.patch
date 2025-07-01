@@ -1,0 +1,37 @@
+===================================================================
+--- lib/aave-v3-origin/src/contracts/protocol/libraries/types/ConfiguratorInputTypes.sol
++++ lib/aave-v3-origin-private/src/contracts/protocol/libraries/types/ConfiguratorInputTypes.sol
+@@ -4,13 +4,9 @@
+ library ConfiguratorInputTypes {
+     struct InitReserveInput {
+         address aTokenImpl;
+         address variableDebtTokenImpl;
+-        bool useVirtualBalance;
+-        address interestRateStrategyAddress;
+         address underlyingAsset;
+-        address treasury;
+-        address incentivesController;
+         string aTokenName;
+         string aTokenSymbol;
+         string variableDebtTokenName;
+         string variableDebtTokenSymbol;
+@@ -19,19 +15,16 @@
+     }
+ 
+     struct UpdateATokenInput {
+         address asset;
+-        address treasury;
+-        address incentivesController;
+         string name;
+         string symbol;
+         address implementation;
+         bytes params;
+     }
+ 
+     struct UpdateDebtTokenInput {
+         address asset;
+-        address incentivesController;
+         string name;
+         string symbol;
+         address implementation;
+         bytes params;
