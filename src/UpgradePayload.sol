@@ -2,8 +2,6 @@
 pragma solidity ^0.8.10;
 
 import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {ITransparentProxyFactory} from
-  "solidity-utils/contracts/transparent-proxy/interfaces/ITransparentProxyFactory.sol";
 
 import {IPool} from "aave-v3-origin/contracts/interfaces/IPool.sol";
 import {IPoolConfigurator} from "aave-v3-origin/contracts/interfaces/IPoolConfigurator.sol";
@@ -13,15 +11,13 @@ import {IncentivizedERC20} from "aave-v3-origin/contracts/protocol/tokenization/
 
 /**
  * @title UpgradePayload
- * @notice Upgrade payload to upgrade the Aave v3.3 to v3.4
+ * @notice Upgrade payload to upgrade the Aave v3.4 to v3.5
  * @author BGD Labs
  */
 contract UpgradePayload {
   struct ConstructorParams {
     IPoolAddressesProvider poolAddressesProvider;
-    address poolDataProvider;
     address poolImpl;
-    address poolConfiguratorImpl;
     address aTokenImpl;
     address vTokenImpl;
   }
@@ -29,18 +25,15 @@ contract UpgradePayload {
   error WrongAddresses();
 
   IPoolAddressesProvider public immutable POOL_ADDRESSES_PROVIDER;
-  address public immutable POOL_DATA_PROVIDER;
   IPool public immutable POOL;
   IPoolConfigurator public immutable POOL_CONFIGURATOR;
 
   address public immutable POOL_IMPL;
-  address public immutable POOL_CONFIGURATOR_IMPL;
   address public immutable A_TOKEN_IMPL;
   address public immutable V_TOKEN_IMPL;
 
   constructor(ConstructorParams memory params) {
     POOL_ADDRESSES_PROVIDER = params.poolAddressesProvider;
-    POOL_DATA_PROVIDER = params.poolDataProvider;
 
     IPool pool = IPool(params.poolAddressesProvider.getPool());
     POOL = pool;
@@ -50,7 +43,6 @@ contract UpgradePayload {
       revert WrongAddresses();
     }
     POOL_IMPL = params.poolImpl;
-    POOL_CONFIGURATOR_IMPL = params.poolConfiguratorImpl;
 
     if (IncentivizedERC20(params.aTokenImpl).POOL() != pool || IncentivizedERC20(params.vTokenImpl).POOL() != pool) {
       revert WrongAddresses();
@@ -60,34 +52,27 @@ contract UpgradePayload {
   }
 
   function execute() external virtual {
-    // 1. Upgrade `PoolConfigurator` implementation.
-    //    This enables usage of v3.4 interfaces and logic within the `PoolConfigurator` for subsequent steps.
-    POOL_ADDRESSES_PROVIDER.setPoolConfiguratorImpl(POOL_CONFIGURATOR_IMPL);
-
     _defaultUpgrade();
   }
 
   function _defaultUpgrade() internal {
-    // 2. Upgrade `Pool` implementation.
+    // 1. Upgrade `Pool` implementation.
     //    This enables usage of v3.4 interfaces and logic within the `Pool`.
     POOL_ADDRESSES_PROVIDER.setPoolImpl(POOL_IMPL);
 
-    // 3. Set the new `PoolDataProvider` implementation.
-    POOL_ADDRESSES_PROVIDER.setPoolDataProvider(POOL_DATA_PROVIDER);
-
-    // 4. Update AToken and VariableDebtToken implementations for all reserves.
+    // 2. Update AToken and VariableDebtToken implementations for all reserves.
     address[] memory reserves = POOL.getReservesList();
     uint256 length = reserves.length;
     for (uint256 i = 0; i < length; i++) {
       address reserve = reserves[i];
 
-      if (!_needToUpdateReserve(reserve)) {
-        continue;
+      if (_needToUpdateReserveAToken(reserve)) {
+        POOL_CONFIGURATOR.updateAToken(_prepareATokenUpdateInfo(reserve));
       }
 
-      POOL_CONFIGURATOR.updateAToken(_prepareATokenUpdateInfo(reserve));
-
-      POOL_CONFIGURATOR.updateVariableDebtToken(_prepareVTokenUpdateInfo(reserve));
+      if (_needToUpdateReserveVToken(reserve)) {
+        POOL_CONFIGURATOR.updateVariableDebtToken(_prepareVTokenUpdateInfo(reserve));
+      }
     }
   }
 
@@ -123,7 +108,11 @@ contract UpgradePayload {
     });
   }
 
-  function _needToUpdateReserve(address) internal view virtual returns (bool) {
+  function _needToUpdateReserveAToken(address) internal view virtual returns (bool) {
+    return true;
+  }
+
+  function _needToUpdateReserveVToken(address) internal view virtual returns (bool) {
     return true;
   }
 }

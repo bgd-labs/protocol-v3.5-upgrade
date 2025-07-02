@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
+
 import {
   ProtocolV3TestBase,
   IPool,
@@ -13,8 +13,6 @@ import {
   ReserveConfiguration,
   SafeERC20
 } from "aave-helpers/src/ProtocolV3TestBase.sol";
-
-import {IFlashLoanReceiver} from "aave-v3-origin/contracts/misc/flashloan/interfaces/IFlashLoanReceiver.sol";
 
 import {UpgradePayload} from "../src/UpgradePayload.sol";
 
@@ -64,7 +62,7 @@ abstract contract UpgradeTest is ProtocolV3TestBase {
     FLASH_RECEIVER = address(new MockFlashReceiver());
   }
 
-  function setUp() public {
+  function setUp() public virtual {
     vm.createSelectFork(vm.rpcUrl(NETWORK), BLOCK_NUMBER);
   }
 
@@ -126,26 +124,6 @@ abstract contract UpgradeTest is ProtocolV3TestBase {
     UpgradePayload _payload = UpgradePayload(_getTestPayload());
 
     executePayload(vm, address(_payload));
-
-    IPoolAddressesProvider addressesProvider = IPoolAddressesProvider(address(_payload.POOL_ADDRESSES_PROVIDER()));
-    IPool pool = IPool(addressesProvider.getPool());
-    address[] memory reserves = pool.getReservesList();
-    IPoolDataProvider poolDataProvider = IPoolDataProvider(addressesProvider.getPoolDataProvider());
-    assertEq(pool.FLASHLOAN_PREMIUM_TO_PROTOCOL(), 100_00);
-
-    for (uint256 i = 0; i < reserves.length; i++) {
-      address reserve = reserves[i];
-      assertTrue(poolDataProvider.getIsVirtualAccActive(reserve));
-
-      address aToken = pool.getReserveAToken(reserve);
-
-      assertGe(IERC20(reserve).balanceOf(aToken), pool.getVirtualUnderlyingBalance(reserve));
-      DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(reserve);
-
-      uint256 virtualAccActiveFlag = (reserveData.configuration.data & ReserveConfiguration.VIRTUAL_ACC_ACTIVE_MASK)
-        >> ReserveConfiguration.VIRTUAL_ACC_START_BIT_POSITION;
-      assertEq(virtualAccActiveFlag, 1);
-    }
   }
 
   function test_gas() external {

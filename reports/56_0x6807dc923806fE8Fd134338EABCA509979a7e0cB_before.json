@@ -17,14 +17,14 @@
     "poolAddressesProvider": "0xff75B6da14FfbbfD355Daf7a2731456b3562Ba6D",
     "poolConfigurator": "0x67bdF23C7fCE7C65fF7415Ba3F2520B45D6f9584",
     "priceOracleSentinel": "0x0000000000000000000000000000000000000000",
-    "protocolDataProvider": "0x1e26247502e90b4fab9D0d17e4775e90085D2A35"
+    "protocolDataProvider": "0xc90Df74A7c16245c5F5C5870327Ceb38Fe5d5328"
   },
   "reserves": {
     "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82": {
       "aToken": "0x4199CC1F5ed0d796563d7CcB2e036253E2C18281",
       "aTokenName": "Aave BNB Smart Chain CAKE",
       "aTokenSymbol": "aBnbCAKE",
-      "aTokenUnderlyingBalance": "520493791370216602786383",
+      "aTokenUnderlyingBalance": "556404597433076696546865",
       "borrowCap": 600000,
       "borrowingEnabled": true,
       "debtCeiling": 350000000,
@@ -44,7 +44,7 @@
       "oracle": "0xB6064eD41d4f67e353768aA239cA86f4F73665a1",
       "oracleDecimals": 8,
       "oracleDescription": "CAKE / USD",
-      "oracleLatestAnswer": "253751065",
+      "oracleLatestAnswer": "228485000",
       "reserveFactor": 2000,
       "supplyCap": 1200000,
       "symbol": "Cake",
@@ -53,13 +53,13 @@
       "variableDebtToken": "0xE20dBC7119c635B1B51462f844861258770e0699",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt CAKE",
       "variableDebtTokenSymbol": "variableDebtBnbCAKE",
-      "virtualBalance": "520493773553860876642476"
+      "virtualBalance": "556404579616720970402958"
     },
     "0x2170Ed0880ac9A755fd29B2688956BD959F933F8": {
       "aToken": "0x2E94171493fAbE316b6205f1585779C887771E2F",
       "aTokenName": "Aave BNB Smart Chain ETH",
       "aTokenSymbol": "aBnbETH",
-      "aTokenUnderlyingBalance": "3362524953134038348360",
+      "aTokenUnderlyingBalance": "3855442233116325609739",
       "borrowCap": 8000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -79,7 +79,7 @@
       "oracle": "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
       "oracleDecimals": 8,
       "oracleDescription": "ETH / USD",
-      "oracleLatestAnswer": "276810029719",
+      "oracleLatestAnswer": "246167000000",
       "reserveFactor": 1500,
       "supplyCap": 10000,
       "symbol": "ETH",
@@ -88,13 +88,13 @@
       "variableDebtToken": "0x8FDea7891b4D6dbdc746309245B316aF691A636C",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt ETH",
       "variableDebtTokenSymbol": "variableDebtBnbETH",
-      "virtualBalance": "3362524947340805691839"
+      "virtualBalance": "3855442227323092953218"
     },
     "0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C": {
       "aToken": "0xBDFd4E51D3c14a232135f04988a42576eFb31519",
       "aTokenName": "Aave BNB Smart Chain wstETH",
       "aTokenSymbol": "aBnbwstETH",
-      "aTokenUnderlyingBalance": "3779521918008026973322",
+      "aTokenUnderlyingBalance": "3346906764441574150994",
       "borrowCap": 190,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -114,7 +114,7 @@
       "oracle": "0xc1377B4cdF9116bf7b3d7F72A4f8A7Be8506cE80",
       "oracleDecimals": 8,
       "oracleDescription": "Capped wstETH / stETH(ETH) / USD",
-      "oracleLatestAnswer": "333585149778",
+      "oracleLatestAnswer": "297103496377",
       "reserveFactor": 1500,
       "supplyCap": 3800,
       "symbol": "wstETH",
@@ -123,13 +123,13 @@
       "variableDebtToken": "0x2c391998308c56D7572A8F501D58CB56fB9Fe1C5",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt wstETH",
       "variableDebtTokenSymbol": "variableDebtBnbwstETH",
-      "virtualBalance": "3779521918008026973322"
+      "virtualBalance": "3346906764441574150994"
     },
     "0x55d398326f99059fF775485246999027B3197955": {
       "aToken": "0xa9251ca9DE909CB71783723713B21E4233fbf1B1",
       "aTokenName": "Aave BNB Smart Chain USDT",
       "aTokenSymbol": "aBnbUSDT",
-      "aTokenUnderlyingBalance": "22045541534592782014442665",
+      "aTokenUnderlyingBalance": "49325531018200281668007466",
       "borrowCap": 90000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -149,22 +149,22 @@
       "oracle": "0xee845A7A40A090Da256420A293803C35B7F436b6",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDT/USD",
-      "oracleLatestAnswer": "99999000",
+      "oracleLatestAnswer": "100020774",
       "reserveFactor": 1000,
-      "supplyCap": 100000000,
+      "supplyCap": 200000000,
       "symbol": "USDT",
       "underlying": "0x55d398326f99059fF775485246999027B3197955",
       "usageAsCollateralEnabled": true,
       "variableDebtToken": "0xF8bb2Be50647447Fb355e3a77b81be4db64107cd",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt USDT",
       "variableDebtTokenSymbol": "variableDebtBnbUSDT",
-      "virtualBalance": "22045445216612966105008502"
+      "virtualBalance": "49325403035636465758573303"
     },
     "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c": {
       "aToken": "0x56a7ddc4e848EbF43845854205ad71D5D5F72d3D",
       "aTokenName": "Aave BNB Smart Chain BTCB",
       "aTokenSymbol": "aBnbBTCB",
-      "aTokenUnderlyingBalance": "1014341018674514494345",
+      "aTokenUnderlyingBalance": "906953174110894766754",
       "borrowCap": 180,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -184,7 +184,7 @@
       "oracle": "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf",
       "oracleDecimals": 8,
       "oracleDescription": "BTC / USD",
-      "oracleLatestAnswer": "10931030000000",
+      "oracleLatestAnswer": "10682937000000",
       "reserveFactor": 2000,
       "supplyCap": 1200,
       "symbol": "BTCB",
@@ -193,13 +193,13 @@
       "variableDebtToken": "0x7b1E82F4f542fbB25D64c5523Fe3e44aBe4F2702",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt BTCB",
       "variableDebtTokenSymbol": "variableDebtBnbBTCB",
-      "virtualBalance": "1014341018669936295521"
+      "virtualBalance": "906953174106316567930"
     },
     "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d": {
       "aToken": "0x00901a076785e0906d1028c7d6372d247bec7d61",
       "aTokenName": "Aave BNB Smart Chain USDC",
       "aTokenSymbol": "aBnbUSDC",
-      "aTokenUnderlyingBalance": "6566769470447082677148872",
+      "aTokenUnderlyingBalance": "5698832116805919608185319",
       "borrowCap": 40000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -219,7 +219,7 @@
       "oracle": "0x9102a9553B470dbD0dC74009a870A5886C92902C",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC/USD",
-      "oracleLatestAnswer": "99980605",
+      "oracleLatestAnswer": "99993000",
       "reserveFactor": 1000,
       "supplyCap": 60000000,
       "symbol": "USDC",
@@ -228,13 +228,13 @@
       "variableDebtToken": "0xcDBBEd5606d9c5C98eEedd67933991dC17F0c68d",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt USDC",
       "variableDebtTokenSymbol": "variableDebtBnbUSDC",
-      "virtualBalance": "6566768881395908531626191"
+      "virtualBalance": "5698831527754745462662638"
     },
     "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c": {
       "aToken": "0x9B00a09492a626678E5A3009982191586C444Df9",
       "aTokenName": "Aave BNB Smart Chain WBNB",
       "aTokenSymbol": "aBnbWBNB",
-      "aTokenUnderlyingBalance": "91935232548938158983180",
+      "aTokenUnderlyingBalance": "96840386117868415621932",
       "borrowCap": 36000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -254,7 +254,7 @@
       "oracle": "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE",
       "oracleDecimals": 8,
       "oracleDescription": "BNB / USD",
-      "oracleLatestAnswer": "66898331010",
+      "oracleLatestAnswer": "65311602067",
       "reserveFactor": 2000,
       "supplyCap": 144000,
       "symbol": "WBNB",
@@ -263,13 +263,13 @@
       "variableDebtToken": "0x0E76414d433ddfe8004d2A7505d218874875a996",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt WBNB",
       "variableDebtTokenSymbol": "variableDebtBnbWBNB",
-      "virtualBalance": "91935231537569214860767"
+      "virtualBalance": "96840385106499471499519"
     },
     "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409": {
       "aToken": "0x75bd1A659bdC62e4C313950d44A2416faB43E785",
       "aTokenName": "Aave BNB Smart Chain FDUSD",
       "aTokenSymbol": "aBnbFDUSD",
-      "aTokenUnderlyingBalance": "1689994298402765353927318",
+      "aTokenUnderlyingBalance": "1177486964164828219934744",
       "borrowCap": 10800000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -289,7 +289,7 @@
       "oracle": "0x72Cb7a00D439296A6fC3c9face9Eca96bfdEf825",
       "oracleDecimals": 8,
       "oracleDescription": "Capped fdUSD/USD",
-      "oracleLatestAnswer": "99897736",
+      "oracleLatestAnswer": "99849435",
       "reserveFactor": 2000,
       "supplyCap": 12000000,
       "symbol": "FDUSD",
@@ -298,7 +298,7 @@
       "variableDebtToken": "0xE628B8a123e6037f1542e662B9F55141a16945C8",
       "variableDebtTokenName": "Aave BNB Smart Chain Variable Debt FDUSD",
       "variableDebtTokenSymbol": "variableDebtBnbFDUSD",
-      "virtualBalance": "1689991326846350405615102"
+      "virtualBalance": "1177483992608413271622528"
     }
   },
   "strategies": {
