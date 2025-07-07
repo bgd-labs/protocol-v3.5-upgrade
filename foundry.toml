@@ -7,7 +7,7 @@ ffi = true
 optimizer = true
 optimizer_runs = 200
 solc = '0.8.27'
-evm_version = 'shanghai'
+evm_version = 'cancun'
 bytecode_hash = 'none'
 libraries = [
     # TODO: update when v3.5 libraries will be deployed
