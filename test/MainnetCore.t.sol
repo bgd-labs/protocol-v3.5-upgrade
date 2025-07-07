@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// TODO remove after v3.4 go live
-import {GovV3Helpers} from "aave-helpers/src/GovV3Helpers.sol";
-
 import {AaveV3Ethereum, AaveV3EthereumAssets} from "aave-address-book/AaveV3Ethereum.sol";
 import {IATokenWithDelegation} from "aave-v3-origin/contracts/interfaces/IATokenWithDelegation.sol";
 import {VariableDebtTokenMainnetInstanceGHO} from
@@ -16,14 +13,7 @@ import {UpgradePayloadMainnetCore} from "../src/UpgradePayloadMainnetCore.sol";
 
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 
-contract MainnetCoreTest is UpgradeTest("mainnet", 22822649) {
-  function setUp() public override {
-    super.setUp();
-
-    // TODO remove after v3.4 go live
-    GovV3Helpers.executePayload(vm, 301);
-  }
-
+contract MainnetCoreTest is UpgradeTest("mainnet", 22866426) {
   function test_upgrade() public override {
     super.test_upgrade();
 
