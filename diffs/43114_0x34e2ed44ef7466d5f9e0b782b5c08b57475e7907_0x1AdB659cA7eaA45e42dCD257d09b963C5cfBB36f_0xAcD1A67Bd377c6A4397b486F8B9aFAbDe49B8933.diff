@@ -1,0 +1,674 @@
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/DataTypes.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/DataTypes.sol
+index 3debcd4..06e6aa3 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/DataTypes.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/DataTypes.sol
+@@ -212,6 +212,8 @@ library DataTypes {
+     InterestRateMode interestRateMode;
+     address onBehalfOf;
+     bool useATokens;
++    address oracle;
++    uint8 userEModeCategory;
+   }
+ 
+   struct ExecuteWithdrawParams {
+@@ -235,9 +237,9 @@ library DataTypes {
+     address asset;
+     address from;
+     address to;
+-    uint256 amount;
+-    uint256 balanceFromBefore;
+-    uint256 balanceToBefore;
++    uint256 scaledAmount;
++    uint256 scaledBalanceFromBefore;
++    uint256 scaledBalanceToBefore;
+     address oracle;
+     uint8 fromEModeCategory;
+   }
+@@ -292,7 +294,7 @@ library DataTypes {
+     UserConfigurationMap userConfig;
+     address asset;
+     address userAddress;
+-    uint256 amount;
++    uint256 amountScaled;
+     InterestRateMode interestRateMode;
+     address oracle;
+     uint8 userEModeCategory;
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/DebtTokenBase.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/DebtTokenBase.sol
+index ab9ee55..60a39a2 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/DebtTokenBase.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/DebtTokenBase.sol
+@@ -82,10 +82,19 @@ abstract contract DebtTokenBase is VersionedInitializable, EIP712Base, Context,
+    * @notice Decreases the borrow allowance of a user on the specific debt token.
+    * @param delegator The address delegating the borrowing power
+    * @param delegatee The address receiving the delegated borrowing power
+-   * @param amount The amount to subtract from the current allowance
++   * @param amount The minimum amount to subtract from the current allowance
++   * @param correctedAmount The maximum amount to subtract from the current allowance
+    */
+-  function _decreaseBorrowAllowance(address delegator, address delegatee, uint256 amount) internal {
+-    uint256 newAllowance = _borrowAllowances[delegator][delegatee] - amount;
++  function _decreaseBorrowAllowance(address delegator, address delegatee, uint256 amount, uint256 correctedAmount)
++    internal
++  {
++    uint256 oldBorrowAllowance = _borrowAllowances[delegator][delegatee];
++    if (oldBorrowAllowance < amount) {
++      revert InsufficientBorrowAllowance(delegatee, oldBorrowAllowance, amount);
++    }
++
++    uint256 consumption = oldBorrowAllowance >= correctedAmount ? correctedAmount : oldBorrowAllowance;
++    uint256 newAllowance = oldBorrowAllowance - consumption;
+ 
+     _borrowAllowances[delegator][delegatee] = newAllowance;
+ 
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/Errors.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/Errors.sol
+index 6c493d8..c8ba3d0 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/Errors.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/Errors.sol
+@@ -35,7 +35,6 @@ library Errors {
+   error BorrowingNotEnabled(); // 'Borrowing is not enabled'
+   error NotEnoughAvailableUserBalance(); // 'User cannot withdraw more than the available balance'
+   error InvalidInterestRateModeSelected(); // 'Invalid interest rate mode selected'
+-  error CollateralBalanceIsZero(); // 'The collateral balance is 0'
+   error HealthFactorLowerThanLiquidationThreshold(); // 'Health factor is below the liquidation threshold'
+   error CollateralCannotCoverNewBorrow(); // 'There is not enough collateral to cover a new borrow'
+   error NoDebtOfSelectedType(); // 'For repayment of a specific type of debt, the user needs to have debt that type'
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/ICreditDelegationToken.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/ICreditDelegationToken.sol
+index aad2bf7..3ac906a 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/ICreditDelegationToken.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/ICreditDelegationToken.sol
+@@ -18,6 +18,14 @@ interface ICreditDelegationToken {
+     address indexed fromUser, address indexed toUser, address indexed asset, uint256 amount
+   );
+ 
++  /**
++   * @dev Indicates a failure with the `spender`’s `allowance`. Used in borrowing.
++   * @param spender Address that may be allowed to operate on tokens without being their owner.
++   * @param allowance Amount of tokens a `spender` is allowed to operate with.
++   * @param needed Minimum amount required to perform a transfer.
++   */
++  error InsufficientBorrowAllowance(address spender, uint256 allowance, uint256 needed);
++
+   /**
+    * @notice Delegates borrowing power to a user on the specific debt token.
+    * Delegation will still respect the liquidation constraints (even if delegated, a
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/IPool.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/IPool.sol
+index 38aad59..2320fbc 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/IPool.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/IPool.sol
+@@ -504,17 +504,17 @@ interface IPool {
+    * @param asset The address of the underlying asset of the aToken
+    * @param from The user from which the aTokens are transferred
+    * @param to The user receiving the aTokens
+-   * @param amount The amount being transferred/withdrawn
+-   * @param balanceFromBefore The aToken balance of the `from` user before the transfer
+-   * @param balanceToBefore The aToken balance of the `to` user before the transfer
++   * @param scaledAmount The scaled amount being transferred/withdrawn
++   * @param scaledBalanceFromBefore The aToken scaled balance of the `from` user before the transfer
++   * @param scaledBalanceToBefore The aToken scaled balance of the `to` user before the transfer
+    */
+   function finalizeTransfer(
+     address asset,
+     address from,
+     address to,
+-    uint256 amount,
+-    uint256 balanceFromBefore,
+-    uint256 balanceToBefore
++    uint256 scaledAmount,
++    uint256 scaledBalanceFromBefore,
++    uint256 scaledBalanceToBefore
+   ) external;
+ 
+   /**
+@@ -709,8 +709,9 @@ interface IPool {
+    * @dev The deficit of a reserve can occur due to situations where borrowed assets are not repaid, leading to bad debt.
+    * @param asset The address of the underlying asset to cover the deficit.
+    * @param amount The amount to be covered, in aToken
++   * @return The amount of tokens burned
+    */
+-  function eliminateReserveDeficit(address asset, uint256 amount) external;
++  function eliminateReserveDeficit(address asset, uint256 amount) external returns (uint256);
+ 
+   /**
+    * @notice Approves or disapproves a position manager. This position manager will be able
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/IVariableDebtToken.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/IVariableDebtToken.sol
+index d567d1f..66a8c5d 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/IVariableDebtToken.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/IVariableDebtToken.sol
+@@ -11,27 +11,32 @@ import {IInitializableDebtToken} from "./IInitializableDebtToken.sol";
+  */
+ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
+   /**
+-   * @notice Mints debt token to the `onBehalfOf` address
++   * @notice Mints debt token to the `onBehalfOf` address.
++   * @dev Passing both the unscaled and scaled amounts enhances precision. The `scaledAmount` is used for precise balance updates,
++   * while the `amount` is used for allowance checks, preventing cumulative rounding errors.
+    * @param user The address receiving the borrowed underlying, being the delegatee in case
+    * of credit delegate, or same as `onBehalfOf` otherwise
+    * @param onBehalfOf The address receiving the debt tokens
+-   * @param amount The amount of debt being minted
++   * @param amount The unscaled amount of debt to be accounted for allowance
++   * @param scaledAmount The scaled amount of debt tokens to mint
+    * @param index The variable debt index of the reserve
+    * @return The scaled total debt of the reserve
+    */
+-  function mint(address user, address onBehalfOf, uint256 amount, uint256 index) external returns (uint256);
++  function mint(address user, address onBehalfOf, uint256 amount, uint256 scaledAmount, uint256 index)
++    external
++    returns (uint256);
+ 
+   /**
+-   * @notice Burns user variable debt
+-   * @dev In some instances, a burn transaction will emit a mint event
+-   * if the amount to burn is less than the interest that the user accrued
++   * @notice Burns user variable debt.
++   * @dev Passing the scaled amount allows for more precise calculations and avoids cumulative errors from repeated conversions.
++   * @dev In some instances, a burn transaction will emit a mint event if the amount to burn is less than the interest that the user accrued.
+    * @param from The address from which the debt will be burned
+-   * @param amount The amount getting burned
++   * @param scaledAmount The scaled amount of debt getting burned
+    * @param index The variable debt index of the reserve
+    * @return True if the new balance is zero
+    * @return The scaled total debt of the reserve
+    */
+-  function burn(address from, uint256 amount, uint256 index) external returns (bool, uint256);
++  function burn(address from, uint256 scaledAmount, uint256 index) external returns (bool, uint256);
+ 
+   /**
+    * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for variableDebtWETH)
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/IncentivizedERC20.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/IncentivizedERC20.sol
+index 4e18e31..478cefc 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/IncentivizedERC20.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/IncentivizedERC20.sol
+@@ -22,6 +22,14 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+   using WadRayMath for uint256;
+   using SafeCast for uint256;
+ 
++  /**
++   * @dev Indicates a failure with the `spender`’s `allowance`. Used in transfers.
++   * @param spender Address that may be allowed to operate on tokens without being their owner.
++   * @param allowance Amount of tokens a `spender` is allowed to operate with.
++   * @param needed Minimum amount required to perform a transfer.
++   */
++  error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
++
+   /**
+    * @dev Only pool admin can call functions marked by this modifier.
+    */
+@@ -168,6 +176,26 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+     return true;
+   }
+ 
++  /**
++   * @dev Updates `owner`'s allowance for `spender` based on spent `value`.
++   *
++   * Revert if not enough allowance is available.
++   *
++   * @param owner The owner of the tokens
++   * @param spender The user allowed to spend on behalf of owner
++   * @param amount The minimum amount being consumed from the allowance
++   * @param correctedAmount The maximum amount being consumed from the allowance
++   */
++  function _spendAllowance(address owner, address spender, uint256 amount, uint256 correctedAmount) internal virtual {
++    uint256 currentAllowance = _allowances[owner][spender];
++    if (currentAllowance < amount) {
++      revert ERC20InsufficientAllowance(spender, currentAllowance, amount);
++    }
++
++    uint256 consumption = currentAllowance >= correctedAmount ? correctedAmount : currentAllowance;
++    _approve(owner, spender, currentAllowance - consumption);
++  }
++
+   /**
+    * @notice Transfers tokens between two users and apply incentives if defined.
+    * @param sender The source address
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/ScaledBalanceTokenBase.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/ScaledBalanceTokenBase.sol
+index 4d22caf..e5f2d8f 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/ScaledBalanceTokenBase.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/ScaledBalanceTokenBase.sol
+@@ -55,22 +55,30 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
+    * @notice Implements the basic logic to mint a scaled balance token.
+    * @param caller The address performing the mint
+    * @param onBehalfOf The address of the user that will receive the scaled tokens
+-   * @param amount The amount of tokens getting minted
++   * @param amountScaled The amountScaled of tokens getting minted
+    * @param index The next liquidity index of the reserve
++   * @param getTokenBalance The function to get the balance of the token
+    * @return `true` if the the previous balance of the user was 0
+    */
+-  function _mintScaled(address caller, address onBehalfOf, uint256 amount, uint256 index) internal returns (bool) {
+-    uint256 amountScaled = amount.rayDiv(index);
++  function _mintScaled(
++    address caller,
++    address onBehalfOf,
++    uint256 amountScaled,
++    uint256 index,
++    function(uint256, uint256) internal pure returns (uint256) getTokenBalance
++  ) internal returns (bool) {
+     require(amountScaled != 0, Errors.InvalidMintAmount());
+ 
+     uint256 scaledBalance = super.balanceOf(onBehalfOf);
+-    uint256 balanceIncrease = scaledBalance.rayMul(index) - scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
++    uint256 nextBalance = getTokenBalance(amountScaled + scaledBalance, index);
++    uint256 previousBalance = getTokenBalance(scaledBalance, _userState[onBehalfOf].additionalData);
++    uint256 balanceIncrease = getTokenBalance(scaledBalance, index) - previousBalance;
+ 
+     _userState[onBehalfOf].additionalData = index.toUint128();
+ 
+     _mint(onBehalfOf, amountScaled.toUint120());
+ 
+-    uint256 amountToMint = amount + balanceIncrease;
++    uint256 amountToMint = nextBalance - previousBalance;
+     emit Transfer(address(0), onBehalfOf, amountToMint);
+     emit Mint(caller, onBehalfOf, amountToMint, balanceIncrease, index);
+ 
+@@ -83,30 +91,39 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
+    * if the amount to burn is less than the interest that the user accrued
+    * @param user The user which debt is burnt
+    * @param target The address that will receive the underlying, if any
+-   * @param amount The amount getting burned
++   * @param amountScaled The scaled amount getting burned
+    * @param index The variable debt index of the reserve
++   * @param getTokenBalance The function to get the balance of the token
+    * @return `true` if the the new balance of the user is 0
+    */
+-  function _burnScaled(address user, address target, uint256 amount, uint256 index) internal returns (bool) {
+-    uint256 amountScaled = amount.rayDiv(index);
++  function _burnScaled(
++    address user,
++    address target,
++    uint256 amountScaled,
++    uint256 index,
++    function(uint256, uint256) internal pure returns (uint256) getTokenBalance
++  ) internal returns (bool) {
+     require(amountScaled != 0, Errors.InvalidBurnAmount());
+ 
+     uint256 scaledBalance = super.balanceOf(user);
+-    uint256 balanceIncrease = scaledBalance.rayMul(index) - scaledBalance.rayMul(_userState[user].additionalData);
++    uint256 nextBalance = getTokenBalance(scaledBalance - amountScaled, index);
++    uint256 previousBalance = getTokenBalance(scaledBalance, _userState[user].additionalData);
++    uint256 balanceIncrease = getTokenBalance(scaledBalance, index) - previousBalance;
+ 
+     _userState[user].additionalData = index.toUint128();
+ 
+     _burn(user, amountScaled.toUint120());
+ 
+-    if (balanceIncrease > amount) {
+-      uint256 amountToMint = balanceIncrease - amount;
++    if (nextBalance > previousBalance) {
++      uint256 amountToMint = nextBalance - previousBalance;
+       emit Transfer(address(0), user, amountToMint);
+       emit Mint(user, user, amountToMint, balanceIncrease, index);
+     } else {
+-      uint256 amountToBurn = amount - balanceIncrease;
++      uint256 amountToBurn = previousBalance - nextBalance;
+       emit Transfer(user, address(0), amountToBurn);
+       emit Burn(user, target, amountToBurn, balanceIncrease, index);
+     }
++
+     return scaledBalance - amountScaled == 0;
+   }
+ }
+diff --git a/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/TokenMath.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/TokenMath.sol
+new file mode 100644
+index 0000000..f7d63fc
+--- /dev/null
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/TokenMath.sol
+@@ -0,0 +1,93 @@
++// SPDX-License-Identifier: MIT
++pragma solidity ^0.8.0;
++
++import {WadRayMath} from "../../libraries/math/WadRayMath.sol";
++
++/**
++ * @title TokenMath
++ * @author BGD Labs
++ * @notice Provides utility functions for calculating scaled amounts and balances for aTokens and vTokens,
++ *         applying specific rounding rules (floor/ceil) as per Aave v3.5's rounding improvements.
++ *         The rounding behavior of the operations is in line with the ERC-4626 token standard.
++ *         In practice, this means rounding in favor of the protocol.
++ */
++library TokenMath {
++  using WadRayMath for uint256;
++
++  /**
++   * @notice Calculates the scaled amount of aTokens to mint when supplying underlying assets.
++   *         The amount is rounded down to ensure the minted aTokens are less than or equal to the supplied amount.
++   * @param amount The amount of underlying asset supplied.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The scaled amount of aTokens to mint.
++   */
++  function getATokenMintScaledAmount(uint256 amount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return amount.rayDivFloor(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of aTokens to burn when withdrawing underlying assets.
++   *         The scaled amount is rounded up to ensure the user's aToken balance is sufficiently reduced.
++   * @param amount The amount of underlying asset to withdraw.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The scaled amount of aTokens to burn.
++   */
++  function getATokenBurnScaledAmount(uint256 amount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return amount.rayDivCeil(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of aTokens to transfer.
++   *         The scaled amount is rounded up to ensure the recipient receives at least the requested amount.
++   * @param amount The amount of aTokens to transfer.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The scaled amount of aTokens for transfer.
++   */
++  function getATokenTransferScaledAmount(uint256 amount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return amount.rayDivCeil(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the actual aToken balance from a scaled balance and the current liquidityIndex.
++   *         The balance is rounded down to prevent overaccounting.
++   * @param scaledAmount The scaled aToken balance.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The actual aToken balance.
++   */
++  function getATokenBalance(uint256 scaledAmount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return scaledAmount.rayMulFloor(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of vTokens to mint when borrowing.
++   *         The amount is rounded up to ensure the protocol never underaccounts the user's debt.
++   * @param amount The amount of underlying asset borrowed.
++   * @param variableBorrowIndex The current vToken variableBorrowIndex.
++   * @return The scaled amount of vTokens to mint.
++   */
++  function getVTokenMintScaledAmount(uint256 amount, uint256 variableBorrowIndex) internal pure returns (uint256) {
++    return amount.rayDivCeil(variableBorrowIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of vTokens to burn.
++   *         The scaled amount is rounded down to prevent over-burning of vTokens.
++   * @param amount The amount of underlying asset corresponding to the vTokens to burn.
++   * @param variableBorrowIndex The current vToken variableBorrowIndex.
++   * @return The scaled amount of vTokens to burn.
++   */
++  function getVTokenBurnScaledAmount(uint256 amount, uint256 variableBorrowIndex) internal pure returns (uint256) {
++    return amount.rayDivFloor(variableBorrowIndex);
++  }
++
++  /**
++   * @notice Calculates the actual vToken balance (debt) from a scaled balance and the current variableBorrowIndex.
++   *         The balance is rounded up to prevent underaccounting the user's debt.
++   * @param scaledAmount The scaled vToken balance.
++   * @param variableBorrowIndex The current vToken variableBorrowIndex.
++   * @return The actual vToken balance (debt).
++   */
++  function getVTokenBalance(uint256 scaledAmount, uint256 variableBorrowIndex) internal pure returns (uint256) {
++    return scaledAmount.rayMulCeil(variableBorrowIndex);
++  }
++}
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/VariableDebtToken.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/VariableDebtToken.sol
+index a8da992..ca91a77 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/VariableDebtToken.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/VariableDebtToken.sol
+@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
+ 
+ import {IERC20} from "../../dependencies/openzeppelin/contracts/IERC20.sol";
+ import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+-import {WadRayMath} from "../libraries/math/WadRayMath.sol";
+ import {Errors} from "../libraries/helpers/Errors.sol";
+ import {IPool} from "../../interfaces/IPool.sol";
+ import {IInitializableDebtToken} from "../../interfaces/IInitializableDebtToken.sol";
+@@ -11,6 +10,7 @@ import {IVariableDebtToken} from "../../interfaces/IVariableDebtToken.sol";
+ import {EIP712Base} from "./base/EIP712Base.sol";
+ import {DebtTokenBase} from "./base/DebtTokenBase.sol";
+ import {ScaledBalanceTokenBase} from "./base/ScaledBalanceTokenBase.sol";
++import {TokenMath} from "../libraries/helpers/TokenMath.sol";
+ 
+ /**
+  * @title VariableDebtToken
+@@ -20,9 +20,20 @@ import {ScaledBalanceTokenBase} from "./base/ScaledBalanceTokenBase.sol";
+  * @dev Transfer and approve functionalities are disabled since its a non-transferable token
+  */
+ abstract contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDebtToken {
+-  using WadRayMath for uint256;
++  using TokenMath for uint256;
+   using SafeCast for uint256;
+ 
++  // @note This gap is made only to add the `__DEPRECATED_AND_NEVER_TO_BE_REUSED` variable
++  // The length of this gap can be decreased in order to add new variables
++  uint256[3] private __unusedGap;
++
++  // @note deprecated in v3.4.0 upgrade in the GHO vToken.
++  // This storage slot can't be used in all vTokens, because the GHO vToken
++  // had a mapping here (before v3.4.0) and right now has some non-zero mapping values in this slot.
++  // old version: mapping(address => GhoUserState) internal _ghoUserState
++  // This storage slot MUST NOT be reused to avoid storage layout conflicts.
++  bytes32 private __DEPRECATED_AND_NEVER_TO_BE_REUSED;
++
+   /**
+    * @dev Constructor.
+    * @param pool The address of the Pool contract
+@@ -47,38 +58,87 @@ abstract contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IV
+ 
+   /// @inheritdoc IERC20
+   function balanceOf(address user) public view virtual override returns (uint256) {
+-    uint256 scaledBalance = super.balanceOf(user);
+-
+-    if (scaledBalance == 0) {
+-      return 0;
+-    }
+-
+-    return scaledBalance.rayMul(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
++    return super.balanceOf(user).getVTokenBalance(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
+   }
+ 
+   /// @inheritdoc IVariableDebtToken
+-  function mint(address user, address onBehalfOf, uint256 amount, uint256 index)
++  function mint(address user, address onBehalfOf, uint256 amount, uint256 scaledAmount, uint256 index)
+     external
+     virtual
+     override
+     onlyPool
+     returns (uint256)
+   {
++    uint256 scaledBalanceOfUser = super.balanceOf(user);
++
+     if (user != onBehalfOf) {
+-      _decreaseBorrowAllowance(onBehalfOf, user, amount);
++      // This comment explains the logic behind the borrow allowance spent calculation.
++      //
++      // Problem:
++      // Simply decreasing the allowance by the input `amount` is not ideal for scaled-balance tokens.
++      // Due to rounding, the actual increase in the user's debt (`debt_increase`) can be slightly
++      // larger than the input `amount`.
++      //
++      // Definitions:
++      // - `amount`: The unscaled amount to be borrowed, passed as the `amount` argument.
++      // - `debt_increase`: The actual unscaled debt increase for the user.
++      // - `allowance_spent`: The unscaled amount deducted from the delegatee's borrow allowance. Equivalent to `debt_increase`.
++      //
++      // Solution:
++      // To handle this, `allowance_spent` must be exactly equal to `debt_increase`.
++      // We calculate `debt_increase` precisely by simulating the effect of the borrow on the user's balance.
++      // By passing `debt_increase` to `_decreaseBorrowAllowance`, we ensure `allowance_spent` is as close as possible to `debt_increase`.
++      //
++      // Backward Compatibility & Guarantees:
++      // This implementation is backward-compatible and secure. The `_decreaseBorrowAllowance` function has a critical feature:
++      // 1. It REQUIRES the borrow allowance to be >= `amount` (the user's requested borrow amount).
++      // 2. The amount consumed from the allowance is `debt_increase`, but it is capped at the `currentAllowance`.
++      // This means if a user has a borrow allowance of 100 wei and `borrow` is called with an `amount` of 100, the call will succeed
++      // even if the calculated `debt_increase` is 101 wei. In that specific scenario, the allowance consumed will be 100 wei (since that is the `currentAllowance`),
++      // and the transaction will not revert. But if the allowance is 101 wei, then the allowance consumed will be 101 wei.
++      //
++      // uint256 debt_increase = balanceAfter - balanceBefore = (scaledBalanceOfUser + scaledAmount).getVTokenBalance(index) - scaledBalanceOfUser.getVTokenBalance(index);
++      // Due to limitations of the solidity compiler, the calculation is inlined for gas efficiency.
++      _decreaseBorrowAllowance(
++        onBehalfOf,
++        user,
++        amount,
++        (scaledBalanceOfUser + scaledAmount).getVTokenBalance(index) - scaledBalanceOfUser.getVTokenBalance(index)
++      );
+     }
+-    _mintScaled(user, onBehalfOf, amount, index);
++    _mintScaled({
++      caller: user,
++      onBehalfOf: onBehalfOf,
++      amountScaled: scaledAmount,
++      index: index,
++      getTokenBalance: TokenMath.getVTokenBalance
++    });
+     return scaledTotalSupply();
+   }
+ 
+   /// @inheritdoc IVariableDebtToken
+-  function burn(address from, uint256 amount, uint256 index) external virtual override onlyPool returns (bool, uint256) {
+-    return (_burnScaled(from, address(0), amount, index), scaledTotalSupply());
++  function burn(address from, uint256 scaledAmount, uint256 index)
++    external
++    virtual
++    override
++    onlyPool
++    returns (bool, uint256)
++  {
++    return (
++      _burnScaled({
++        user: from,
++        target: address(0),
++        amountScaled: scaledAmount,
++        index: index,
++        getTokenBalance: TokenMath.getVTokenBalance
++      }),
++      scaledTotalSupply()
++    );
+   }
+ 
+   /// @inheritdoc IERC20
+   function totalSupply() public view virtual override returns (uint256) {
+-    return super.totalSupply().rayMul(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
++    return super.totalSupply().getVTokenBalance(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
+   }
+ 
+   /// @inheritdoc EIP712Base
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/VariableDebtTokenInstance.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/VariableDebtTokenInstance.sol
+index 61822f9..8de4e9d 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/VariableDebtTokenInstance.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/VariableDebtTokenInstance.sol
+@@ -12,7 +12,7 @@ import {
+  * @notice Instance of the variable debt token for the Aave protocol
+  */
+ contract VariableDebtTokenInstance is VariableDebtToken {
+-  uint256 public constant DEBT_TOKEN_REVISION = 3;
++  uint256 public constant DEBT_TOKEN_REVISION = 4;
+ 
+   constructor(IPool pool, address rewardsController) VariableDebtToken(pool, rewardsController) {}
+ 
+diff --git a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/WadRayMath.sol b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/WadRayMath.sol
+index 433dd94..88e3b00 100644
+--- a/tmp/43114_0x1AdB659cA7eaA45e42dCD257d09b963C5cfBB36f_flat/WadRayMath.sol
++++ b/tmp/43114_0xAcD1A67Bd377c6A4397b486F8B9aFAbDe49B8933_flat/WadRayMath.sol
+@@ -6,10 +6,16 @@ pragma solidity ^0.8.0;
+  * @author Aave
+  * @notice Provides functions to perform calculations with Wad and Ray units
+  * @dev Provides mul and div function for wads (decimal numbers with 18 digits of precision) and rays (decimal numbers
+- * with 27 digits of precision)
+- * @dev Operations are rounded. If a value is >=.5, will be rounded up, otherwise rounded down.
++ * with 27 digits of precision).
++ * @dev Default operations round half up (if a value is >= .5, it will be rounded up, otherwise rounded down).
++ * @dev For specific rounding behaviors, functions with `Floor` and `Ceil` suffixes or a `Rounding` parameter are available.
+  */
+ library WadRayMath {
++  enum Rounding {
++    Floor,
++    Ceil
++  }
++
+   // HALF_WAD and HALF_RAY expressed with extended notation as constant with operations are not supported in Yul assembly
+   uint256 internal constant WAD = 1e18;
+   uint256 internal constant HALF_WAD = 0.5e18;
+@@ -51,22 +57,38 @@ library WadRayMath {
+     }
+   }
+ 
+-  /**
+-   * @notice Multiplies two ray, rounding half up to the nearest ray
+-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+-   * @param a Ray
+-   * @param b Ray
+-   * @return c = a raymul b
+-   */
+   function rayMul(uint256 a, uint256 b) internal pure returns (uint256 c) {
+-    // to avoid overflow, a <= (type(uint256).max - HALF_RAY) / b
+     assembly {
++      // to avoid overflow, a <= (type(uint256).max - HALF_RAY) / b
+       if iszero(or(iszero(b), iszero(gt(a, div(sub(not(0), HALF_RAY), b))))) { revert(0, 0) }
+-
+       c := div(add(mul(a, b), HALF_RAY), RAY)
+     }
+   }
+ 
++  function rayMul(uint256 a, uint256 b, Rounding rounding) internal pure returns (uint256 c) {
++    if (rounding == Rounding.Floor) return rayMulFloor(a, b);
++    return rayMulCeil(a, b);
++  }
++
++  function rayMulFloor(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * b does not exceed uint256 max
++      if iszero(or(iszero(b), iszero(gt(a, div(not(0), b))))) { revert(0, 0) }
++
++      c := div(mul(a, b), RAY)
++    }
++  }
++
++  function rayMulCeil(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * b does not exceed uint256 max
++      if iszero(or(iszero(b), iszero(gt(a, div(not(0), b))))) { revert(0, 0) }
++
++      let product := mul(a, b)
++      c := add(div(product, RAY), iszero(iszero(mod(product, RAY))))
++    }
++  }
++
+   /**
+    * @notice Divides two ray, rounding half up to the nearest ray
+    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+@@ -75,14 +97,35 @@ library WadRayMath {
+    * @return c = a raydiv b
+    */
+   function rayDiv(uint256 a, uint256 b) internal pure returns (uint256 c) {
+-    // to avoid overflow, a <= (type(uint256).max - halfB) / RAY
+     assembly {
++      // to avoid overflow, a <= (type(uint256).max - b / 2) / RAY
+       if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), RAY))))) { revert(0, 0) }
+-
+       c := div(add(mul(a, RAY), div(b, 2)), b)
+     }
+   }
+ 
++  function rayDiv(uint256 a, uint256 b, Rounding rounding) internal pure returns (uint256 c) {
++    if (rounding == Rounding.Floor) return rayDivFloor(a, b);
++    return rayDivCeil(a, b);
++  }
++
++  function rayDivCeil(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * RAY does not exceed uint256 max
++      if or(iszero(b), iszero(iszero(gt(a, div(not(0), RAY))))) { revert(0, 0) }
++      let scaled := mul(a, RAY)
++      c := add(div(scaled, b), iszero(iszero(mod(scaled, b))))
++    }
++  }
++
++  function rayDivFloor(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * RAY does not exceed uint256 max
++      if or(iszero(b), iszero(iszero(gt(a, div(not(0), RAY))))) { revert(0, 0) }
++      c := div(mul(a, RAY), b)
++    }
++  }
++
+   /**
+    * @dev Casts ray down to wad
+    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328

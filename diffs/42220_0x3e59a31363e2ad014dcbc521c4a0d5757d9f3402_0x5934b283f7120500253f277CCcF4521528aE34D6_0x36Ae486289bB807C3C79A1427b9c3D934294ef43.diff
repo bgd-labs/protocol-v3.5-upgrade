@@ -1,0 +1,1320 @@
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/DataTypes.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/DataTypes.sol
+index 3debcd4..06e6aa3 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/DataTypes.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/DataTypes.sol
+@@ -212,6 +212,8 @@ library DataTypes {
+     InterestRateMode interestRateMode;
+     address onBehalfOf;
+     bool useATokens;
++    address oracle;
++    uint8 userEModeCategory;
+   }
+ 
+   struct ExecuteWithdrawParams {
+@@ -235,9 +237,9 @@ library DataTypes {
+     address asset;
+     address from;
+     address to;
+-    uint256 amount;
+-    uint256 balanceFromBefore;
+-    uint256 balanceToBefore;
++    uint256 scaledAmount;
++    uint256 scaledBalanceFromBefore;
++    uint256 scaledBalanceToBefore;
+     address oracle;
+     uint8 fromEModeCategory;
+   }
+@@ -292,7 +294,7 @@ library DataTypes {
+     UserConfigurationMap userConfig;
+     address asset;
+     address userAddress;
+-    uint256 amount;
++    uint256 amountScaled;
+     InterestRateMode interestRateMode;
+     address oracle;
+     uint8 userEModeCategory;
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/EModeLogic.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/EModeLogic.sol
+index 55a5dd1..77e0560 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/EModeLogic.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/EModeLogic.sol
+@@ -1,15 +1,9 @@
+ // SPDX-License-Identifier: BUSL-1.1
+ pragma solidity ^0.8.10;
+ 
+-import {GPv2SafeERC20} from "../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol";
+-import {IERC20} from "../../../dependencies/openzeppelin/contracts/IERC20.sol";
+ import {IPool} from "../../../interfaces/IPool.sol";
+-import {UserConfiguration} from "../configuration/UserConfiguration.sol";
+-import {WadRayMath} from "../math/WadRayMath.sol";
+-import {PercentageMath} from "../math/PercentageMath.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ValidationLogic} from "./ValidationLogic.sol";
+-import {ReserveLogic} from "./ReserveLogic.sol";
+ 
+ /**
+  * @title EModeLogic library
+@@ -17,13 +11,6 @@ import {ReserveLogic} from "./ReserveLogic.sol";
+  * @notice Implements the base logic for all the actions related to the eMode
+  */
+ library EModeLogic {
+-  using ReserveLogic for DataTypes.ReserveCache;
+-  using ReserveLogic for DataTypes.ReserveData;
+-  using GPv2SafeERC20 for IERC20;
+-  using UserConfiguration for DataTypes.UserConfigurationMap;
+-  using WadRayMath for uint256;
+-  using PercentageMath for uint256;
+-
+   /**
+    * @notice Updates the user efficiency mode category
+    * @dev Will revert if user is borrowing non-compatible asset or change will drop HF < HEALTH_FACTOR_LIQUIDATION_THRESHOLD
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/Errors.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/Errors.sol
+index 6c493d8..c8ba3d0 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/Errors.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/Errors.sol
+@@ -35,7 +35,6 @@ library Errors {
+   error BorrowingNotEnabled(); // 'Borrowing is not enabled'
+   error NotEnoughAvailableUserBalance(); // 'User cannot withdraw more than the available balance'
+   error InvalidInterestRateModeSelected(); // 'Invalid interest rate mode selected'
+-  error CollateralBalanceIsZero(); // 'The collateral balance is 0'
+   error HealthFactorLowerThanLiquidationThreshold(); // 'Health factor is below the liquidation threshold'
+   error CollateralCannotCoverNewBorrow(); // 'There is not enough collateral to cover a new borrow'
+   error NoDebtOfSelectedType(); // 'For repayment of a specific type of debt, the user needs to have debt that type'
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/GenericLogic.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/GenericLogic.sol
+index 809ce96..c554325 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/GenericLogic.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/GenericLogic.sol
+@@ -9,6 +9,8 @@ import {UserConfiguration} from "../configuration/UserConfiguration.sol";
+ import {EModeConfiguration} from "../configuration/EModeConfiguration.sol";
+ import {PercentageMath} from "../math/PercentageMath.sol";
+ import {WadRayMath} from "../math/WadRayMath.sol";
++import {TokenMath} from "../helpers/TokenMath.sol";
++import {MathUtils} from "../math/MathUtils.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ReserveLogic} from "./ReserveLogic.sol";
+ import {EModeLogic} from "./EModeLogic.sol";
+@@ -20,6 +22,7 @@ import {EModeLogic} from "./EModeLogic.sol";
+  */
+ library GenericLogic {
+   using ReserveLogic for DataTypes.ReserveData;
++  using TokenMath for uint256;
+   using WadRayMath for uint256;
+   using PercentageMath for uint256;
+   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+@@ -130,15 +133,22 @@ library GenericLogic {
+       }
+     }
+ 
++    // @note At this point, `avgLiquidationThreshold` represents
++    // `SUM(collateral_base_value_i * liquidation_threshold_i)` for all collateral assets.
++    // It has 8 decimals (base currency) + 2 decimals (percentage) = 10 decimals.
++    // healthFactor has 18 decimals
++    // healthFactor = (avgLiquidationThreshold * WAD / totalDebtInBaseCurrency) / 100_00
++    // 18 decimals = (10 decimals * 18 decimals / 8 decimals) / 2 decimals = 18 decimals
++    vars.healthFactor = (vars.totalDebtInBaseCurrency == 0)
++      ? type(uint256).max
++      : vars.avgLiquidationThreshold.wadDiv(vars.totalDebtInBaseCurrency) / 100_00;
++
+     unchecked {
+       vars.avgLtv = vars.totalCollateralInBaseCurrency != 0 ? vars.avgLtv / vars.totalCollateralInBaseCurrency : 0;
+       vars.avgLiquidationThreshold =
+         vars.totalCollateralInBaseCurrency != 0 ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency : 0;
+     }
+ 
+-    vars.healthFactor = (vars.totalDebtInBaseCurrency == 0)
+-      ? type(uint256).max
+-      : (vars.totalCollateralInBaseCurrency.percentMul(vars.avgLiquidationThreshold)).wadDiv(vars.totalDebtInBaseCurrency);
+     return (
+       vars.totalCollateralInBaseCurrency,
+       vars.totalDebtInBaseCurrency,
+@@ -162,7 +172,7 @@ library GenericLogic {
+     uint256 totalDebtInBaseCurrency,
+     uint256 ltv
+   ) internal pure returns (uint256) {
+-    uint256 availableBorrowsInBaseCurrency = totalCollateralInBaseCurrency.percentMul(ltv);
++    uint256 availableBorrowsInBaseCurrency = totalCollateralInBaseCurrency.percentMulFloor(ltv);
+ 
+     if (availableBorrowsInBaseCurrency <= totalDebtInBaseCurrency) {
+       return 0;
+@@ -189,16 +199,11 @@ library GenericLogic {
+     uint256 assetPrice,
+     uint256 assetUnit
+   ) private view returns (uint256) {
+-    // fetching variable debt
+-    uint256 userTotalDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledBalanceOf(user);
+-    if (userTotalDebt == 0) {
+-      return 0;
+-    }
++    uint256 userTotalDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledBalanceOf(user).getVTokenBalance(
++      reserve.getNormalizedDebt()
++    );
+ 
+-    userTotalDebt = userTotalDebt.rayMul(reserve.getNormalizedDebt()) * assetPrice;
+-    unchecked {
+-      return userTotalDebt / assetUnit;
+-    }
++    return MathUtils.mulDivCeil(userTotalDebt, assetPrice, assetUnit);
+   }
+ 
+   /**
+@@ -217,9 +222,9 @@ library GenericLogic {
+     uint256 assetPrice,
+     uint256 assetUnit
+   ) private view returns (uint256) {
+-    uint256 normalizedIncome = reserve.getNormalizedIncome();
+-    uint256 balance =
+-      (IScaledBalanceToken(reserve.aTokenAddress).scaledBalanceOf(user).rayMul(normalizedIncome)) * assetPrice;
++    uint256 balance = (
++      IScaledBalanceToken(reserve.aTokenAddress).scaledBalanceOf(user).getATokenBalance(reserve.getNormalizedIncome())
++    ) * assetPrice;
+ 
+     unchecked {
+       return balance / assetUnit;
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IAToken.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IAToken.sol
+index e42351f..436c809 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IAToken.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IAToken.sol
+@@ -24,38 +24,47 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
+    * @notice Mints `amount` aTokens to `user`
+    * @param caller The address performing the mint
+    * @param onBehalfOf The address of the user that will receive the minted aTokens
+-   * @param amount The amount of tokens getting minted
++   * @param scaledAmount The scaled amount of tokens getting minted
+    * @param index The next liquidity index of the reserve
+    * @return `true` if the the previous balance of the user was 0
+    */
+-  function mint(address caller, address onBehalfOf, uint256 amount, uint256 index) external returns (bool);
++  function mint(address caller, address onBehalfOf, uint256 scaledAmount, uint256 index) external returns (bool);
+ 
+   /**
+-   * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
+-   * @dev In some instances, the mint event could be emitted from a burn transaction
+-   * if the amount to burn is less than the interest that the user accrued
++   * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`.
++   * @dev Passing both the unscaled and scaled amounts enhances precision. The `scaledAmount` is used for precise balance updates,
++   * while the `amount` is used for the underlying asset transfer, preventing cumulative rounding errors.
++   * @dev In some instances, a mint event may be emitted from a burn transaction if the amount to burn is less than the interest that the user accrued.
+    * @param from The address from which the aTokens will be burned
+    * @param receiverOfUnderlying The address that will receive the underlying
+-   * @param amount The amount being burned
++   * @param amount The amount of underlying to be burned (non scaled)
++   * @param scaledAmount The scaled amount of aTokens to be burned (scaled)
+    * @param index The next liquidity index of the reserve
++   * @return `true` if the the new balance of the user is 0
+    */
+-  function burn(address from, address receiverOfUnderlying, uint256 amount, uint256 index) external;
++  function burn(address from, address receiverOfUnderlying, uint256 amount, uint256 scaledAmount, uint256 index)
++    external
++    returns (bool);
+ 
+   /**
+    * @notice Mints aTokens to the reserve treasury
+-   * @param amount The amount of tokens getting minted
++   * @param scaledAmount The scaled amount of tokens getting minted
+    * @param index The next liquidity index of the reserve
+    */
+-  function mintToTreasury(uint256 amount, uint256 index) external;
++  function mintToTreasury(uint256 scaledAmount, uint256 index) external;
+ 
+   /**
+-   * @notice Transfers aTokens in the event of a borrow being liquidated, in case the liquidators reclaims the aToken
++   * @notice Transfers aTokens in the event of a borrow being liquidated, in case the liquidator reclaims the aToken.
++   * @dev Passing both the unscaled and scaled amounts enhances precision. The `scaledAmount` is used for precise balance updates,
++   * while the `amount` is used for logging and consistency, preventing cumulative rounding errors.
+    * @param from The address getting liquidated, current owner of the aTokens
+    * @param to The recipient
+-   * @param value The amount of tokens getting transferred
++   * @param amount The amount of tokens getting transferred (non-scaled)
++   * @param scaledAmount The scaled amount of tokens getting transferred (scaled)
+    * @param index The next liquidity index of the reserve
+    */
+-  function transferOnLiquidation(address from, address to, uint256 value, uint256 index) external;
++  function transferOnLiquidation(address from, address to, uint256 amount, uint256 scaledAmount, uint256 index)
++    external;
+ 
+   /**
+    * @notice Transfers the underlying asset to `target`.
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IPool.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IPool.sol
+index 38aad59..2320fbc 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IPool.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IPool.sol
+@@ -504,17 +504,17 @@ interface IPool {
+    * @param asset The address of the underlying asset of the aToken
+    * @param from The user from which the aTokens are transferred
+    * @param to The user receiving the aTokens
+-   * @param amount The amount being transferred/withdrawn
+-   * @param balanceFromBefore The aToken balance of the `from` user before the transfer
+-   * @param balanceToBefore The aToken balance of the `to` user before the transfer
++   * @param scaledAmount The scaled amount being transferred/withdrawn
++   * @param scaledBalanceFromBefore The aToken scaled balance of the `from` user before the transfer
++   * @param scaledBalanceToBefore The aToken scaled balance of the `to` user before the transfer
+    */
+   function finalizeTransfer(
+     address asset,
+     address from,
+     address to,
+-    uint256 amount,
+-    uint256 balanceFromBefore,
+-    uint256 balanceToBefore
++    uint256 scaledAmount,
++    uint256 scaledBalanceFromBefore,
++    uint256 scaledBalanceToBefore
+   ) external;
+ 
+   /**
+@@ -709,8 +709,9 @@ interface IPool {
+    * @dev The deficit of a reserve can occur due to situations where borrowed assets are not repaid, leading to bad debt.
+    * @param asset The address of the underlying asset to cover the deficit.
+    * @param amount The amount to be covered, in aToken
++   * @return The amount of tokens burned
+    */
+-  function eliminateReserveDeficit(address asset, uint256 amount) external;
++  function eliminateReserveDeficit(address asset, uint256 amount) external returns (uint256);
+ 
+   /**
+    * @notice Approves or disapproves a position manager. This position manager will be able
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IVariableDebtToken.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IVariableDebtToken.sol
+index d567d1f..66a8c5d 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IVariableDebtToken.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IVariableDebtToken.sol
+@@ -11,27 +11,32 @@ import {IInitializableDebtToken} from "./IInitializableDebtToken.sol";
+  */
+ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
+   /**
+-   * @notice Mints debt token to the `onBehalfOf` address
++   * @notice Mints debt token to the `onBehalfOf` address.
++   * @dev Passing both the unscaled and scaled amounts enhances precision. The `scaledAmount` is used for precise balance updates,
++   * while the `amount` is used for allowance checks, preventing cumulative rounding errors.
+    * @param user The address receiving the borrowed underlying, being the delegatee in case
+    * of credit delegate, or same as `onBehalfOf` otherwise
+    * @param onBehalfOf The address receiving the debt tokens
+-   * @param amount The amount of debt being minted
++   * @param amount The unscaled amount of debt to be accounted for allowance
++   * @param scaledAmount The scaled amount of debt tokens to mint
+    * @param index The variable debt index of the reserve
+    * @return The scaled total debt of the reserve
+    */
+-  function mint(address user, address onBehalfOf, uint256 amount, uint256 index) external returns (uint256);
++  function mint(address user, address onBehalfOf, uint256 amount, uint256 scaledAmount, uint256 index)
++    external
++    returns (uint256);
+ 
+   /**
+-   * @notice Burns user variable debt
+-   * @dev In some instances, a burn transaction will emit a mint event
+-   * if the amount to burn is less than the interest that the user accrued
++   * @notice Burns user variable debt.
++   * @dev Passing the scaled amount allows for more precise calculations and avoids cumulative errors from repeated conversions.
++   * @dev In some instances, a burn transaction will emit a mint event if the amount to burn is less than the interest that the user accrued.
+    * @param from The address from which the debt will be burned
+-   * @param amount The amount getting burned
++   * @param scaledAmount The scaled amount of debt getting burned
+    * @param index The variable debt index of the reserve
+    * @return True if the new balance is zero
+    * @return The scaled total debt of the reserve
+    */
+-  function burn(address from, uint256 amount, uint256 index) external returns (bool, uint256);
++  function burn(address from, uint256 scaledAmount, uint256 index) external returns (bool, uint256);
+ 
+   /**
+    * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for variableDebtWETH)
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IncentivizedERC20.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IncentivizedERC20.sol
+index 4e18e31..478cefc 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/IncentivizedERC20.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/IncentivizedERC20.sol
+@@ -22,6 +22,14 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+   using WadRayMath for uint256;
+   using SafeCast for uint256;
+ 
++  /**
++   * @dev Indicates a failure with the `spender`’s `allowance`. Used in transfers.
++   * @param spender Address that may be allowed to operate on tokens without being their owner.
++   * @param allowance Amount of tokens a `spender` is allowed to operate with.
++   * @param needed Minimum amount required to perform a transfer.
++   */
++  error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
++
+   /**
+    * @dev Only pool admin can call functions marked by this modifier.
+    */
+@@ -168,6 +176,26 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+     return true;
+   }
+ 
++  /**
++   * @dev Updates `owner`'s allowance for `spender` based on spent `value`.
++   *
++   * Revert if not enough allowance is available.
++   *
++   * @param owner The owner of the tokens
++   * @param spender The user allowed to spend on behalf of owner
++   * @param amount The minimum amount being consumed from the allowance
++   * @param correctedAmount The maximum amount being consumed from the allowance
++   */
++  function _spendAllowance(address owner, address spender, uint256 amount, uint256 correctedAmount) internal virtual {
++    uint256 currentAllowance = _allowances[owner][spender];
++    if (currentAllowance < amount) {
++      revert ERC20InsufficientAllowance(spender, currentAllowance, amount);
++    }
++
++    uint256 consumption = currentAllowance >= correctedAmount ? correctedAmount : currentAllowance;
++    _approve(owner, spender, currentAllowance - consumption);
++  }
++
+   /**
+    * @notice Transfers tokens between two users and apply incentives if defined.
+    * @param sender The source address
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/LiquidationLogic.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/LiquidationLogic.sol
+index d51f940..9ee3c29 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/LiquidationLogic.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/LiquidationLogic.sol
+@@ -4,7 +4,8 @@ pragma solidity ^0.8.10;
+ import {IERC20} from "../../../dependencies/openzeppelin/contracts//IERC20.sol";
+ import {GPv2SafeERC20} from "../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol";
+ import {PercentageMath} from "../../libraries/math/PercentageMath.sol";
+-import {WadRayMath} from "../../libraries/math/WadRayMath.sol";
++import {MathUtils} from "../../libraries/math/MathUtils.sol";
++import {TokenMath} from "../../libraries/helpers/TokenMath.sol";
+ import {DataTypes} from "../../libraries/types/DataTypes.sol";
+ import {ReserveLogic} from "./ReserveLogic.sol";
+ import {ValidationLogic} from "./ValidationLogic.sol";
+@@ -26,7 +27,7 @@ import {Errors} from "../helpers/Errors.sol";
+  * @notice Implements actions involving management of collateral in the protocol, the main one being the liquidations
+  */
+ library LiquidationLogic {
+-  using WadRayMath for uint256;
++  using TokenMath for uint256;
+   using PercentageMath for uint256;
+   using ReserveLogic for DataTypes.ReserveCache;
+   using ReserveLogic for DataTypes.ReserveData;
+@@ -71,12 +72,13 @@ library LiquidationLogic {
+    * @param reservesData The state of all the reserves
+    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+    * @param params The additional parameters needed to execute the eliminateDeficit function
++   * @return The amount of deficit covered
+    */
+   function executeEliminateDeficit(
+     mapping(address => DataTypes.ReserveData) storage reservesData,
+     DataTypes.UserConfigurationMap storage userConfig,
+     DataTypes.ExecuteEliminateDeficitParams memory params
+-  ) external {
++  ) external returns (uint256) {
+     require(params.amount != 0, Errors.InvalidAmount());
+ 
+     DataTypes.ReserveData storage reserve = reservesData[params.asset];
+@@ -96,24 +98,30 @@ library LiquidationLogic {
+       balanceWriteOff = currentDeficit;
+     }
+ 
+-    uint256 userBalance =
+-      IAToken(reserveCache.aTokenAddress).scaledBalanceOf(params.user).rayMul(reserveCache.nextLiquidityIndex);
+-    require(balanceWriteOff <= userBalance, Errors.NotEnoughAvailableUserBalance());
++    uint256 userScaledBalance = IAToken(reserveCache.aTokenAddress).scaledBalanceOf(params.user);
++    uint256 scaledBalanceWriteOff = balanceWriteOff.getATokenBurnScaledAmount(reserveCache.nextLiquidityIndex);
++    require(scaledBalanceWriteOff <= userScaledBalance, Errors.NotEnoughAvailableUserBalance());
+ 
+     bool isCollateral = userConfig.isUsingAsCollateral(reserve.id);
+-    if (isCollateral && balanceWriteOff == userBalance) {
++    if (isCollateral && scaledBalanceWriteOff == userScaledBalance) {
+       userConfig.setUsingAsCollateral(reserve.id, params.asset, params.user, false);
+     }
+ 
+-    IAToken(reserveCache.aTokenAddress).burn(
+-      params.user, reserveCache.aTokenAddress, balanceWriteOff, reserveCache.nextLiquidityIndex
+-    );
++    IAToken(reserveCache.aTokenAddress).burn({
++      from: params.user,
++      receiverOfUnderlying: reserveCache.aTokenAddress,
++      amount: balanceWriteOff,
++      scaledAmount: scaledBalanceWriteOff,
++      index: reserveCache.nextLiquidityIndex
++    });
+ 
+     reserve.deficit -= balanceWriteOff.toUint128();
+ 
+     reserve.updateInterestRatesAndVirtualBalance(reserveCache, params.asset, 0, 0, params.interestRateStrategyAddress);
+ 
+     emit IPool.DeficitCovered(params.asset, params.user, balanceWriteOff);
++
++    return balanceWriteOff;
+   }
+ 
+   struct LiquidationCallLocalVars {
+@@ -133,8 +141,8 @@ library LiquidationLogic {
+     uint256 debtAssetPrice;
+     uint256 collateralAssetUnit;
+     uint256 debtAssetUnit;
+-    IAToken collateralAToken;
+     DataTypes.ReserveCache debtReserveCache;
++    DataTypes.ReserveCache collateralReserveCache;
+   }
+ 
+   /**
+@@ -161,7 +169,9 @@ library LiquidationLogic {
+     DataTypes.ReserveData storage debtReserve = reservesData[params.debtAsset];
+     DataTypes.UserConfigurationMap storage borrowerConfig = usersConfig[params.borrower];
+     vars.debtReserveCache = debtReserve.cache();
++    vars.collateralReserveCache = collateralReserve.cache();
+     debtReserve.updateState(vars.debtReserveCache);
++    collateralReserve.updateState(vars.collateralReserveCache);
+ 
+     (vars.totalCollateralInBaseCurrency, vars.totalDebtInBaseCurrency,,, vars.healthFactor,) = GenericLogic
+       .calculateUserAccountData(
+@@ -176,11 +186,11 @@ library LiquidationLogic {
+       })
+     );
+ 
+-    vars.collateralAToken = IAToken(collateralReserve.aTokenAddress);
+-    vars.borrowerCollateralBalance = vars.collateralAToken.balanceOf(params.borrower);
++    vars.borrowerCollateralBalance = IAToken(vars.collateralReserveCache.aTokenAddress).scaledBalanceOf(params.borrower)
++      .getATokenBalance(vars.collateralReserveCache.nextLiquidityIndex);
+     vars.borrowerReserveDebt = IVariableDebtToken(vars.debtReserveCache.variableDebtTokenAddress).scaledBalanceOf(
+       params.borrower
+-    ).rayMul(vars.debtReserveCache.nextVariableBorrowIndex);
++    ).getVTokenBalance(vars.debtReserveCache.nextVariableBorrowIndex);
+ 
+     ValidationLogic.validateLiquidationCall(
+       borrowerConfig,
+@@ -204,15 +214,17 @@ library LiquidationLogic {
+     ) {
+       vars.liquidationBonus = eModeCategories[params.borrowerEModeCategory].liquidationBonus;
+     } else {
+-      vars.liquidationBonus = collateralReserve.configuration.getLiquidationBonus();
++      vars.liquidationBonus = vars.collateralReserveCache.reserveConfiguration.getLiquidationBonus();
+     }
+     vars.collateralAssetPrice = IPriceOracleGetter(params.priceOracle).getAssetPrice(params.collateralAsset);
+     vars.debtAssetPrice = IPriceOracleGetter(params.priceOracle).getAssetPrice(params.debtAsset);
+-    vars.collateralAssetUnit = 10 ** collateralReserve.configuration.getDecimals();
++    vars.collateralAssetUnit = 10 ** vars.collateralReserveCache.reserveConfiguration.getDecimals();
+     vars.debtAssetUnit = 10 ** vars.debtReserveCache.reserveConfiguration.getDecimals();
+ 
+-    vars.borrowerReserveDebtInBaseCurrency = (vars.borrowerReserveDebt * vars.debtAssetPrice) / vars.debtAssetUnit;
++    vars.borrowerReserveDebtInBaseCurrency =
++      MathUtils.mulDivCeil(vars.borrowerReserveDebt, vars.debtAssetPrice, vars.debtAssetUnit);
+ 
++    // @note floor rounding
+     vars.borrowerReserveCollateralInBaseCurrency =
+       (vars.borrowerCollateralBalance * vars.collateralAssetPrice) / vars.collateralAssetUnit;
+ 
+@@ -243,7 +255,7 @@ library LiquidationLogic {
+       vars.liquidationProtocolFeeAmount,
+       vars.collateralToLiquidateInBaseCurrency
+     ) = _calculateAvailableCollateralToLiquidate(
+-      collateralReserve.configuration,
++      vars.collateralReserveCache.reserveConfiguration,
+       vars.collateralAssetPrice,
+       vars.collateralAssetUnit,
+       vars.debtAssetPrice,
+@@ -261,10 +273,11 @@ library LiquidationLogic {
+       vars.actualDebtToLiquidate < vars.borrowerReserveDebt
+         && vars.actualCollateralToLiquidate + vars.liquidationProtocolFeeAmount < vars.borrowerCollateralBalance
+     ) {
+-      bool isDebtMoreThanLeftoverThreshold = (
+-        (vars.borrowerReserveDebt - vars.actualDebtToLiquidate) * vars.debtAssetPrice
+-      ) / vars.debtAssetUnit >= MIN_LEFTOVER_BASE;
++      bool isDebtMoreThanLeftoverThreshold = MathUtils.mulDivCeil(
++        vars.borrowerReserveDebt - vars.actualDebtToLiquidate, vars.debtAssetPrice, vars.debtAssetUnit
++      ) >= MIN_LEFTOVER_BASE;
+ 
++      // @note floor rounding
+       bool isCollateralMoreThanLeftoverThreshold = (
+         (vars.borrowerCollateralBalance - vars.actualCollateralToLiquidate - vars.liquidationProtocolFeeAmount)
+           * vars.collateralAssetPrice
+@@ -295,7 +308,7 @@ library LiquidationLogic {
+     // An asset can only be ceiled if it has no supply or if it was not a collateral previously.
+     // Therefore we can be sure that no inconsistent state can be reached in which a user has multiple collaterals, with one being ceiled.
+     // This allows for the implicit assumption that: if the asset was a collateral & the asset was ceiled, the user must have been in isolation.
+-    if (collateralReserve.configuration.getDebtCeiling() != 0) {
++    if (vars.collateralReserveCache.reserveConfiguration.getDebtCeiling() != 0) {
+       // IsolationModeTotalDebt only discounts `actualDebtToLiquidate`, not the fully burned amount in case of deficit creation.
+       // This is by design as otherwise the debt ceiling would render ineffective if a collateral asset faces bad debt events.
+       // The governance can decide the raise the ceiling to discount manifested deficit.
+@@ -307,31 +320,43 @@ library LiquidationLogic {
+     if (params.receiveAToken) {
+       _liquidateATokens(reservesData, reservesList, usersConfig, collateralReserve, params, vars);
+     } else {
++      // @note Manually updating the cache in case the debt and collateral are the same asset.
++      // This ensures the rates are updated correctly, considering the burning of debt
++      // in the `_burnDebtTokens` function.
++      if (params.collateralAsset == params.debtAsset) {
++        vars.collateralReserveCache.nextScaledVariableDebt = vars.debtReserveCache.nextScaledVariableDebt;
++      }
++
+       _burnCollateralATokens(collateralReserve, params, vars);
+     }
+ 
+     // Transfer fee to treasury if it is non-zero
+     if (vars.liquidationProtocolFeeAmount != 0) {
+-      uint256 liquidityIndex = collateralReserve.getNormalizedIncome();
+-      uint256 scaledDownLiquidationProtocolFee = vars.liquidationProtocolFeeAmount.rayDiv(liquidityIndex);
+-      uint256 scaledDownBorrowerBalance = vars.collateralAToken.scaledBalanceOf(params.borrower);
++      // getATokenTransferScaledAmount has been used because under the hood, transferOnLiquidation is calling AToken.transfer
++      uint256 scaledDownLiquidationProtocolFee =
++        vars.liquidationProtocolFeeAmount.getATokenTransferScaledAmount(vars.collateralReserveCache.nextLiquidityIndex);
++      uint256 scaledDownBorrowerBalance =
++        IAToken(vars.collateralReserveCache.aTokenAddress).scaledBalanceOf(params.borrower);
+       // To avoid trying to send more aTokens than available on balance, due to 1 wei imprecision
+       if (scaledDownLiquidationProtocolFee > scaledDownBorrowerBalance) {
+-        vars.liquidationProtocolFeeAmount = scaledDownBorrowerBalance.rayMul(liquidityIndex);
++        scaledDownLiquidationProtocolFee = scaledDownBorrowerBalance;
++        vars.liquidationProtocolFeeAmount =
++          scaledDownBorrowerBalance.getATokenBalance(vars.collateralReserveCache.nextLiquidityIndex);
+       }
+-      vars.collateralAToken.transferOnLiquidation(
+-        params.borrower,
+-        vars.collateralAToken.RESERVE_TREASURY_ADDRESS(),
+-        vars.liquidationProtocolFeeAmount,
+-        liquidityIndex
+-      );
++      IAToken(vars.collateralReserveCache.aTokenAddress).transferOnLiquidation({
++        from: params.borrower,
++        to: IAToken(vars.collateralReserveCache.aTokenAddress).RESERVE_TREASURY_ADDRESS(),
++        amount: vars.liquidationProtocolFeeAmount,
++        scaledAmount: scaledDownLiquidationProtocolFee,
++        index: vars.collateralReserveCache.nextLiquidityIndex
++      });
+     }
+ 
+     // burn bad debt if necessary
+     // Each additional debt asset already adds around ~75k gas to the liquidation.
+     // To keep the liquidation gas under control, 0 usd collateral positions are not touched, as there is no immediate benefit in burning or transferring to treasury.
+     if (hasNoCollateralLeft && borrowerConfig.isBorrowingAny()) {
+-      _burnBadDebt(reservesData, reservesList, borrowerConfig, params.borrower, params.interestRateStrategyAddress);
++      _burnBadDebt(reservesData, reservesList, borrowerConfig, params);
+     }
+ 
+     // Transfers the debt asset being repaid to the aToken, where the liquidity is kept
+@@ -362,10 +387,8 @@ library LiquidationLogic {
+     DataTypes.ExecuteLiquidationCallParams memory params,
+     LiquidationCallLocalVars memory vars
+   ) internal {
+-    DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
+-    collateralReserve.updateState(collateralReserveCache);
+     collateralReserve.updateInterestRatesAndVirtualBalance(
+-      collateralReserveCache,
++      vars.collateralReserveCache,
+       params.collateralAsset,
+       0,
+       vars.actualCollateralToLiquidate,
+@@ -373,9 +396,15 @@ library LiquidationLogic {
+     );
+ 
+     // Burn the equivalent amount of aToken, sending the underlying to the liquidator
+-    vars.collateralAToken.burn(
+-      params.borrower, params.liquidator, vars.actualCollateralToLiquidate, collateralReserveCache.nextLiquidityIndex
+-    );
++    IAToken(vars.collateralReserveCache.aTokenAddress).burn({
++      from: params.borrower,
++      receiverOfUnderlying: params.liquidator,
++      amount: vars.actualCollateralToLiquidate,
++      scaledAmount: vars.actualCollateralToLiquidate.getATokenBurnScaledAmount(
++        vars.collateralReserveCache.nextLiquidityIndex
++      ),
++      index: vars.collateralReserveCache.nextLiquidityIndex
++    });
+   }
+ 
+   /**
+@@ -397,9 +426,14 @@ library LiquidationLogic {
+     DataTypes.ExecuteLiquidationCallParams memory params,
+     LiquidationCallLocalVars memory vars
+   ) internal {
+-    uint256 liquidatorPreviousATokenBalance = IAToken(vars.collateralAToken).scaledBalanceOf(params.liquidator);
+-    vars.collateralAToken.transferOnLiquidation(
+-      params.borrower, params.liquidator, vars.actualCollateralToLiquidate, collateralReserve.getNormalizedIncome()
++    uint256 liquidatorPreviousATokenBalance =
++      IAToken(vars.collateralReserveCache.aTokenAddress).scaledBalanceOf(params.liquidator);
++    IAToken(vars.collateralReserveCache.aTokenAddress).transferOnLiquidation(
++      params.borrower,
++      params.liquidator,
++      vars.actualCollateralToLiquidate,
++      vars.actualCollateralToLiquidate.getATokenTransferScaledAmount(vars.collateralReserveCache.nextLiquidityIndex),
++      vars.collateralReserveCache.nextLiquidityIndex
+     );
+ 
+     if (liquidatorPreviousATokenBalance == 0) {
+@@ -410,8 +444,8 @@ library LiquidationLogic {
+           reservesData,
+           reservesList,
+           liquidatorConfig,
+-          collateralReserve.configuration,
+-          collateralReserve.aTokenAddress
++          vars.collateralReserveCache.reserveConfiguration,
++          vars.collateralReserveCache.aTokenAddress
+         )
+       ) {
+         liquidatorConfig.setUsingAsCollateral(collateralReserve.id, params.collateralAsset, params.liquidator, true);
+@@ -447,13 +481,16 @@ library LiquidationLogic {
+     // even after the user debt was fully repaid, so to avoid this function reverting in the `_burnScaled`
+     // (see ScaledBalanceTokenBase contract), we check for any debt remaining.
+     if (borrowerReserveDebt != 0) {
++      uint256 burnAmount = hasNoCollateralLeft ? borrowerReserveDebt : actualDebtToLiquidate;
++
++      // As vDebt.burn rounds down, we ensure an equivalent of <= amount debt is burned.
+       (noMoreDebt, debtReserveCache.nextScaledVariableDebt) = IVariableDebtToken(
+         debtReserveCache.variableDebtTokenAddress
+-      ).burn(
+-        borrower,
+-        hasNoCollateralLeft ? borrowerReserveDebt : actualDebtToLiquidate,
+-        debtReserveCache.nextVariableBorrowIndex
+-      );
++      ).burn({
++        from: borrower,
++        scaledAmount: burnAmount.getVTokenBurnScaledAmount(debtReserveCache.nextVariableBorrowIndex),
++        index: debtReserveCache.nextVariableBorrowIndex
++      });
+     }
+ 
+     uint256 outstandingDebt = borrowerReserveDebt - actualDebtToLiquidate;
+@@ -517,7 +554,7 @@ library LiquidationLogic {
+ 
+     // This is the base collateral to liquidate based on the given debt to cover
+     vars.baseCollateral =
+-      ((debtAssetPrice * debtToCover * collateralAssetUnit)) / (vars.collateralAssetPrice * debtAssetUnit);
++      (debtAssetPrice * debtToCover * collateralAssetUnit) / (vars.collateralAssetPrice * debtAssetUnit);
+ 
+     vars.maxCollateralToLiquidate = vars.baseCollateral.percentMul(liquidationBonus);
+ 
+@@ -525,7 +562,7 @@ library LiquidationLogic {
+       vars.collateralAmount = borrowerCollateralBalance;
+       vars.debtAmountNeeded = (
+         (vars.collateralAssetPrice * vars.collateralAmount * debtAssetUnit) / (debtAssetPrice * collateralAssetUnit)
+-      ).percentDiv(liquidationBonus);
++      ).percentDivCeil(liquidationBonus);
+     } else {
+       vars.collateralAmount = vars.maxCollateralToLiquidate;
+       vars.debtAmountNeeded = debtToCover;
+@@ -554,14 +591,13 @@ library LiquidationLogic {
+    * @param reservesData The state of all the reserves
+    * @param reservesList The addresses of all the active reserves
+    * @param borrowerConfig The user configuration
+-   * @param borrower The user from which the debt will be burned.
++   * @param params The txn params
+    */
+   function _burnBadDebt(
+     mapping(address => DataTypes.ReserveData) storage reservesData,
+     mapping(uint256 => address) storage reservesList,
+     DataTypes.UserConfigurationMap storage borrowerConfig,
+-    address borrower,
+-    address interestRateStrategyAddress
++    DataTypes.ExecuteLiquidationCallParams memory params
+   ) internal {
+     uint256 cachedBorrowerConfig = borrowerConfig.data;
+     uint256 i = 0;
+@@ -571,21 +607,21 @@ library LiquidationLogic {
+       if (isBorrowed) {
+         address reserveAddress = reservesList[i];
+         if (reserveAddress != address(0)) {
+-          DataTypes.ReserveData storage currentReserve = reservesData[reserveAddress];
+-          DataTypes.ReserveCache memory reserveCache = currentReserve.cache();
++          DataTypes.ReserveCache memory reserveCache = reservesData[reserveAddress].cache();
+           if (reserveCache.reserveConfiguration.getActive()) {
+-            currentReserve.updateState(reserveCache);
++            reservesData[reserveAddress].updateState(reserveCache);
+ 
+             _burnDebtTokens(
+               reserveCache,
+-              currentReserve,
++              reservesData[reserveAddress],
+               borrowerConfig,
+-              borrower,
++              params.borrower,
+               reserveAddress,
+-              IERC20(reserveCache.variableDebtTokenAddress).balanceOf(borrower),
++              IVariableDebtToken(reserveCache.variableDebtTokenAddress).scaledBalanceOf(params.borrower)
++                .getVTokenBalance(reserveCache.nextVariableBorrowIndex),
+               0,
+               true,
+-              interestRateStrategyAddress
++              params.interestRateStrategyAddress
+             );
+           }
+         }
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/MathUtils.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/MathUtils.sol
+index 701ce53..20613ea 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/MathUtils.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/MathUtils.sol
+@@ -90,4 +90,17 @@ library MathUtils {
+   function calculateCompoundedInterest(uint256 rate, uint40 lastUpdateTimestamp) internal view returns (uint256) {
+     return calculateCompoundedInterest(rate, lastUpdateTimestamp, block.timestamp);
+   }
++
++  function mulDivCeil(uint256 a, uint256 b, uint256 c) internal pure returns (uint256 d) {
++    assembly {
++      // Revert if c == 0 to avoid division by zero
++      if iszero(c) { revert(0, 0) }
++
++      // Overflow check: Ensure a * b does not exceed uint256 max
++      if iszero(or(iszero(b), iszero(gt(a, div(not(0), b))))) { revert(0, 0) }
++
++      let product := mul(a, b)
++      d := add(div(product, c), iszero(iszero(mod(product, c))))
++    }
++  }
+ }
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/PercentageMath.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/PercentageMath.sol
+index 914d38a..a99a2b3 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/PercentageMath.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/PercentageMath.sol
+@@ -33,6 +33,25 @@ library PercentageMath {
+     }
+   }
+ 
++  function percentMulCeil(uint256 value, uint256 percentage) internal pure returns (uint256 result) {
++    // to avoid overflow, value <= type(uint256).max / percentage
++    assembly {
++      if iszero(or(iszero(percentage), iszero(gt(value, div(not(0), percentage))))) { revert(0, 0) }
++
++      let product := mul(value, percentage)
++      result := add(div(product, PERCENTAGE_FACTOR), iszero(iszero(mod(product, PERCENTAGE_FACTOR))))
++    }
++  }
++
++  function percentMulFloor(uint256 value, uint256 percentage) internal pure returns (uint256 result) {
++    // to avoid overflow, value <= type(uint256).max / percentage
++    assembly {
++      if iszero(or(iszero(percentage), iszero(gt(value, div(not(0), percentage))))) { revert(0, 0) }
++
++      result := div(mul(value, percentage), PERCENTAGE_FACTOR)
++    }
++  }
++
+   /**
+    * @notice Executes a percentage division
+    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+@@ -50,4 +69,13 @@ library PercentageMath {
+       result := div(add(mul(value, PERCENTAGE_FACTOR), div(percentage, 2)), percentage)
+     }
+   }
++
++  function percentDivCeil(uint256 value, uint256 percentage) internal pure returns (uint256 result) {
++    // to avoid overflow, value <= type(uint256).max / PERCENTAGE_FACTOR
++    assembly {
++      if or(iszero(percentage), iszero(iszero(gt(value, div(not(0), PERCENTAGE_FACTOR))))) { revert(0, 0) }
++      let val := mul(value, PERCENTAGE_FACTOR)
++      result := add(div(val, percentage), iszero(iszero(mod(val, percentage))))
++    }
++  }
+ }
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ReserveLogic.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/ReserveLogic.sol
+index 0714e2f..057859a 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ReserveLogic.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/ReserveLogic.sol
+@@ -11,6 +11,7 @@ import {MathUtils} from "../math/MathUtils.sol";
+ import {WadRayMath} from "../math/WadRayMath.sol";
+ import {PercentageMath} from "../math/PercentageMath.sol";
+ import {Errors} from "../helpers/Errors.sol";
++import {TokenMath} from "../helpers/TokenMath.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ 
+@@ -21,6 +22,7 @@ import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol
+  */
+ library ReserveLogic {
+   using WadRayMath for uint256;
++  using TokenMath for uint256;
+   using PercentageMath for uint256;
+   using SafeCast for uint256;
+   using GPv2SafeERC20 for IERC20;
+@@ -120,7 +122,8 @@ library ReserveLogic {
+     uint256 liquidityTaken,
+     address interestRateStrategyAddress
+   ) internal {
+-    uint256 totalVariableDebt = reserveCache.nextScaledVariableDebt.rayMul(reserveCache.nextVariableBorrowIndex);
++    uint256 totalVariableDebt =
++      reserveCache.nextScaledVariableDebt.getVTokenBalance(reserveCache.nextVariableBorrowIndex);
+ 
+     (uint256 nextLiquidityRate, uint256 nextVariableRate) = IReserveInterestRateStrategy(interestRateStrategyAddress)
+       .calculateInterestRates(
+@@ -169,19 +172,16 @@ library ReserveLogic {
+       return;
+     }
+ 
+-    //calculate the total variable debt at moment of the last interaction
+-    uint256 prevTotalVariableDebt = reserveCache.currScaledVariableDebt.rayMul(reserveCache.currVariableBorrowIndex);
+-
+-    //calculate the new total variable debt after accumulation of the interest on the index
+-    uint256 currTotalVariableDebt = reserveCache.currScaledVariableDebt.rayMul(reserveCache.nextVariableBorrowIndex);
+-
+-    //debt accrued is the sum of the current debt minus the sum of the debt at the last update
+-    uint256 totalDebtAccrued = currTotalVariableDebt - prevTotalVariableDebt;
++    // debt accrued is the sum of the current debt minus the sum of the debt at the last update
++    // Rounding down to undermint to the treasury and keep the invariant healthy.
++    uint256 totalDebtAccrued = reserveCache.currScaledVariableDebt.rayMulFloor(
++      reserveCache.nextVariableBorrowIndex - reserveCache.currVariableBorrowIndex
++    );
+ 
+     uint256 amountToMint = totalDebtAccrued.percentMul(reserveCache.reserveFactor);
+ 
+     if (amountToMint != 0) {
+-      reserve.accruedToTreasury += amountToMint.rayDiv(reserveCache.nextLiquidityIndex).toUint128();
++      reserve.accruedToTreasury += amountToMint.getATokenMintScaledAmount(reserveCache.nextLiquidityIndex).toUint128();
+     }
+   }
+ 
+diff --git a/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/TokenMath.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/TokenMath.sol
+new file mode 100644
+index 0000000..f7d63fc
+--- /dev/null
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/TokenMath.sol
+@@ -0,0 +1,93 @@
++// SPDX-License-Identifier: MIT
++pragma solidity ^0.8.0;
++
++import {WadRayMath} from "../../libraries/math/WadRayMath.sol";
++
++/**
++ * @title TokenMath
++ * @author BGD Labs
++ * @notice Provides utility functions for calculating scaled amounts and balances for aTokens and vTokens,
++ *         applying specific rounding rules (floor/ceil) as per Aave v3.5's rounding improvements.
++ *         The rounding behavior of the operations is in line with the ERC-4626 token standard.
++ *         In practice, this means rounding in favor of the protocol.
++ */
++library TokenMath {
++  using WadRayMath for uint256;
++
++  /**
++   * @notice Calculates the scaled amount of aTokens to mint when supplying underlying assets.
++   *         The amount is rounded down to ensure the minted aTokens are less than or equal to the supplied amount.
++   * @param amount The amount of underlying asset supplied.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The scaled amount of aTokens to mint.
++   */
++  function getATokenMintScaledAmount(uint256 amount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return amount.rayDivFloor(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of aTokens to burn when withdrawing underlying assets.
++   *         The scaled amount is rounded up to ensure the user's aToken balance is sufficiently reduced.
++   * @param amount The amount of underlying asset to withdraw.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The scaled amount of aTokens to burn.
++   */
++  function getATokenBurnScaledAmount(uint256 amount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return amount.rayDivCeil(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of aTokens to transfer.
++   *         The scaled amount is rounded up to ensure the recipient receives at least the requested amount.
++   * @param amount The amount of aTokens to transfer.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The scaled amount of aTokens for transfer.
++   */
++  function getATokenTransferScaledAmount(uint256 amount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return amount.rayDivCeil(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the actual aToken balance from a scaled balance and the current liquidityIndex.
++   *         The balance is rounded down to prevent overaccounting.
++   * @param scaledAmount The scaled aToken balance.
++   * @param liquidityIndex The current aToken liquidityIndex.
++   * @return The actual aToken balance.
++   */
++  function getATokenBalance(uint256 scaledAmount, uint256 liquidityIndex) internal pure returns (uint256) {
++    return scaledAmount.rayMulFloor(liquidityIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of vTokens to mint when borrowing.
++   *         The amount is rounded up to ensure the protocol never underaccounts the user's debt.
++   * @param amount The amount of underlying asset borrowed.
++   * @param variableBorrowIndex The current vToken variableBorrowIndex.
++   * @return The scaled amount of vTokens to mint.
++   */
++  function getVTokenMintScaledAmount(uint256 amount, uint256 variableBorrowIndex) internal pure returns (uint256) {
++    return amount.rayDivCeil(variableBorrowIndex);
++  }
++
++  /**
++   * @notice Calculates the scaled amount of vTokens to burn.
++   *         The scaled amount is rounded down to prevent over-burning of vTokens.
++   * @param amount The amount of underlying asset corresponding to the vTokens to burn.
++   * @param variableBorrowIndex The current vToken variableBorrowIndex.
++   * @return The scaled amount of vTokens to burn.
++   */
++  function getVTokenBurnScaledAmount(uint256 amount, uint256 variableBorrowIndex) internal pure returns (uint256) {
++    return amount.rayDivFloor(variableBorrowIndex);
++  }
++
++  /**
++   * @notice Calculates the actual vToken balance (debt) from a scaled balance and the current variableBorrowIndex.
++   *         The balance is rounded up to prevent underaccounting the user's debt.
++   * @param scaledAmount The scaled vToken balance.
++   * @param variableBorrowIndex The current vToken variableBorrowIndex.
++   * @return The actual vToken balance (debt).
++   */
++  function getVTokenBalance(uint256 scaledAmount, uint256 variableBorrowIndex) internal pure returns (uint256) {
++    return scaledAmount.rayMulCeil(variableBorrowIndex);
++  }
++}
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ValidationLogic.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/ValidationLogic.sol
+index a894189..9484e9c 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/ValidationLogic.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/ValidationLogic.sol
+@@ -13,13 +13,14 @@ import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
+ import {UserConfiguration} from "../configuration/UserConfiguration.sol";
+ import {EModeConfiguration} from "../configuration/EModeConfiguration.sol";
+ import {Errors} from "../helpers/Errors.sol";
+-import {WadRayMath} from "../math/WadRayMath.sol";
++import {TokenMath} from "../helpers/TokenMath.sol";
+ import {PercentageMath} from "../math/PercentageMath.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ReserveLogic} from "./ReserveLogic.sol";
+ import {GenericLogic} from "./GenericLogic.sol";
+ import {SafeCast} from "openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ import {IncentivizedERC20} from "../../tokenization/base/IncentivizedERC20.sol";
++import {MathUtils} from "../math/MathUtils.sol";
+ 
+ /**
+  * @title ValidationLogic library
+@@ -28,7 +29,7 @@ import {IncentivizedERC20} from "../../tokenization/base/IncentivizedERC20.sol";
+  */
+ library ValidationLogic {
+   using ReserveLogic for DataTypes.ReserveData;
+-  using WadRayMath for uint256;
++  using TokenMath for uint256;
+   using PercentageMath for uint256;
+   using SafeCast for uint256;
+   using GPv2SafeERC20 for IERC20;
+@@ -58,15 +59,15 @@ library ValidationLogic {
+   /**
+    * @notice Validates a supply action.
+    * @param reserveCache The cached data of the reserve
+-   * @param amount The amount to be supplied
++   * @param scaledAmount The scaledAmount to be supplied
+    */
+   function validateSupply(
+     DataTypes.ReserveCache memory reserveCache,
+     DataTypes.ReserveData storage reserve,
+-    uint256 amount,
++    uint256 scaledAmount,
+     address onBehalfOf
+   ) internal view {
+-    require(amount != 0, Errors.InvalidAmount());
++    require(scaledAmount != 0, Errors.InvalidAmount());
+ 
+     (bool isActive, bool isFrozen,, bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+     require(isActive, Errors.ReserveInactive());
+@@ -78,9 +79,8 @@ library ValidationLogic {
+     require(
+       supplyCap == 0
+         || (
+-          (IAToken(reserveCache.aTokenAddress).scaledTotalSupply() + uint256(reserve.accruedToTreasury)).rayMul(
+-            reserveCache.nextLiquidityIndex
+-          ) + amount
++          (IAToken(reserveCache.aTokenAddress).scaledTotalSupply() + scaledAmount + uint256(reserve.accruedToTreasury))
++            .getATokenBalance(reserveCache.nextLiquidityIndex)
+         ) <= supplyCap * (10 ** reserveCache.reserveConfiguration.getDecimals()),
+       Errors.SupplyCapExceeded()
+     );
+@@ -89,15 +89,15 @@ library ValidationLogic {
+   /**
+    * @notice Validates a withdraw action.
+    * @param reserveCache The cached data of the reserve
+-   * @param amount The amount to be withdrawn
+-   * @param userBalance The balance of the user
++   * @param scaledAmount The scaled amount to be withdrawn
++   * @param scaledUserBalance The scaled balance of the user
+    */
+-  function validateWithdraw(DataTypes.ReserveCache memory reserveCache, uint256 amount, uint256 userBalance)
++  function validateWithdraw(DataTypes.ReserveCache memory reserveCache, uint256 scaledAmount, uint256 scaledUserBalance)
+     internal
+     pure
+   {
+-    require(amount != 0, Errors.InvalidAmount());
+-    require(amount <= userBalance, Errors.NotEnoughAvailableUserBalance());
++    require(scaledAmount != 0, Errors.InvalidAmount());
++    require(scaledAmount <= scaledUserBalance, Errors.NotEnoughAvailableUserBalance());
+ 
+     (bool isActive,,, bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+     require(isActive, Errors.ReserveInactive());
+@@ -105,14 +105,10 @@ library ValidationLogic {
+   }
+ 
+   struct ValidateBorrowLocalVars {
+-    uint256 currentLtv;
+-    uint256 collateralNeededInBaseCurrency;
+-    uint256 userCollateralInBaseCurrency;
++    uint256 amount;
+     uint256 userDebtInBaseCurrency;
+     uint256 availableLiquidity;
+-    uint256 healthFactor;
+     uint256 totalDebt;
+-    uint256 totalSupplyVariableDebt;
+     uint256 reserveDecimals;
+     uint256 borrowCap;
+     uint256 amountInBaseCurrency;
+@@ -138,9 +134,10 @@ library ValidationLogic {
+     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+     DataTypes.ValidateBorrowParams memory params
+   ) internal view {
+-    require(params.amount != 0, Errors.InvalidAmount());
++    require(params.amountScaled != 0, Errors.InvalidAmount());
+ 
+     ValidateBorrowLocalVars memory vars;
++    vars.amount = params.amountScaled.getVTokenBalance(params.reserveCache.nextVariableBorrowIndex);
+ 
+     (vars.isActive, vars.isFrozen, vars.borrowingEnabled, vars.isPaused) =
+       params.reserveCache.reserveConfiguration.getFlags();
+@@ -149,7 +146,7 @@ library ValidationLogic {
+     require(!vars.isPaused, Errors.ReservePaused());
+     require(!vars.isFrozen, Errors.ReserveFrozen());
+     require(vars.borrowingEnabled, Errors.BorrowingNotEnabled());
+-    require(IERC20(params.reserveCache.aTokenAddress).totalSupply() >= params.amount, Errors.InvalidAmount());
++    require(IERC20(params.reserveCache.aTokenAddress).totalSupply() >= vars.amount, Errors.InvalidAmount());
+ 
+     require(
+       params.priceOracleSentinel == address(0) || IPriceOracleSentinel(params.priceOracleSentinel).isBorrowAllowed(),
+@@ -166,10 +163,9 @@ library ValidationLogic {
+     }
+ 
+     if (vars.borrowCap != 0) {
+-      vars.totalSupplyVariableDebt =
+-        params.reserveCache.currScaledVariableDebt.rayMul(params.reserveCache.nextVariableBorrowIndex);
+-
+-      vars.totalDebt = vars.totalSupplyVariableDebt + params.amount;
++      vars.totalDebt = (params.reserveCache.currScaledVariableDebt + params.amountScaled).getVTokenBalance(
++        params.reserveCache.nextVariableBorrowIndex
++      );
+ 
+       unchecked {
+         require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.BorrowCapExceeded());
+@@ -185,37 +181,6 @@ library ValidationLogic {
+       );
+     }
+ 
+-    (vars.userCollateralInBaseCurrency, vars.userDebtInBaseCurrency, vars.currentLtv,, vars.healthFactor,) =
+-    GenericLogic.calculateUserAccountData(
+-      reservesData,
+-      reservesList,
+-      eModeCategories,
+-      DataTypes.CalculateUserAccountDataParams({
+-        userConfig: params.userConfig,
+-        user: params.userAddress,
+-        oracle: params.oracle,
+-        userEModeCategory: params.userEModeCategory
+-      })
+-    );
+-
+-    require(vars.userCollateralInBaseCurrency != 0, Errors.CollateralBalanceIsZero());
+-    require(vars.currentLtv != 0, Errors.LtvValidationFailed());
+-
+-    require(vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HealthFactorLowerThanLiquidationThreshold());
+-
+-    vars.amountInBaseCurrency = IPriceOracleGetter(params.oracle).getAssetPrice(params.asset) * params.amount;
+-    unchecked {
+-      vars.amountInBaseCurrency /= vars.assetUnit;
+-    }
+-
+-    //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
+-    vars.collateralNeededInBaseCurrency =
+-      (vars.userDebtInBaseCurrency + vars.amountInBaseCurrency).percentDiv(vars.currentLtv); //LTV is calculated in percentage
+-
+-    require(
+-      vars.collateralNeededInBaseCurrency <= vars.userCollateralInBaseCurrency, Errors.CollateralCannotCoverNewBorrow()
+-    );
+-
+     if (params.userConfig.isBorrowingAny()) {
+       (vars.siloedBorrowingEnabled, vars.siloedBorrowingAddress) =
+         params.userConfig.getSiloedBorrowingState(reservesData, reservesList);
+@@ -234,7 +199,7 @@ library ValidationLogic {
+    * @param reserveCache The cached data of the reserve
+    * @param amountSent The amount sent for the repayment. Can be an actual value or type(uint256).max
+    * @param onBehalfOf The address of the user sender is repaying for
+-   * @param debt The borrow balance of the user
++   * @param debtScaled The borrow scaled balance of the user
+    */
+   function validateRepay(
+     address user,
+@@ -242,7 +207,7 @@ library ValidationLogic {
+     uint256 amountSent,
+     DataTypes.InterestRateMode interestRateMode,
+     address onBehalfOf,
+-    uint256 debt
++    uint256 debtScaled
+   ) internal pure {
+     require(amountSent != 0, Errors.InvalidAmount());
+     require(interestRateMode == DataTypes.InterestRateMode.VARIABLE, Errors.InvalidInterestRateModeSelected());
+@@ -252,7 +217,7 @@ library ValidationLogic {
+     require(isActive, Errors.ReserveInactive());
+     require(!isPaused, Errors.ReservePaused());
+ 
+-    require(debt != 0, Errors.NoDebtOfSelectedType());
++    require(debtScaled != 0, Errors.NoDebtOfSelectedType());
+   }
+ 
+   /**
+@@ -389,7 +354,51 @@ library ValidationLogic {
+   }
+ 
+   /**
+-   * @notice Validates the health factor of a user and the ltv of the asset being withdrawn.
++   * @notice Validates the health factor of a user and the ltv of the asset being borrowed.
++   *         The ltv validation is a measure to prevent accidental borrowing close to liquidations.
++   *         Sophisticated users can work around this validation in various ways.
++   * @param reservesData The state of all the reserves
++   * @param reservesList The addresses of all the active reserves
++   * @param eModeCategories The configuration of all the efficiency mode categories
++   * @param userConfig The state of the user for the specific reserve
++   * @param user The user from which the aTokens are being transferred
++   * @param userEModeCategory The users active efficiency mode category
++   * @param oracle The price oracle
++   */
++  function validateHFAndLtv(
++    mapping(address => DataTypes.ReserveData) storage reservesData,
++    mapping(uint256 => address) storage reservesList,
++    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
++    DataTypes.UserConfigurationMap memory userConfig,
++    address user,
++    uint8 userEModeCategory,
++    address oracle
++  ) internal view {
++    (uint256 userCollateralInBaseCurrency, uint256 userDebtInBaseCurrency, uint256 currentLtv,, uint256 healthFactor,) =
++    GenericLogic.calculateUserAccountData(
++      reservesData,
++      reservesList,
++      eModeCategories,
++      DataTypes.CalculateUserAccountDataParams({
++        userConfig: userConfig,
++        user: user,
++        oracle: oracle,
++        userEModeCategory: userEModeCategory
++      })
++    );
++
++    require(currentLtv != 0, Errors.LtvValidationFailed());
++
++    require(healthFactor >= HEALTH_FACTOR_LIQUIDATION_THRESHOLD, Errors.HealthFactorLowerThanLiquidationThreshold());
++
++    require(
++      userCollateralInBaseCurrency >= userDebtInBaseCurrency.percentDivCeil(currentLtv),
++      Errors.CollateralCannotCoverNewBorrow()
++    );
++  }
++
++  /**
++   * @notice Validates the health factor of a user and the ltvzero configuration for the asset being withdrawn/transferred or disabled as collateral.
+    * @param reservesData The state of all the reserves
+    * @param reservesList The addresses of all the active reserves
+    * @param eModeCategories The configuration of all the efficiency mode categories
+@@ -399,7 +408,7 @@ library ValidationLogic {
+    * @param oracle The price oracle
+    * @param userEModeCategory The users active efficiency mode category
+    */
+-  function validateHFAndLtv(
++  function validateHFAndLtvzero(
+     mapping(address => DataTypes.ReserveData) storage reservesData,
+     mapping(uint256 => address) storage reservesList,
+     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+diff --git a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/WadRayMath.sol b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/WadRayMath.sol
+index 433dd94..88e3b00 100644
+--- a/tmp/42220_0x5934b283f7120500253f277CCcF4521528aE34D6_flat/WadRayMath.sol
++++ b/tmp/42220_0x36Ae486289bB807C3C79A1427b9c3D934294ef43_flat/WadRayMath.sol
+@@ -6,10 +6,16 @@ pragma solidity ^0.8.0;
+  * @author Aave
+  * @notice Provides functions to perform calculations with Wad and Ray units
+  * @dev Provides mul and div function for wads (decimal numbers with 18 digits of precision) and rays (decimal numbers
+- * with 27 digits of precision)
+- * @dev Operations are rounded. If a value is >=.5, will be rounded up, otherwise rounded down.
++ * with 27 digits of precision).
++ * @dev Default operations round half up (if a value is >= .5, it will be rounded up, otherwise rounded down).
++ * @dev For specific rounding behaviors, functions with `Floor` and `Ceil` suffixes or a `Rounding` parameter are available.
+  */
+ library WadRayMath {
++  enum Rounding {
++    Floor,
++    Ceil
++  }
++
+   // HALF_WAD and HALF_RAY expressed with extended notation as constant with operations are not supported in Yul assembly
+   uint256 internal constant WAD = 1e18;
+   uint256 internal constant HALF_WAD = 0.5e18;
+@@ -51,22 +57,38 @@ library WadRayMath {
+     }
+   }
+ 
+-  /**
+-   * @notice Multiplies two ray, rounding half up to the nearest ray
+-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+-   * @param a Ray
+-   * @param b Ray
+-   * @return c = a raymul b
+-   */
+   function rayMul(uint256 a, uint256 b) internal pure returns (uint256 c) {
+-    // to avoid overflow, a <= (type(uint256).max - HALF_RAY) / b
+     assembly {
++      // to avoid overflow, a <= (type(uint256).max - HALF_RAY) / b
+       if iszero(or(iszero(b), iszero(gt(a, div(sub(not(0), HALF_RAY), b))))) { revert(0, 0) }
+-
+       c := div(add(mul(a, b), HALF_RAY), RAY)
+     }
+   }
+ 
++  function rayMul(uint256 a, uint256 b, Rounding rounding) internal pure returns (uint256 c) {
++    if (rounding == Rounding.Floor) return rayMulFloor(a, b);
++    return rayMulCeil(a, b);
++  }
++
++  function rayMulFloor(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * b does not exceed uint256 max
++      if iszero(or(iszero(b), iszero(gt(a, div(not(0), b))))) { revert(0, 0) }
++
++      c := div(mul(a, b), RAY)
++    }
++  }
++
++  function rayMulCeil(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * b does not exceed uint256 max
++      if iszero(or(iszero(b), iszero(gt(a, div(not(0), b))))) { revert(0, 0) }
++
++      let product := mul(a, b)
++      c := add(div(product, RAY), iszero(iszero(mod(product, RAY))))
++    }
++  }
++
+   /**
+    * @notice Divides two ray, rounding half up to the nearest ray
+    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+@@ -75,14 +97,35 @@ library WadRayMath {
+    * @return c = a raydiv b
+    */
+   function rayDiv(uint256 a, uint256 b) internal pure returns (uint256 c) {
+-    // to avoid overflow, a <= (type(uint256).max - halfB) / RAY
+     assembly {
++      // to avoid overflow, a <= (type(uint256).max - b / 2) / RAY
+       if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), RAY))))) { revert(0, 0) }
+-
+       c := div(add(mul(a, RAY), div(b, 2)), b)
+     }
+   }
+ 
++  function rayDiv(uint256 a, uint256 b, Rounding rounding) internal pure returns (uint256 c) {
++    if (rounding == Rounding.Floor) return rayDivFloor(a, b);
++    return rayDivCeil(a, b);
++  }
++
++  function rayDivCeil(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * RAY does not exceed uint256 max
++      if or(iszero(b), iszero(iszero(gt(a, div(not(0), RAY))))) { revert(0, 0) }
++      let scaled := mul(a, RAY)
++      c := add(div(scaled, b), iszero(iszero(mod(scaled, b))))
++    }
++  }
++
++  function rayDivFloor(uint256 a, uint256 b) internal pure returns (uint256 c) {
++    assembly {
++      // Overflow check: Ensure a * RAY does not exceed uint256 max
++      if or(iszero(b), iszero(iszero(gt(a, div(not(0), RAY))))) { revert(0, 0) }
++      c := div(mul(a, RAY), b)
++    }
++  }
++
+   /**
+    * @dev Casts ray down to wad
+    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328

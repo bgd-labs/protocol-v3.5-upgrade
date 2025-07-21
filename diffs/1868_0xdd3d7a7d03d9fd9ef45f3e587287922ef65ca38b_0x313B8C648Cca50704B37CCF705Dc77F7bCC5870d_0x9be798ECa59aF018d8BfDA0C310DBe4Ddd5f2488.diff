@@ -1,0 +1,42 @@
+diff --git a/tmp/1868_0x313B8C648Cca50704B37CCF705Dc77F7bCC5870d_flat/Contract.sol b/tmp/1868_0x9be798ECa59aF018d8BfDA0C310DBe4Ddd5f2488_flat/Contract.sol
+index 22e69af..17c6e27 100644
+--- a/tmp/1868_0x313B8C648Cca50704B37CCF705Dc77F7bCC5870d_flat/Contract.sol
++++ b/tmp/1868_0x9be798ECa59aF018d8BfDA0C310DBe4Ddd5f2488_flat/Contract.sol
+@@ -1,24 +1,18 @@
+ // SPDX-License-Identifier: BUSL-1.1
+-pragma solidity ^0.8.10;
++pragma solidity ^0.8.0;
+ 
+-import {PoolInstance} from "aave-v3-origin/contracts/instances/PoolInstance.sol";
+-import {L2PoolInstance} from "aave-v3-origin/contracts/instances/L2PoolInstance.sol";
+-import {Errors} from "aave-v3-origin/contracts/protocol/libraries/helpers/Errors.sol";
+-import {Pool} from "aave-v3-origin/contracts/protocol/pool/Pool.sol";
+-import {IPoolAddressesProvider} from "aave-v3-origin/contracts/interfaces/IPoolAddressesProvider.sol";
+-import {IReserveInterestRateStrategy} from "aave-v3-origin/contracts/interfaces/IReserveInterestRateStrategy.sol";
++import {L2Pool} from "../protocol/pool/L2Pool.sol";
++import {IPoolAddressesProvider} from "../interfaces/IPoolAddressesProvider.sol";
++import {IReserveInterestRateStrategy} from "../interfaces/IReserveInterestRateStrategy.sol";
++import {PoolInstance} from "./PoolInstance.sol";
+ 
+-import {CustomInitialize} from "./CustomInitialize.sol";
+-
+-contract L2PoolInstanceWithCustomInitialize is L2PoolInstance {
+-  constructor(IPoolAddressesProvider provider, IReserveInterestRateStrategy interestRateStrategy_)
+-    L2PoolInstance(provider, interestRateStrategy_)
++/**
++ * @title Aave L2Pool Instance
++ * @author BGD Labs
++ * @notice Instance of the L2Pool for the Aave protocol, intended to be used on rollups
++ */
++contract L2PoolInstance is L2Pool, PoolInstance {
++  constructor(IPoolAddressesProvider provider, IReserveInterestRateStrategy interestRateStrategy)
++    PoolInstance(provider, interestRateStrategy)
+   {}
+-
+-  /// @inheritdoc PoolInstance
+-  function initialize(IPoolAddressesProvider provider) external virtual override(Pool, PoolInstance) initializer {
+-    require(provider == ADDRESSES_PROVIDER, Errors.InvalidAddressesProvider());
+-
+-    CustomInitialize._initialize(_reservesCount, _reservesList, _reserves);
+-  }
+ }

@@ -6,7 +6,7 @@ import {DeploymentLibrary} from "../script/Deploy.s.sol";
 import {UpgradeTest} from "./UpgradeTest.t.sol";
 import {Deployments} from "../src/Deployments.sol";
 
-contract BaseTest is UpgradeTest("base", 32545558) {
+contract BaseTest is UpgradeTest("base", 33157111) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployBase();
   }
