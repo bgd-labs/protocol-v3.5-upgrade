@@ -1,7 +1,7 @@
 aave-address-book/=lib/aave-helpers/lib/aave-address-book/src/
 aave-helpers/=lib/aave-helpers/
-aave-v3-origin-tests/=lib/aave-v3-origin-private/tests/
-aave-v3-origin/=lib/aave-v3-origin-private/src
+aave-v3-origin-tests/=lib/aave-v3-origin/tests/
+aave-v3-origin/=lib/aave-v3-origin/src
 erc4626-tests/=lib/aave-helpers/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/
 forge-std/=lib/forge-std/src/
 openzeppelin-contracts-upgradeable/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/
@@ -10,8 +10,3 @@ solidity-utils/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/so
 
 lib/aave-helpers/:aave-address-book/=lib/aave-helpers/lib/aave-address-book/src/
 lib/aave-helpers/:solidity-utils/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/src/
-
-lib/aave-v3-origin-private/:solidity-utils/=lib/aave-v3-origin-private/lib/solidity-utils/src/
-lib/aave-v3-origin-private/:ds-test/=lib/aave-v3-origin-private/lib/forge-std/lib/ds-test/src/
-lib/aave-v3-origin-private/:openzeppelin-contracts-upgradeable/=lib/aave-v3-origin-private/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/
-lib/aave-v3-origin-private/:openzeppelin-contracts/=lib/aave-v3-origin-private/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/
