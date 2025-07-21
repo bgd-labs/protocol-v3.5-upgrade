@@ -14,7 +14,7 @@
       "aToken": "0xBAB0366ADdA6d2845c6BB5db4339A824350d24F7",
       "aTokenName": "Aave Soneium USDT",
       "aTokenSymbol": "aSoneUSDT",
-      "aTokenUnderlyingBalance": "571726888",
+      "aTokenUnderlyingBalance": "5697667322",
       "borrowCap": 4500000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -34,7 +34,7 @@
       "oracle": "0x01bcEb741614D4388028EaF3284DCB04386c30D2",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDT / USD",
-      "oracleLatestAnswer": "100019500",
+      "oracleLatestAnswer": "100024851",
       "reserveFactor": 1000,
       "supplyCap": 5000000,
       "symbol": "USDT",
@@ -43,13 +43,13 @@
       "variableDebtToken": "0xb3B6f42Ef71DDd9348136FFBdF02B545c0d2B799",
       "variableDebtTokenName": "Aave Soneium Variable Debt USDT",
       "variableDebtTokenSymbol": "variableDebtSoneUSDT",
-      "virtualBalance": "571726888"
+      "virtualBalance": "5697667322"
     },
     "0x4200000000000000000000000000000000000006": {
       "aToken": "0x1bD45Cc20CE61BE344A64218E6Ade01E72b08f39",
       "aTokenName": "Aave Soneium WETH",
       "aTokenSymbol": "aSoneWETH",
-      "aTokenUnderlyingBalance": "181262688564681810901",
+      "aTokenUnderlyingBalance": "212316270533827042065",
       "borrowCap": 720,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -69,7 +69,7 @@
       "oracle": "0x291cF980BA12505D65ee01BDe0882F1d5e533525",
       "oracleDecimals": 8,
       "oracleDescription": "ETH / USD",
-      "oracleLatestAnswer": "245436000000",
+      "oracleLatestAnswer": "257674000000",
       "reserveFactor": 1500,
       "supplyCap": 800,
       "symbol": "WETH",
@@ -78,13 +78,13 @@
       "variableDebtToken": "0xC52375A5A04C0ABe5a6Ca5F3a344be2415EF54dB",
       "variableDebtTokenName": "Aave Soneium Variable Debt WETH",
       "variableDebtTokenSymbol": "variableDebtSoneWETH",
-      "virtualBalance": "181262688564681810901"
+      "virtualBalance": "212316270533827042065"
     },
     "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369": {
       "aToken": "0xb2C9E934A55B58D20496A5019F8722a96d8A44d8",
       "aTokenName": "Aave Soneium USDCe",
       "aTokenSymbol": "aSoneUSDCe",
-      "aTokenUnderlyingBalance": "1053098343319",
+      "aTokenUnderlyingBalance": "1027038489022",
       "borrowCap": 7200000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -104,7 +104,7 @@
       "oracle": "0xe9d6696fc74A8ef545D2c9C842f820763407E778",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC / USD",
-      "oracleLatestAnswer": "99987752",
+      "oracleLatestAnswer": "99989994",
       "reserveFactor": 1000,
       "supplyCap": 8000000,
       "symbol": "USDC.e",
@@ -113,7 +113,7 @@
       "variableDebtToken": "0xccE2594ea5bC482DB9b4826Ce25d0764fE56BfD8",
       "variableDebtTokenName": "Aave Soneium Variable Debt USDCe",
       "variableDebtTokenSymbol": "variableDebtSoneUSDCe",
-      "virtualBalance": "1053098343319"
+      "virtualBalance": "1027038489022"
     }
   },
   "strategies": {
