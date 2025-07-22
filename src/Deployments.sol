@@ -14,10 +14,10 @@ library Deployments {
   address public constant BNB = 0x6d70Ed63F662f325135e4C97af2B030068f536B4; // cancun
   address public constant CELO = 0xD8d64BAb7C362E5F762ea0E7c334801Fba604028; // cancun
   address public constant SCROLL = 0x7467F305c2a269C22548C0821E6a33caa2C7Ec9B; // cancun
-  address public constant LINEA = address(0);
+  address public constant LINEA = 0xc0799CF19914081684f0203cC87FE5436d5d717F; // london
   address public constant ZKSYNC = address(0);
   address public constant SONEIUM = 0xc1082221D1a99BAc4e1FcBE406c9A4AE8c6a825C; // cancun
-  address public constant MAINNET_CORE = address(0);
-  address public constant MAINNET_LIDO = address(0);
-  address public constant MAINNET_ETHERFI = address(0);
+  address public constant MAINNET_CORE = 0xD51B0B941cfcF3388c17ABa5DcBab766d34fD45b; // cancun
+  address public constant MAINNET_LIDO = 0x6ab8c847371911C778963Fa0C07645f3e587B012; // cancun
+  address public constant MAINNET_ETHERFI = 0xb705bdF5DF2c8658e3C3f3bdcCA6084000C026d3; // cancun
 }

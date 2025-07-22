@@ -284,13 +284,13 @@
       "label": null,
       "balanceDiff": null,
       "stateDiff": {
-        "0xb37666113f25c36e5647d28f516926089a55950439f4c66b538876823712f8aa": {
-          "previousValue": "0x00686b935a000000000002000000000000000000000000000000000000000000",
-          "newValue": "0x00686b935a000000000003000000000000000000000000000000000000000000"
+        "0x5e42e61f6ba243bb2d33351fdcc4ecfed25145016826881fdc8a40a4e9d16a26": {
+          "previousValue": "0x00687f408a000000000002000000000000000000000000000000000000000000",
+          "newValue": "0x00687f408a000000000003000000000000000000000000000000000000000000"
         },
-        "0xb37666113f25c36e5647d28f516926089a55950439f4c66b538876823712f8ab": {
-          "previousValue": "0x000000000000000000093a800000000000006899b7db00000000000000000000",
-          "newValue": "0x000000000000000000093a800000000000006899b7db000000000000686b935b"
+        "0x5e42e61f6ba243bb2d33351fdcc4ecfed25145016826881fdc8a40a4e9d16a27": {
+          "previousValue": "0x000000000000000000093a8000000000000068ad650b00000000000000000000",
+          "newValue": "0x000000000000000000093a8000000000000068ad650b000000000000687f408b"
         }
       }
     },
@@ -404,7 +404,7 @@
       "oracle": "0x36964C0579D02E0a5AaAb89E24Cf8d7CDF3549EE",
       "oracleDecimals": 8,
       "oracleDescription": "Capped pyUSD/USD",
-      "oracleLatestAnswer": "99863961",
+      "oracleLatestAnswer": "99937000",
       "reserveFactor": 2000,
       "supplyCap": 1,
       "symbol": "PYUSD",
@@ -419,7 +419,7 @@
       "aToken": "0x6914ECCf50837dC61b43ee478a9BD9B439648956",
       "aTokenName": "Aave Ethereum EtherFi FRAX",
       "aTokenSymbol": "aEthEtherFiFRAX",
-      "aTokenUnderlyingBalance": "523924272458686674225113",
+      "aTokenUnderlyingBalance": "527792014577415327422090",
       "borrowCap": 1,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -439,7 +439,7 @@
       "oracle": "0xeF50f8DC65402c3019586bc8725fCD0b99B8AAd7",
       "oracleDecimals": 8,
       "oracleDescription": "Capped FRAX/USD",
-      "oracleLatestAnswer": "99865401",
+      "oracleLatestAnswer": "99952992",
       "reserveFactor": 2000,
       "supplyCap": 1,
       "symbol": "FRAX",
@@ -448,13 +448,13 @@
       "variableDebtToken": "0xfd3aDA5AAbdc6531C7C2AC46c00eBf870f5a0E6B",
       "variableDebtTokenName": "Aave Ethereum EtherFi Variable Debt FRAX",
       "variableDebtTokenSymbol": "variableDebtEthEtherFiFRAX",
-      "virtualBalance": "523924272458686674225113"
+      "virtualBalance": "527792014577415327422090"
     },
     "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": {
       "aToken": "0x7380c583cDe4409eFF5DD3320D93a45D96B80E2e",
       "aTokenName": "Aave Ethereum EtherFi USDC",
       "aTokenSymbol": "aEthEtherFiUSDC",
-      "aTokenUnderlyingBalance": "59681427329",
+      "aTokenUnderlyingBalance": "58606673705",
       "borrowCap": 1,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -474,7 +474,7 @@
       "oracle": "0xB6557F02F0a5dA7b9D3C2d979cc19e00e756F6dA",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC/USD",
-      "oracleLatestAnswer": "99992000",
+      "oracleLatestAnswer": "99988000",
       "reserveFactor": 1000,
       "supplyCap": 1,
       "symbol": "USDC",
@@ -483,13 +483,13 @@
       "variableDebtToken": "0x9355032d747f1e08F8720CD01950E652eE15cdB7",
       "variableDebtTokenName": "Aave Ethereum EtherFi Variable Debt USDC",
       "variableDebtTokenSymbol": "variableDebtEthEtherFiUSDC",
-      "virtualBalance": "59681420429"
+      "virtualBalance": "58606666805"
     },
     "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee": {
       "aToken": "0xbe1F842e7e0afd2c2322aae5d34bA899544b29db",
       "aTokenName": "Aave Ethereum EtherFi weETH",
       "aTokenSymbol": "aEthEtherFiweETH",
-      "aTokenUnderlyingBalance": "42587655948391586498",
+      "aTokenUnderlyingBalance": "40131364080279552529",
       "borrowCap": 0,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -509,7 +509,7 @@
       "oracle": "0xf112aF6F0A332B815fbEf3Ff932c057E570b62d3",
       "oracleDecimals": 8,
       "oracleDescription": "Capped weETH / eETH(ETH) / USD",
-      "oracleLatestAnswer": "276967747005",
+      "oracleLatestAnswer": "397587430327",
       "reserveFactor": 4500,
       "supplyCap": 1,
       "symbol": "weETH",
@@ -518,7 +518,7 @@
       "variableDebtToken": "0x16264412CB72F0d16A446f7D928Dd0D822810048",
       "variableDebtTokenName": "Aave Ethereum EtherFi Variable Debt weETH",
       "variableDebtTokenSymbol": "variableDebtEthEtherFiweETH",
-      "virtualBalance": "42587655948391586498"
+      "virtualBalance": "40131364080279552529"
     }
   },
   "strategies": {
