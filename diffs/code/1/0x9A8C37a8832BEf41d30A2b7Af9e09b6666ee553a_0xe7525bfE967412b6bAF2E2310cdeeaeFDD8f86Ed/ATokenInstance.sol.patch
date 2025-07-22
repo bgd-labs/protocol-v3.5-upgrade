@@ -1,0 +1,14 @@
+===================================================================
+--- lib/aave-v3-origin-private/src/contracts/instances/ATokenInstance.sol
++++ lib/aave-v3-origin/src/contracts/instances/ATokenInstance.sol
+@@ -15,9 +15,9 @@
+  * @author BGD Labs
+  * @notice Instance of the interest bearing token for the Aave protocol
+  */
+ contract ATokenInstance is AToken {
+-    uint256 public constant ATOKEN_REVISION = 3;
++    uint256 public constant ATOKEN_REVISION = 4;
+ 
+     constructor(
+         IPool pool,
+         address rewardsController,

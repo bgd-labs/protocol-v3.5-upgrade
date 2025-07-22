@@ -16,7 +16,7 @@ libraries = [
     'aave-v3-origin/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0x5e84CEe2afb7B37d2AB14722C39A7c1C26F5B0BB',
     'aave-v3-origin/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0x36Ae486289bB807C3C79A1427b9c3D934294ef43',
     'aave-v3-origin/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0xE51B69e5722Bf547866A4d7Bc190c6e81b626806',
-    'aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x034Fd14b9Ae6bB066a1F9f85A55e990b0b25c168'
+    'aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x034Fd14b9Ae6bB066a1F9f85A55e990b0b25c168',
 ]
 
 [profile.metis]
@@ -31,7 +31,7 @@ libraries = [
     'aave-v3-origin/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0xb5656eCAE657A1bF5f7F5CD06363090A4D2c68e3',
     'aave-v3-origin/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0x22B38029a2B034340B695C6144B3AfD678e109E3',
     'aave-v3-origin/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0xbB6558a80Ed7811bd6d02bD26814e49c349b3acD',
-    'aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x330a2C27fCE66685d87ebaE4cE9dA71D2F6D1141'
+    'aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x330a2C27fCE66685d87ebaE4cE9dA71D2F6D1141',
 ]
 
 [profile.zksync]
@@ -40,7 +40,6 @@ test = 'zksync'
 libs = ['lib']
 solc = '0.8.27'
 optimizer = true
-optimizer_runs = 200
 fs_permissions = [{ access = "write", path = "./reports" }]
 ffi = true
 evm_version = 'cancun'
@@ -51,7 +50,7 @@ libraries = [
     'aave-v3-origin/contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic:0x9d9568079b93045C82822Bf70A91C151BD65a02E',
     'aave-v3-origin/contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic:0x592B64d9246278D734F3E6B872452663ce5FE248',
     'aave-v3-origin/contracts/protocol/libraries/logic/PoolLogic.sol:PoolLogic:0xaE13c560F109649c4211801cB64aa1B794b0A5d3',
-    'aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x98daac81a8b784c5930b884e64e711fecde0ef51'
+    'aave-v3-origin/contracts/protocol/libraries/logic/SupplyLogic.sol:SupplyLogic:0x98daac81a8b784c5930b884e64e711fecde0ef51',
 ]
 
 [profile.zksync.zksync]

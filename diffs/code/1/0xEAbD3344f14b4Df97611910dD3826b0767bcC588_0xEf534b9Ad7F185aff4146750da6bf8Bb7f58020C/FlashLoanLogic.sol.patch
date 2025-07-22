@@ -1,0 +1,58 @@
+===================================================================
+--- lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/FlashLoanLogic.sol
++++ lib/aave-v3-origin/src/contracts/protocol/libraries/logic/FlashLoanLogic.sol
+@@ -10,9 +10,9 @@
+ import {IFlashLoanSimpleReceiver} from "../../../misc/flashloan/interfaces/IFlashLoanSimpleReceiver.sol";
+ import {IPoolAddressesProvider} from "../../../interfaces/IPoolAddressesProvider.sol";
+ import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
+ import {Errors} from "../helpers/Errors.sol";
+-import {WadRayMath} from "../math/WadRayMath.sol";
++import {TokenMath} from "../helpers/TokenMath.sol";
+ import {PercentageMath} from "../math/PercentageMath.sol";
+ import {DataTypes} from "../types/DataTypes.sol";
+ import {ValidationLogic} from "./ValidationLogic.sol";
+ import {BorrowLogic} from "./BorrowLogic.sol";
+@@ -27,9 +27,9 @@
+     using ReserveLogic for DataTypes.ReserveCache;
+     using ReserveLogic for DataTypes.ReserveData;
+     using GPv2SafeERC20 for IERC20;
+     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+-    using WadRayMath for uint256;
++    using TokenMath for uint256;
+     using PercentageMath for uint256;
+     using SafeCast for uint256;
+ 
+     // Helper struct for internal variables used in the `executeFlashLoan` function
+@@ -84,9 +84,9 @@
+             vars.currentAmount = params.amounts[i];
+             vars.totalPremiums[i] = DataTypes.InterestRateMode(
+                 params.interestRateModes[i]
+             ) == DataTypes.InterestRateMode.NONE
+-                ? vars.currentAmount.percentMul(vars.flashloanPremium)
++                ? vars.currentAmount.percentMulCeil(vars.flashloanPremium)
+                 : 0;
+ 
+             reservesData[params.assets[i]].virtualUnderlyingBalance -= vars
+                 .currentAmount
+@@ -197,9 +197,9 @@
+ 
+         IFlashLoanSimpleReceiver receiver = IFlashLoanSimpleReceiver(
+             params.receiverAddress
+         );
+-        uint256 totalPremium = params.amount.percentMul(
++        uint256 totalPremium = params.amount.percentMulCeil(
+             params.flashLoanPremium
+         );
+ 
+         reserve.virtualUnderlyingBalance -= params.amount.toUint128();
+@@ -250,9 +250,9 @@
+         reserve.updateState(reserveCache);
+ 
+         reserve.accruedToTreasury += params
+             .totalPremium
+-            .rayDiv(reserveCache.nextLiquidityIndex)
++            .getATokenMintScaledAmount(reserveCache.nextLiquidityIndex)
+             .toUint128();
+ 
+         reserve.updateInterestRatesAndVirtualBalance(
+             reserveCache,
