@@ -96,7 +96,7 @@
       "aToken": "0x7C307e128efA31F540F2E2d976C995E0B65F51F6",
       "aTokenName": "Aave Base weETH",
       "aTokenSymbol": "aBasweETH",
-      "aTokenUnderlyingBalance": "92242535451702743009293",
+      "aTokenUnderlyingBalance": "85939513422170665659791",
       "borrowCap": 1,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -116,22 +116,22 @@
       "oracle": "0xFc4d1d7a8FD1E6719e361e16044b460737F12C44",
       "oracleDecimals": 8,
       "oracleDescription": "Capped weETH / eETH(ETH) / USD",
-      "oracleLatestAnswer": "406469637631",
+      "oracleLatestAnswer": "395999619416",
       "reserveFactor": 4500,
-      "supplyCap": 100000,
+      "supplyCap": 120000,
       "symbol": "weETH",
       "underlying": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
       "usageAsCollateralEnabled": true,
       "variableDebtToken": "0x8D2e3F1f4b38AA9f1ceD22ac06019c7561B03901",
       "variableDebtTokenName": "Aave Base Variable Debt weETH",
       "variableDebtTokenSymbol": "variableDebtBasweETH",
-      "virtualBalance": "92242535429949911821683"
+      "virtualBalance": "85939513400417834472181"
     },
     "0x2416092f143378750bb29b79eD961ab195CcEea5": {
       "aToken": "0xDD5745756C2de109183c6B5bB886F9207bEF114D",
       "aTokenName": "Aave Base ezETH",
       "aTokenSymbol": "aBasezETH",
-      "aTokenUnderlyingBalance": "136230045877547671286",
+      "aTokenUnderlyingBalance": "125263781183825868472",
       "borrowCap": 1,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -151,7 +151,7 @@
       "oracle": "0x438e24f5FCDC1A66ecb25D19B5543e0Cb91A44D4",
       "oracleDecimals": 8,
       "oracleDescription": "Capped ezETH / ETH / USD",
-      "oracleLatestAnswer": "399810935106",
+      "oracleLatestAnswer": "389506042655",
       "reserveFactor": 1500,
       "supplyCap": 1900,
       "symbol": "ezETH",
@@ -160,13 +160,13 @@
       "variableDebtToken": "0xbc4f5631f2843488792e4F1660d0A51Ba489bdBd",
       "variableDebtTokenName": "Aave Base Variable Debt ezETH",
       "variableDebtTokenSymbol": "variableDebtBasezETH",
-      "virtualBalance": "136230045877547671286"
+      "virtualBalance": "125263781183825868472"
     },
     "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22": {
       "aToken": "0xcf3D55c10DB69f28fD1A75Bd73f3D8A2d9c595ad",
       "aTokenName": "Aave Base cbETH",
       "aTokenSymbol": "aBascbETH",
-      "aTokenUnderlyingBalance": "4541759956244086713581",
+      "aTokenUnderlyingBalance": "3677228751052968624366",
       "borrowCap": 430,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -186,7 +186,7 @@
       "oracle": "0x8e11Ad4531826ff47BD8157a2c705F5422Da6A61",
       "oracleDecimals": 8,
       "oracleDescription": "Capped cbETH / ETH / USD",
-      "oracleLatestAnswer": "419177000233",
+      "oracleLatestAnswer": "408374078097",
       "reserveFactor": 1500,
       "supplyCap": 6000,
       "symbol": "cbETH",
@@ -195,13 +195,13 @@
       "variableDebtToken": "0x1DabC36f19909425f654777249815c073E8Fd79F",
       "variableDebtTokenName": "Aave Base Variable Debt cbETH",
       "variableDebtTokenSymbol": "variableDebtBascbETH",
-      "virtualBalance": "4541759953779559725643"
+      "virtualBalance": "3677228748588441636428"
     },
     "0x4200000000000000000000000000000000000006": {
       "aToken": "0xD4a0e0b9149BCee3C920d2E00b5dE09138fd8bb7",
       "aTokenName": "Aave Base WETH",
       "aTokenSymbol": "aBasWETH",
-      "aTokenUnderlyingBalance": "9414573216742225573054",
+      "aTokenUnderlyingBalance": "9112160862042712045226",
       "borrowCap": 110000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -221,7 +221,7 @@
       "oracle": "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
       "oracleDecimals": 8,
       "oracleDescription": "ETH / USD",
-      "oracleLatestAnswer": "378965000000",
+      "oracleLatestAnswer": "369142200130",
       "reserveFactor": 1500,
       "supplyCap": 130000,
       "symbol": "WETH",
@@ -230,14 +230,14 @@
       "variableDebtToken": "0x24e6e0795b3c7c71D965fCc4f371803d1c1DcA1E",
       "variableDebtTokenName": "Aave Base Variable Debt WETH",
       "variableDebtTokenSymbol": "variableDebtBasWETH",
-      "virtualBalance": "9414573212872782673815"
+      "virtualBalance": "9112160858173269145987"
     },
     "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42": {
       "aToken": "0x90DA57E0A6C0d166Bf15764E03b83745Dc90025B",
       "aTokenName": "Aave Base EURC",
       "aTokenSymbol": "aBasEURC",
-      "aTokenUnderlyingBalance": "7132422780147",
-      "borrowCap": 18341874,
+      "aTokenUnderlyingBalance": "8354421926592",
+      "borrowCap": 23844436,
       "borrowingEnabled": true,
       "debtCeiling": 0,
       "decimals": 6,
@@ -256,7 +256,7 @@
       "oracle": "0x215f25556f91b30AFCF0a12dA51C9d4374B22570",
       "oracleDecimals": 8,
       "oracleDescription": "Capped EURC/USD",
-      "oracleLatestAnswer": "116396060",
+      "oracleLatestAnswer": "117308671",
       "reserveFactor": 1000,
       "supplyCap": 31160000,
       "symbol": "EURC",
@@ -265,13 +265,13 @@
       "variableDebtToken": "0x03D01595769333174036832e18fA2f17C74f8161",
       "variableDebtTokenName": "Aave Base Variable Debt EURC",
       "variableDebtTokenSymbol": "variableDebtBasEURC",
-      "virtualBalance": "7132422780147"
+      "virtualBalance": "8354421926592"
     },
     "0x63706e401c06ac8513145b7687A14804d17f814b": {
       "aToken": "0x67EAF2BeE4384a2f84Da9Eb8105C661C123736BA",
       "aTokenName": "Aave Base AAVE",
       "aTokenSymbol": "aBasAAVE",
-      "aTokenUnderlyingBalance": "5096621260789016872978",
+      "aTokenUnderlyingBalance": "4209590784830480804211",
       "borrowCap": 1,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -291,7 +291,7 @@
       "oracle": "0x3d6774EF702A10b20FCa8Ed40FC022f7E4938e07",
       "oracleDecimals": 8,
       "oracleDescription": "AAVE / USD",
-      "oracleLatestAnswer": "32849493300",
+      "oracleLatestAnswer": "30299566440",
       "reserveFactor": 2000,
       "supplyCap": 30000,
       "symbol": "AAVE",
@@ -300,13 +300,13 @@
       "variableDebtToken": "0xcEC1Ea95dDEF7CFC27D3D9615E05b035af460978",
       "variableDebtTokenName": "Aave Base Variable Debt AAVE",
       "variableDebtTokenSymbol": "variableDebtBasAAVE",
-      "virtualBalance": "5096621260789016872978"
+      "virtualBalance": "4209590784830480804211"
     },
     "0x6Bb7a212910682DCFdbd5BCBb3e28FB4E8da10Ee": {
       "aToken": "0x067ae75628177FD257c2B1e500993e1a0baBcBd1",
       "aTokenName": "Aave Base GHO",
       "aTokenSymbol": "aBasGHO",
-      "aTokenUnderlyingBalance": "4750159758447288465921853",
+      "aTokenUnderlyingBalance": "4758191431233536812163201",
       "borrowCap": 45000000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -334,13 +334,13 @@
       "variableDebtToken": "0x38e59ADE183BbEb94583d44213c8f3297e9933e9",
       "variableDebtTokenName": "Aave Base Variable Debt GHO",
       "variableDebtTokenSymbol": "variableDebtBasGHO",
-      "virtualBalance": "4750159758447288465921853"
+      "virtualBalance": "4758191431233536812163201"
     },
     "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913": {
       "aToken": "0x4e65fE4DbA92790696d040ac24Aa414708F5c0AB",
       "aTokenName": "Aave Base USDC",
       "aTokenSymbol": "aBasUSDC",
-      "aTokenUnderlyingBalance": "18581326944930",
+      "aTokenUnderlyingBalance": "18647998920956",
       "borrowCap": 220800000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -360,7 +360,7 @@
       "oracle": "0xfcF82bFa2485253263969167583Ea4de09e9993b",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC/USD",
-      "oracleLatestAnswer": "99989000",
+      "oracleLatestAnswer": "99986735",
       "reserveFactor": 1000,
       "supplyCap": 240000000,
       "symbol": "USDC",
@@ -369,13 +369,13 @@
       "variableDebtToken": "0x59dca05b6c26dbd64b5381374aAaC5CD05644C28",
       "variableDebtTokenName": "Aave Base Variable Debt USDC",
       "variableDebtTokenSymbol": "variableDebtBasUSDC",
-      "virtualBalance": "18581318793702"
+      "virtualBalance": "18647990769728"
     },
     "0xEDfa23602D0EC14714057867A78d01e94176BEA0": {
       "aToken": "0x80a94C36747CF51b2FbabDfF045f6D22c1930eD1",
       "aTokenName": "Aave Base wrsETH",
       "aTokenSymbol": "aBaswrsETH",
-      "aTokenUnderlyingBalance": "2831385768636965490029",
+      "aTokenUnderlyingBalance": "2812397623540623182560",
       "borrowCap": 1,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -395,22 +395,22 @@
       "oracle": "0x567E7f3DB2CD4C81872F829C8ab6556616818580",
       "oracleDecimals": 8,
       "oracleDescription": "Capped rsETH / ETH / USD",
-      "oracleLatestAnswer": "397755180657",
+      "oracleLatestAnswer": "387521451603",
       "reserveFactor": 2000,
-      "supplyCap": 3000,
+      "supplyCap": 3250,
       "symbol": "wrsETH",
       "underlying": "0xEDfa23602D0EC14714057867A78d01e94176BEA0",
       "usageAsCollateralEnabled": true,
       "variableDebtToken": "0xe9541C77a111bCAa5dF56839bbC50894eba7aFcb",
       "variableDebtTokenName": "Aave Base Variable Debt wrsETH",
       "variableDebtTokenSymbol": "variableDebtBaswrsETH",
-      "virtualBalance": "2831385768636965490029"
+      "virtualBalance": "2812397623540623182560"
     },
     "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452": {
       "aToken": "0x99CBC45ea5bb7eF3a5BC08FB1B7E56bB2442Ef0D",
       "aTokenName": "Aave Base wstETH",
       "aTokenSymbol": "aBaswstETH",
-      "aTokenUnderlyingBalance": "7626254279416922417652",
+      "aTokenUnderlyingBalance": "8603978908464132133244",
       "borrowCap": 5460,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -430,7 +430,7 @@
       "oracle": "0x56038D3998C42db18ba3B821bD1EbaB9B678e657",
       "oracleDecimals": 8,
       "oracleDescription": "Capped wstETH / stETH(ETH) / USD",
-      "oracleLatestAnswer": "458096864376",
+      "oracleLatestAnswer": "446256697061",
       "reserveFactor": 500,
       "supplyCap": 25000,
       "symbol": "wstETH",
@@ -439,13 +439,13 @@
       "variableDebtToken": "0x41A7C3f5904ad176dACbb1D99101F59ef0811DC1",
       "variableDebtTokenName": "Aave Base Variable Debt wstETH",
       "variableDebtTokenSymbol": "variableDebtBaswstETH",
-      "virtualBalance": "7626254278518970222805"
+      "virtualBalance": "8603978907566179938397"
     },
     "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf": {
       "aToken": "0xBdb9300b7CDE636d9cD4AFF00f6F009fFBBc8EE6",
       "aTokenName": "Aave Base cbBTC",
       "aTokenSymbol": "aBascbBTC",
-      "aTokenUnderlyingBalance": "172355695766",
+      "aTokenUnderlyingBalance": "168910421833",
       "borrowCap": 640,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -465,7 +465,7 @@
       "oracle": "0x64c911996D3c6aC71f9b455B1E8E7266BcbD848F",
       "oracleDecimals": 8,
       "oracleDescription": "BTC / USD",
-      "oracleLatestAnswer": "11806827000000",
+      "oracleLatestAnswer": "11854414301682",
       "reserveFactor": 5000,
       "supplyCap": 4500,
       "symbol": "cbBTC",
@@ -474,13 +474,13 @@
       "variableDebtToken": "0x05e08702028de6AaD395DC6478b554a56920b9AD",
       "variableDebtTokenName": "Aave Base Variable Debt cbBTC",
       "variableDebtTokenSymbol": "variableDebtBascbBTC",
-      "virtualBalance": "172355695766"
+      "virtualBalance": "168910421833"
     },
     "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA": {
       "aToken": "0x0a1d576f3eFeF75b330424287a95A366e8281D54",
       "aTokenName": "Aave Base USDbC",
       "aTokenSymbol": "aBasUSDbC",
-      "aTokenUnderlyingBalance": "94209088752",
+      "aTokenUnderlyingBalance": "88074904426",
       "borrowCap": 1194000,
       "borrowingEnabled": true,
       "debtCeiling": 0,
@@ -500,7 +500,7 @@
       "oracle": "0xfcF82bFa2485253263969167583Ea4de09e9993b",
       "oracleDecimals": 8,
       "oracleDescription": "Capped USDC/USD",
-      "oracleLatestAnswer": "99989000",
+      "oracleLatestAnswer": "99986735",
       "reserveFactor": 5000,
       "supplyCap": 1559000,
       "symbol": "USDbC",
@@ -509,13 +509,13 @@
       "variableDebtToken": "0x7376b2F323dC56fCd4C191B34163ac8a84702DAB",
       "variableDebtTokenName": "Aave Base Variable Debt USDbC",
       "variableDebtTokenSymbol": "variableDebtBasUSDbC",
-      "virtualBalance": "94209088752"
+      "virtualBalance": "88074904426"
     },
     "0xecAc9C5F704e954931349Da37F60E39f515c11c1": {
       "aToken": "0x90072A4aA69B5Eb74984Ab823EFC5f91e90b3a72",
       "aTokenName": "Aave Base LBTC",
       "aTokenSymbol": "aBasLBTC",
-      "aTokenUnderlyingBalance": "3323974093",
+      "aTokenUnderlyingBalance": "3325389618",
       "borrowCap": 1,
       "borrowingEnabled": false,
       "debtCeiling": 0,
@@ -535,7 +535,7 @@
       "oracle": "0x64c911996D3c6aC71f9b455B1E8E7266BcbD848F",
       "oracleDecimals": 8,
       "oracleDescription": "BTC / USD",
-      "oracleLatestAnswer": "11806827000000",
+      "oracleLatestAnswer": "11854414301682",
       "reserveFactor": 5000,
       "supplyCap": 58,
       "symbol": "LBTC",
@@ -544,7 +544,7 @@
       "variableDebtToken": "0xa2525b3f058846075506903d792d58C5a0D834c9",
       "variableDebtTokenName": "Aave Base Variable Debt LBTC",
       "variableDebtTokenSymbol": "variableDebtBasLBTC",
-      "virtualBalance": "3323974093"
+      "virtualBalance": "3325389618"
     }
   },
   "strategies": {

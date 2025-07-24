@@ -8,7 +8,7 @@ import {Deployments} from "../../src/Deployments.sol";
 /**
  * env needs to be set to
  */
-contract ZkSyncTest is UpgradeTest("zksync", 63213859) {
+contract ZkSyncTest is UpgradeTest("zksync", 63257371) {
   function _getPayload() internal virtual override returns (address) {
     return DeploymentLibrary._deployZKSync();
   }
