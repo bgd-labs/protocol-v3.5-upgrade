@@ -30,14 +30,14 @@ for (const file of filteredFiles) {
 
   // diff slots that are not pure implementation slots (e.g. things on addresses provider)
   execSync(
-    `npx @bgd-labs/cli@latest codeDiff --address1 ${contentBefore.poolConfig.protocolDataProvider} --chainId1 ${contentBefore.chainId} --address2 ${contentAfter.poolConfig.protocolDataProvider} --chainId2 ${contentAfter.chainId} -o file`,
+    `npx @bgd-labs/cli@0.0.31 codeDiff --address1 ${contentBefore.poolConfig.protocolDataProvider} --chainId1 ${contentBefore.chainId} --address2 ${contentAfter.poolConfig.protocolDataProvider} --chainId2 ${contentAfter.chainId} -o file`,
   );
 
   for (const contract of Object.keys(contentAfter.raw)) {
     const implSlot = contentAfter.raw[contract].stateDiff[erc1967ImplSlot];
     if (implSlot) {
       execSync(
-        `npx @bgd-labs/cli@latest codeDiff --address1 ${bytes32ToAddress(
+        `npx @bgd-labs/cli@0.0.31 codeDiff --address1 ${bytes32ToAddress(
           implSlot.previousValue,
         )} --chainId1 ${contentBefore.chainId} --address2 ${bytes32ToAddress(
           implSlot.newValue,
