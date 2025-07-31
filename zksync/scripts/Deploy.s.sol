@@ -6,16 +6,12 @@ import {AaveProtocolDataProvider, IPool} from "aave-v3-origin/contracts/helpers/
 import {PoolConfiguratorInstance} from "aave-v3-origin/contracts/instances/PoolConfiguratorInstance.sol";
 import {ATokenInstance} from "aave-v3-origin/contracts/instances/ATokenInstance.sol";
 import {VariableDebtTokenInstance} from "aave-v3-origin/contracts/instances/VariableDebtTokenInstance.sol";
-import {IPoolAddressesProvider} from "aave-address-book/AaveV3.sol";
+import {IPoolAddressesProvider, IReserveInterestRateStrategy} from "aave-address-book/AaveV3.sol";
 import {AaveV3ZkSync, AaveV3ZkSyncAssets} from "aave-address-book/AaveV3ZkSync.sol";
 import {GovernanceV3ZkSync} from "aave-address-book/GovernanceV3ZkSync.sol";
+import {PoolInstance} from "aave-v3-origin/contracts/instances/PoolInstance.sol";
 
 import {UpgradePayload} from "../../src/UpgradePayload.sol";
-import {
-  PoolInstanceWithCustomInitialize,
-  IReserveInterestRateStrategy
-} from "../../src/PoolInstanceWithCustomInitialize.sol";
-import {PoolConfiguratorWithCustomInitialize} from "../../src/PoolConfiguratorWithCustomInitialize.sol";
 
 library DeploymentLibrary {
   struct DeployParameters {
@@ -43,7 +39,7 @@ library DeploymentLibrary {
 
     payloadParams.poolAddressesProvider = IPoolAddressesProvider(deployParams.poolAddressesProvider);
     payloadParams.poolImpl = address(
-      new PoolInstanceWithCustomInitialize{salt: "v1"}(
+      new PoolInstance{salt: "v1"}(
         IPoolAddressesProvider(deployParams.poolAddressesProvider),
         IReserveInterestRateStrategy(deployParams.interestRateStrategy)
       )
@@ -55,9 +51,6 @@ library DeploymentLibrary {
     private
     returns (address)
   {
-    payloadParams.poolConfiguratorImpl = address(new PoolConfiguratorWithCustomInitialize{salt: "v1"}());
-    payloadParams.poolDataProvider =
-      address(new AaveProtocolDataProvider{salt: "v1"}(IPoolAddressesProvider(deployParams.poolAddressesProvider)));
     payloadParams.aTokenImpl = address(
       new ATokenInstance{salt: "v1"}(IPool(deployParams.pool), deployParams.rewardsController, deployParams.treasury)
     );

@@ -1,0 +1,83 @@
+Index: settings
+===================================================================
+--- settings
++++ settings
+@@ -1,30 +1,21 @@
+ {
+   "remappings": [
+     "aave-address-book/=lib/aave-helpers/lib/aave-address-book/src/",
+     "aave-helpers/=lib/aave-helpers/",
+-    "aave-v3-origin-tests/=lib/aave-v3-origin-private/tests/",
+-    "aave-v3-origin/=lib/aave-v3-origin-private/src/",
++    "aave-v3-origin-tests/=lib/aave-v3-origin/tests/",
++    "aave-v3-origin/=lib/aave-v3-origin/src/",
+     "erc4626-tests/=lib/aave-helpers/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+     "forge-std/=lib/forge-std/src/",
+     "openzeppelin-contracts-upgradeable/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/",
+     "openzeppelin-contracts/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/",
+     "solidity-utils/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/src/",
+-    "gho-direct-minter/=lib/GhoDirectMinter/src/",
+     "lib/aave-helpers/:aave-address-book/=lib/aave-helpers/lib/aave-address-book/src/",
+     "lib/aave-helpers/:solidity-utils/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/src/",
+-    "lib/aave-v3-origin-private/:solidity-utils/=lib/aave-v3-origin-private/lib/solidity-utils/src/",
+-    "lib/GhoDirectMinter/:aave-address-book/=lib/aave-helpers/lib/aave-address-book/src/",
+-    "lib/GhoDirectMinter/:aave-helpers/=lib/aave-helpers/",
+-    "lib/GhoDirectMinter/:erc4626-tests/=lib/aave-helpers/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+-    "lib/GhoDirectMinter/:forge-std/=lib/GhoDirectMinter/lib/forge-std/src/",
+-    "lib/GhoDirectMinter/:solidity-utils/=lib/aave-helpers/lib/aave-address-book/lib/aave-v3-origin/lib/solidity-utils/src/",
+-    "@openzeppelin/contracts-upgradeable/=lib/aave-v3-origin-private/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/contracts/",
+-    "@openzeppelin/contracts/=lib/aave-v3-origin-private/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+-    "GhoDirectMinter/=lib/GhoDirectMinter/",
+-    "aave-v3-origin-private/=lib/aave-v3-origin-private/",
+-    "ds-test/=lib/aave-v3-origin-private/lib/forge-std/lib/ds-test/src/",
+-    "halmos-cheatcodes/=lib/aave-v3-origin-private/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/"
++    "@openzeppelin/contracts-upgradeable/=lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/contracts/",
++    "@openzeppelin/contracts/=lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
++    "ds-test/=lib/aave-v3-origin/lib/forge-std/lib/ds-test/src/",
++    "halmos-cheatcodes/=lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/"
+   ],
+   "optimizer": {
+     "enabled": true,
+     "runs": 200
+@@ -48,27 +39,27 @@
+   },
+   "evmVersion": "london",
+   "viaIR": false,
+   "libraries": {
+-    "lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/BorrowLogic.sol": {
+-      "BorrowLogic": "0x24B58926d2Dd490238C6366dc7b36357caBd71b9"
++    "lib/aave-v3-origin/src/contracts/protocol/libraries/logic/BorrowLogic.sol": {
++      "BorrowLogic": "0x46464bCF5BBa29834b57E6c7631fEfb966F427A2"
+     },
+-    "lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/ConfiguratorLogic.sol": {
++    "lib/aave-v3-origin/src/contracts/protocol/libraries/logic/ConfiguratorLogic.sol": {
+       "ConfiguratorLogic": "0xD379a9e4A925916cF69c16C34409F401a28d5A52"
+     },
+-    "lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/EModeLogic.sol": {
+-      "EModeLogic": "0x23Bde27B7be7C2Eb741c3BcEF95384AAEc4f084c"
++    "lib/aave-v3-origin/src/contracts/protocol/libraries/logic/EModeLogic.sol": {
++      "EModeLogic": "0x9D147ED046EA1c629B6e66b0504E45019B133aa4"
+     },
+-    "lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/FlashLoanLogic.sol": {
+-      "FlashLoanLogic": "0x001b936869b535B4AF6F77a9be033801B39fcfa6"
++    "lib/aave-v3-origin/src/contracts/protocol/libraries/logic/FlashLoanLogic.sol": {
++      "FlashLoanLogic": "0xb5656eCAE657A1bF5f7F5CD06363090A4D2c68e3"
+     },
+-    "lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/LiquidationLogic.sol": {
+-      "LiquidationLogic": "0xED56ED0316FECBF93E3F5cA5aE70b8eF48ad4535"
++    "lib/aave-v3-origin/src/contracts/protocol/libraries/logic/LiquidationLogic.sol": {
++      "LiquidationLogic": "0x22B38029a2B034340B695C6144B3AfD678e109E3"
+     },
+-    "lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/PoolLogic.sol": {
+-      "PoolLogic": "0xca1610aE2820d34EB717b43e3CB1dd33B7eC05FB"
++    "lib/aave-v3-origin/src/contracts/protocol/libraries/logic/PoolLogic.sol": {
++      "PoolLogic": "0xbB6558a80Ed7811bd6d02bD26814e49c349b3acD"
+     },
+-    "lib/aave-v3-origin-private/src/contracts/protocol/libraries/logic/SupplyLogic.sol": {
+-      "SupplyLogic": "0x8bd15bbd01e987D4b851818b6586AA6E16E65c62"
++    "lib/aave-v3-origin/src/contracts/protocol/libraries/logic/SupplyLogic.sol": {
++      "SupplyLogic": "0x330a2C27fCE66685d87ebaE4cE9dA71D2F6D1141"
+     }
+   }
+ }
+\ No newline at end of file
